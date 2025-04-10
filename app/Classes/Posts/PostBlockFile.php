@@ -59,4 +59,22 @@ class PostBlockFile extends \Katu\Models\Model
 
 		return $this;
 	}
+
+	public function getPath(): string
+	{
+		return $this->path;
+	}
+
+	public function getFile(): \Katu\Files\File
+	{
+		return new \Katu\Files\File(
+			\App\App::getFileDir(),
+			$this->getPath(),
+		);
+	}
+
+	public function getImage(): \Katu\Tools\Images\Image
+	{
+		return new \Katu\Tools\Images\Image($this->getFile());
+	}
 }

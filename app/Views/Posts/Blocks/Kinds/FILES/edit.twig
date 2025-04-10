@@ -1,1 +1,13 @@
 <input type="file" name="values[{{ postBlock.getId }}][]" multiple>
+
+<table>
+	<tbody>
+		{% for postBlockFile in postBlock.getPostBlockFiles %}
+			<tr>
+				<td>
+					<img src="{{ postBlockFile.getImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>

@@ -29,8 +29,12 @@ class EditPost extends \Katu\Controllers\Controller
 				return PostBlockFile::createFromUpload(PostBlock::get(4), $upload);
 			}, UploadCollection::createFromInput($request->getUploadedFiles()["values"][4])->getArrayCopy()));
 
-			var_dump(($postBlockFiles));
-			die;
+			return $response
+				->withStatus(302)
+				->withHeader("Location", (string)\Katu\Tools\Routing\URL::getFor("posts.edit", [
+					"postId" => $post->getId(),
+				]))
+				;
 		}
 
 		return $response->withBody((new HTMLEngine($request))->render("Posts/edit.twig", [

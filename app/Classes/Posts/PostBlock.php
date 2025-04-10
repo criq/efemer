@@ -41,4 +41,11 @@ class PostBlock extends \Katu\Models\Model
 	{
 		return KindCollection::createDefault()->filterByCode(new Code($this->kind))->getFirst();
 	}
+
+	public function getPostBlockFiles(): PostBlockFileCollection
+	{
+		return new PostBlockFileCollection(PostBlockFile::getBy([
+			"postBlockId" => $this->getId(),
+		])->getItems());
+	}
 }
