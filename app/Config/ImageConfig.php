@@ -14,8 +14,8 @@ class ImageConfig extends \Katu\Config\ImageConfig
 		return new VersionCollection([
 			new Version("THUMBNAIL", "webp", 100, new FilterCollection([
 				new FitFilter([
-					"width" => 100,
-					"height" => 100,
+					"width" => 400,
+					"height" => 400,
 				]),
 			])),
 		]);

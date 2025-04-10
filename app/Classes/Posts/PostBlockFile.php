@@ -4,36 +4,38 @@ namespace App\Classes\Posts;
 
 use Katu\Files\Upload;
 use Katu\Tools\Calendar\Time;
+use Katu\Types\TIdentifier;
 
 class PostBlockFile extends \Katu\Models\Model
 {
 	const TABLE = "post_block_files";
 
 	public $id;
-	public $path;
 	public $postBlockId;
 	public $timeCreated;
+	public $uri;
 
 	public static function createFromUpload(PostBlock $postBlock, Upload $upload): PostBlockFile
 	{
+		$time = new Time;
+
 		$path = implode("/", [
-			\Katu\Tools\Random\Generator::getFileName(2),
-			\Katu\Tools\Random\Generator::getFileName(2),
-			\Katu\Tools\Random\Generator::getFileName(32),
+			$time->format("Y"),
+			$time->format("m"),
+			$time->format("d"),
+			\Katu\Tools\Random\Generator::getIdString(2),
+			\Katu\Tools\Random\Generator::getIdString(16),
 			$upload->getFileName(),
 		]);
 
-		$file = new \Katu\Files\File(
-			\App\App::getFileDir(),
-			$path,
-		);
-
-		$file->set($upload->getStream()->getContents());
+		$storageObject = \App\Classes\ThirdParty\Google\Cloud::getFilesBucket()->upload($upload->getStream()->getContents(), [
+			"name" => $path,
+		]);
 
 		$object = new PostBlockFile;
 		$object->setTimeCreated(new Time);
 		$object->setPostBlock($postBlock);
-		$object->setPath($path);
+		$object->setURI($storageObject->gcsUri());
 		$object->persist();
 
 		return $object;
@@ -53,24 +55,33 @@ class PostBlockFile extends \Katu\Models\Model
 		return $this;
 	}
 
-	public function setPath(string $path): PostBlockFile
+	public function setURI(string $uri): PostBlockFile
 	{
-		$this->path = $path;
+		$this->uri = $uri;
 
 		return $this;
 	}
 
-	public function getPath(): string
+	public function getURI(): string
 	{
-		return $this->path;
+		return $this->uri;
 	}
 
-	public function getFile(): \Katu\Files\File
+	public function getFile(): ?\Katu\Files\File
 	{
-		return new \Katu\Files\File(
-			\App\App::getFileDir(),
-			$this->getPath(),
-		);
+		if (preg_match("/^gs:\/\/(?<bucket>.+)\/(?<name>.+)$/U", $this->getURI(), $match)) {
+			$file = new \Katu\Files\File(\App\App::getTemporaryDir(), ...(new TIdentifier($this->getURI()))->getPathParts());
+			if (!$file->exists()) {
+				$client = \App\Classes\ThirdParty\Google\Cloud::getStorageClient();
+				$bucket = $client->bucket($match["bucket"]);
+				$object = $bucket->object($match["name"]);
+				$file->set($object->downloadAsString());
+			}
+
+			return $file;
+		}
+
+		return null;
 	}
 
 	public function getImage(): \Katu\Tools\Images\Image

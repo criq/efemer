@@ -12,7 +12,8 @@
   ],
   "require": {
     "criq/katu": "^4",
-    "criq/sexy": "^4"
+    "criq/sexy": "^4",
+    "google/cloud": "@stable"
   },
   "autoload": {
     "psr-4": {

@@ -2,6 +2,7 @@
 .DS_Store
 .env
 .platform
+.secret
 composer.phar
 data/*
 files/*
