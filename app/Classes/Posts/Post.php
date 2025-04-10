@@ -25,4 +25,11 @@ class Post extends \Katu\Models\Model
 			"postId" => $this->getId(),
 		])->getItems());
 	}
+
+	public function getPostBlockFiles(): PostBlockFileCollection
+	{
+		return new PostBlockFileCollection(array_merge(...array_map(function (PostBlock $postBlock) {
+			return $postBlock->getPostBlockFiles()->getArrayCopy();
+		}, $this->getPostBlocks()->getArrayCopy())));
+	}
 }
