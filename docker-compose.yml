@@ -30,6 +30,7 @@ services:
       - ./composer.json:/var/www/composer.json
       - ./composer.lock:/var/www/composer.lock
       - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+      - ./files:/var/www/files
       - ./logs:/var/logs
       - ./logs:/var/www/logs
       - ./public:/var/www/public

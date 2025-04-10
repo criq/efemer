@@ -9,6 +9,9 @@
 					<td>
 						{{ post.getId }}
 					</td>
+					<td>
+						<a href="{{ url("posts.edit", { postId: post.getId }) }}">U</a>
+					</td>
 				</tr>
 			{% endfor %}
 		</tbody>

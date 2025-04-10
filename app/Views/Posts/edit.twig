@@ -2,14 +2,31 @@
 
 {% block body %}
 
-	<ul>
-		{% for kind in kinds %}
-			<li>
-				<a href="{{ url("postBlocks.create", { postId: post.getId, kindCode: kind.getCode }) }}">
-					{{ kind.getTitle }}
-				</a>
-			</li>
-		{% endfor %}
-	</ul>
+	<form action="" method="POST" enctype="multipart/form-data">
+		{% include "Blocks/formHeader.twig" %}
+
+		<ul>
+			{% for kind in kinds %}
+				<li>
+					<a href="{{ url("postBlocks.create", { postId: post.getId, kindCode: kind.getCode }) }}">
+						{{ kind.getTitle }}
+					</a>
+				</li>
+			{% endfor %}
+		</ul>
+
+		<ul>
+			{% for postBlock in post.getPostBlocks %}
+				<li>
+					{% include "Posts/Blocks/Kinds/#{postBlock.getKind.getCode}/edit.twig" %}
+				</li>
+			{% endfor %}
+		</ul>
+
+		<button type="submit">
+			S
+		</button>
+
+	</form>
 
 {% endblock body %}

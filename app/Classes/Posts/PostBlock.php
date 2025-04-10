@@ -3,7 +3,9 @@
 namespace App\Classes\Posts;
 
 use App\Classes\Posts\Blocks\Kind;
+use App\Classes\Posts\Blocks\KindCollection;
 use Katu\Tools\Calendar\Time;
+use Katu\Tools\Strings\Code;
 
 class PostBlock extends \Katu\Models\Model
 {
@@ -33,5 +35,10 @@ class PostBlock extends \Katu\Models\Model
 		$this->kind = $kind->getCode()->getConstantFormat();
 
 		return $this;
+	}
+
+	public function getKind(): ?Kind
+	{
+		return KindCollection::createDefault()->filterByCode(new Code($this->kind))->getFirst();
 	}
 }

@@ -18,4 +18,11 @@ class Post extends \Katu\Models\Model
 
 		return $this;
 	}
+
+	public function getPostBlocks(): PostBlockCollection
+	{
+		return new PostBlockCollection(PostBlock::getBy([
+			"postId" => $this->getId(),
+		])->getItems());
+	}
 }

@@ -9,6 +9,7 @@ class KindCollection extends \ArrayObject
 	public static function createDefault(): KindCollection
 	{
 		return new static([
+			new \App\Classes\Posts\Blocks\Kinds\FilesKind,
 			new \App\Classes\Posts\Blocks\Kinds\TextKind,
 		]);
 	}
