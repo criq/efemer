@@ -2,7 +2,8 @@ FROM php:8.2-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    zip unzip git curl libpng-dev libonig-dev libxml2-dev libicu-dev \
+    zip unzip git curl libpng-dev libonig-dev libxml2-dev libicu-dev libjpeg-dev libwebp-dev \
+    && docker-php-ext-configure gd --with-jpeg --with-webp \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug
