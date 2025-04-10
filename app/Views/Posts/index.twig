@@ -14,7 +14,7 @@
 						{{ post.getId }}
 					</td>
 					<td>
-						{{ dump(post.getPostBlockFiles) }}
+						<img src="{{ post.getPostBlockFiles.getFirst.getImage.getImageVersion("THUMBNAIL") }}" alt="">
 					</td>
 					<td>
 						<a href="{{ url("posts.edit", { postId: post.getId }) }}">
