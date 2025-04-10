@@ -1,0 +1,83 @@
+services:
+  nginx:
+    image: nginx:latest
+    container_name: efemer-nginx
+    ports:
+      - "50090:80"
+    volumes:
+      - ./app:/var/www/app
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+      - ./logs:/var/logs
+      - ./public:/var/www/public
+      - ./tmp:/var/www/tmp
+      - ./vendor:/var/www/vendor
+    depends_on:
+      - php
+    networks:
+      - efemer-network
+
+  php:
+    build:
+      context: ./docker/php
+    image: efemer
+    container_name: efemer-php
+    volumes:
+      - ./.env:/var/www/.env
+      - ./.git:/var/www/.git
+      - ./.platform:/var/www/.platform
+      - ./app:/var/www/app
+      - ./composer.json:/var/www/composer.json
+      - ./composer.lock:/var/www/composer.lock
+      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+      - ./logs:/var/logs
+      - ./logs:/var/www/logs
+      - ./public:/var/www/public
+      - ./tmp:/var/www/tmp
+      - ./vendor:/var/www/vendor
+    working_dir: /var/www
+    env_file:
+      - .env
+    networks:
+      - efemer-network
+
+  mysql:
+    image: mysql:latest
+    container_name: efemer-mysql
+    restart: always
+    ports:
+      - "50091:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    networks:
+      - efemer-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: efemer-phpmyadmin
+    restart: always
+    ports:
+      - "50092:80"
+    environment:
+      PMA_HOST: ${PMA_HOST}
+      PMA_PORT: ${PMA_PORT}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    depends_on:
+      - mysql
+    networks:
+      - efemer-network
+
+  redis:
+    image: redis:latest
+    container_name: efemer-redis
+    restart: always
+    networks:
+      - efemer-network
+
+networks:
+  efemer-network:

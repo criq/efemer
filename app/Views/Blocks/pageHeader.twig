@@ -1,0 +1,11 @@
+<div class="a-page-header">
+
+	{% include "Blocks/breadcrumbs.twig" with {
+		breadcrumbs: page.getBreadcrumbs,
+	} %}
+
+	<h1 class="a-title">
+		{{ page.getTitle }}
+	</h1>
+
+</div>

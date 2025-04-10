@@ -1,0 +1,40 @@
+{
+  "devDependencies": {
+    "babel-loader": "^8.2.2",
+    "css-loader": "^6.2.0",
+    "cssnano": "^5.0.7",
+    "extract-loader": "^5.1.0",
+    "file-loader": "^6.2.0",
+    "jquery": "^3.6.0",
+    "postcss": "^8.5.1",
+    "postcss-loader": "^6.2.1",
+    "postcss-preset-env": "^10.1.3",
+    "precss": "^4.0.0",
+    "webpack": "^5.48.0"
+  },
+  "name": "noob_package",
+  "description": "noob ====",
+  "version": "1.0.0",
+  "main": "postcss.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/criq/noob.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/criq/noob/issues"
+  },
+  "homepage": "https://github.com/criq/noob#readme",
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.3",
+    "clean-webpack-plugin": "^4.0.0",
+    "mini-css-extract-plugin": "^2.9.2",
+    "sass": "^1.83.4",
+    "sass-loader": "^16.0.4"
+  }
+}

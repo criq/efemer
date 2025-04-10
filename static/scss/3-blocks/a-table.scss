@@ -1,0 +1,43 @@
+.a-table {
+	border-collapse: collapse;
+
+	th, td {
+		border-bottom: 1px solid #EEE;
+		border-top: 1px solid #EEE;
+		text-align: left;
+		padding: .35rem;
+	}
+
+	thead {
+
+		th {
+			font-weight: bold;
+		}
+
+	}
+
+	&__narrow {
+		width: 1px;
+	}
+
+	&__nowrap {
+		white-space: nowrap;
+	}
+
+	&--striped {
+
+		tbody {
+
+			tr:nth-child(odd) {
+
+				th, td {
+					background-color: #FAFAFA;
+				}
+
+			}
+
+		}
+
+	}
+
+}

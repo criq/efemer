@@ -1,0 +1,11 @@
+.config
+.DS_Store
+.env
+.platform
+composer.phar
+data/*
+files/*
+logs/*
+node_modules/
+tmp/*
+vendor

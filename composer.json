@@ -1,0 +1,27 @@
+{
+  "name": "efemer/efemer",
+  "repositories": [
+    {
+      "url": "https://github.com/criq/katu",
+      "type": "git"
+    },
+    {
+      "url": "https://github.com/criq/sexy",
+      "type": "git"
+    }
+  ],
+  "require": {
+    "criq/katu": "^4",
+    "criq/sexy": "^4"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "./app/"
+    }
+  },
+  "scripts": {
+    "post-create-project-cmd": [
+      "npm install"
+    ]
+  }
+}

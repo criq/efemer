@@ -1,0 +1,9 @@
+{% if errors.hasErrors %}
+	<div class="a-errors">
+		{% for error in errors %}
+			<p>
+				{{ error|raw }}
+			</p>
+		{% endfor %}
+	</div>
+{% endif %}

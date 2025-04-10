@@ -1,0 +1,27 @@
+.a-breadcrumbs {
+	display: flex;
+	font-size: .9rem;
+	gap: .3rem;
+	line-height: $line-height;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+
+	li {
+		display: inline;
+
+		&::before {
+			content: "/";
+		}
+
+		&:first-child {
+
+			&::before {
+				content: "";
+			}
+
+		}
+
+	}
+
+}

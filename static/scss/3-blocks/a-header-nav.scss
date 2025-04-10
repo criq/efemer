@@ -1,0 +1,28 @@
+.a-header-nav {
+	border-bottom: 1px solid #EEE;
+	display: flex;
+	flex-direction: row;
+	gap: 2rem;
+	justify-content: space-between;
+	padding: 1rem;
+
+	&__title {
+		font-weight: bold;
+	}
+
+	&__section {
+		display: flex;
+		flex-direction: row;
+		gap: 2rem;
+	}
+
+	&__list {
+		display: flex;
+		flex-direction: row;
+		gap: 1.5rem;
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+	}
+
+}

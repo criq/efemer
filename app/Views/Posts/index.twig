@@ -1,0 +1,17 @@
+{% extends "Templates/default.twig" %}
+
+{% block body %}
+
+	<table>
+		<tbody>
+			{% for post in posts %}
+				<tr>
+					<td>
+						{{ post.getId }}
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+{% endblock body %}
