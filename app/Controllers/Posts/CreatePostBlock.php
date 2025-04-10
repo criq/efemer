@@ -21,6 +21,7 @@ class CreatePostBlock extends \Katu\Controllers\Controller
 		$postBlock->setTimeCreated(new Time);
 		$postBlock->setPost($post);
 		$postBlock->setKind($kind);
+		$postBlock->setPosition($post->getPostBlocks()->getMaxPosition() + 1);
 		$postBlock->persist();
 
 		return $response

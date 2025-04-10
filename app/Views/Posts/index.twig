@@ -2,6 +2,10 @@
 
 {% block body %}
 
+	<a href="{{ url("posts.create") }}">
+		C
+	</a>
+
 	<table>
 		<tbody>
 			{% for post in posts %}
@@ -10,7 +14,9 @@
 						{{ post.getId }}
 					</td>
 					<td>
-						<a href="{{ url("posts.edit", { postId: post.getId }) }}">U</a>
+						<a href="{{ url("posts.edit", { postId: post.getId }) }}">
+							E
+						</a>
 					</td>
 				</tr>
 			{% endfor %}

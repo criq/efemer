@@ -13,6 +13,7 @@ class PostBlock extends \Katu\Models\Model
 
 	public $id;
 	public $kind;
+	public $position;
 	public $postId;
 	public $timeCreated;
 
@@ -40,6 +41,18 @@ class PostBlock extends \Katu\Models\Model
 	public function getKind(): ?Kind
 	{
 		return KindCollection::createDefault()->filterByCode(new Code($this->kind))->getFirst();
+	}
+
+	public function setPosition(int $position): PostBlock
+	{
+		$this->position = $position;
+
+		return $this;
+	}
+
+	public function getPosition(): int
+	{
+		return $this->position;
 	}
 
 	public function getPostBlockFiles(): PostBlockFileCollection
