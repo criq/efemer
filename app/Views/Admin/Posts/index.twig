@@ -1,0 +1,53 @@
+{% extends "Templates/default.twig" %}
+
+{% block body %}
+
+	<div class="container">
+		<div class="row">
+			<div class="col-auto">
+
+				<h1>
+					Stránky
+				</h1>
+
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-auto">
+
+				<p>
+					<a class="btn btn-primary" href="{{ url("admin.posts.create") }}">
+						Přidat
+					</a>
+				</p>
+
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-auto">
+
+				<table class="table">
+					<tbody>
+						{% for post in posts %}
+							<tr>
+								<td>
+									{{ post.getId }}
+								</td>
+								<td>
+									<img class="img-fluid" src="{{ post.getPostBlockFiles.getFirst.getImage.getImageVersion("THUMBNAIL") }}" alt="">
+								</td>
+								<td>
+									<a class="btn btn-primary" href="{{ url("admin.posts.edit", { postId: post.getId }) }}">
+										Upravit
+									</a>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+
+			</div>
+		</div>
+	</div>
+
+{% endblock body %}

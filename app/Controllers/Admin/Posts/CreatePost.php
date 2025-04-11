@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\Posts;
+namespace App\Controllers\Admin\Posts;
 
 use App\Classes\Posts\Post;
 use Katu\Tools\Calendar\Time;

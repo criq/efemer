@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\Posts;
+namespace App\Controllers\Admin\Posts;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

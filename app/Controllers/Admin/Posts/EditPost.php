@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\Posts;
+namespace App\Controllers\Admin\Posts;
 
 use App\Classes\Posts\Blocks\KindCollection;
 use App\Classes\Posts\Post;
@@ -34,7 +34,7 @@ class EditPost extends \Katu\Controllers\Controller
 				;
 		}
 
-		return $response->withBody((new HTMLEngine($request))->render("Posts/edit.twig", [
+		return $response->withBody((new HTMLEngine($request))->render("Admin/Posts/edit.twig", [
 			"kinds" => $kinds,
 			"post" => $post,
 		]));

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\Posts;
+namespace App\Controllers\Admin\Posts;
 
 use App\Classes\Posts\Post;
 use App\Classes\Views\HTMLEngine;
@@ -13,7 +13,7 @@ class Index extends \Katu\Controllers\Controller
 	{
 		$posts = Post::getAll();
 
-		return $response->withBody((new HTMLEngine($request))->render("Posts/index.twig", [
+		return $response->withBody((new HTMLEngine($request))->render("Admin/Posts/index.twig", [
 			"posts" => $posts,
 		]));
 	}

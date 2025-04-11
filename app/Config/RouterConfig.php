@@ -12,11 +12,11 @@ class RouterConfig extends \Katu\Config\RouterConfig
 		return new RouteCollection([
 			"homepage" => new Route("/", [new \App\Controllers\Homepage\Index, "getResponse"]),
 			"images.getVersion" => new Route("/images/{imagePackage}/{versionCode}.{extension}", [new \App\Controllers\Images, "getVersion"]),
-			"postBlocks.create" => new Route("/posts/{postId}/blocks/create/{kindCode}", [new \App\Controllers\Posts\CreatePostBlock, "getResponse"]),
-			"postBlocks.edit" => new Route("/posts/{postId}/blocks/{postBlockId}/edit", [new \App\Controllers\Posts\EditPostBlock, "getResponse"]),
-			"posts.create" => new Route("/posts/create", [new \App\Controllers\Posts\CreatePost, "getResponse"]),
-			"posts.edit" => new Route("/posts/{postId}/edit", [new \App\Controllers\Posts\EditPost, "getResponse"]),
-			"posts" => new Route("/posts", [new \App\Controllers\Posts\Index, "getResponse"]),
+			"admin.postBlocks.create" => new Route("/posts/{postId}/blocks/create/{kindCode}", [new \App\Controllers\Admin\Posts\CreatePostBlock, "getResponse"]),
+			"admin.postBlocks.edit" => new Route("/posts/{postId}/blocks/{postBlockId}/edit", [new \App\Controllers\Admin\Posts\EditPostBlock, "getResponse"]),
+			"admin.posts.create" => new Route("/posts/create", [new \App\Controllers\Admin\Posts\CreatePost, "getResponse"]),
+			"admin.posts.edit" => new Route("/posts/{postId}/edit", [new \App\Controllers\Admin\Posts\EditPost, "getResponse"]),
+			"admin.posts" => new Route("/posts", [new \App\Controllers\Admin\Posts\Index, "getResponse"]),
 		]);
 	}
 }
