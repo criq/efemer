@@ -24,13 +24,9 @@ class FilesKind extends Kind
 
 	public static function validate(PostBlock $postBlock, ServerRequestInterface $request): Validation
 	{
-		$validation = new Validation;
-
 		$output = UploadCollection::createFromInput($request->getUploadedFiles()["values"][$postBlock->getId()]);
 
-		$validation->setResponse($output);
-
-		return $validation;
+		return (new Validation)->setResponse($output);
 	}
 
 	public static function setFromValidation(PostBlock $postBlock, Validation $validation): PostBlock

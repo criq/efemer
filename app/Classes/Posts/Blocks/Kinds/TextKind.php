@@ -22,9 +22,16 @@ class TextKind extends Kind
 
 	public static function validate(PostBlock $postBlock, ServerRequestInterface $request): Validation
 	{
+		$output = $request->getParsedBody()["values"][$postBlock->getId()];
+
+		return (new Validation)->setResponse($output);
 	}
 
 	public static function setFromValidation(PostBlock $postBlock, Validation $validation): PostBlock
 	{
+		$postBlock->setValue($validation->getResponse());
+		$postBlock->persist();
+
+		return $postBlock;
 	}
 }

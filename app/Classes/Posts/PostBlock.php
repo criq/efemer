@@ -16,6 +16,7 @@ class PostBlock extends \Katu\Models\Model
 	public $position;
 	public $postId;
 	public $timeCreated;
+	public $value;
 
 	public function setTimeCreated(Time $time): PostBlock
 	{
@@ -58,6 +59,18 @@ class PostBlock extends \Katu\Models\Model
 	public function getPosition(): int
 	{
 		return $this->position;
+	}
+
+	public function setValue(?string $value): PostBlock
+	{
+		$this->value = $value;
+
+		return $this;
+	}
+
+	public function getValue(): ?string
+	{
+		return $this->value;
 	}
 
 	public function getPostBlockFiles(): PostBlockFileCollection
