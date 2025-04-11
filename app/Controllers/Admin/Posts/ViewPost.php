@@ -11,7 +11,7 @@ use Katu\Files\UploadCollection;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class EditPost extends \Katu\Controllers\Controller
+class ViewPost extends \Katu\Controllers\Controller
 {
 	public function getResponse(ServerRequestInterface $request, ResponseInterface $response, string $postId)
 	{
@@ -28,13 +28,13 @@ class EditPost extends \Katu\Controllers\Controller
 
 			return $response
 				->withStatus(302)
-				->withHeader("Location", (string)\Katu\Tools\Routing\URL::getFor("posts.edit", [
+				->withHeader("Location", (string)\Katu\Tools\Routing\URL::getFor("posts.view", [
 					"postId" => $post->getId(),
 				]))
 				;
 		}
 
-		return $response->withBody((new HTMLEngine($request))->render("Admin/Posts/edit.twig", [
+		return $response->withBody((new HTMLEngine($request))->render("Admin/Posts/view.twig", [
 			"kinds" => $kinds,
 			"post" => $post,
 		]));

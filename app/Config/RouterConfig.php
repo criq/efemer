@@ -10,13 +10,14 @@ class RouterConfig extends \Katu\Config\RouterConfig
 	public function getRoutes(): RouteCollection
 	{
 		return new RouteCollection([
-			"homepage" => new Route("/", [new \App\Controllers\Homepage\Index, "getResponse"]),
-			"images.getVersion" => new Route("/images/{imagePackage}/{versionCode}.{extension}", [new \App\Controllers\Images, "getVersion"]),
-			"admin.postBlocks.create" => new Route("/posts/{postId}/blocks/create/{kindCode}", [new \App\Controllers\Admin\Posts\CreatePostBlock, "getResponse"]),
-			"admin.postBlocks.edit" => new Route("/posts/{postId}/blocks/{postBlockId}/edit", [new \App\Controllers\Admin\Posts\EditPostBlock, "getResponse"]),
-			"admin.posts.create" => new Route("/posts/create", [new \App\Controllers\Admin\Posts\CreatePost, "getResponse"]),
-			"admin.posts.edit" => new Route("/posts/{postId}/edit", [new \App\Controllers\Admin\Posts\EditPost, "getResponse"]),
-			"admin.posts" => new Route("/posts", [new \App\Controllers\Admin\Posts\Index, "getResponse"]),
+			"admin.postBlocks.create" => new Route("/posts/{postId}/blocks/create/{kindCode}", [\App\Controllers\Admin\Posts\CreatePostBlock::class, "getResponse"]),
+			"admin.postBlocks.edit" => new Route("/posts/{postId}/blocks/{postBlockId}/edit", [\App\Controllers\Admin\Posts\EditPostBlock::class, "getResponse"]),
+			"admin.postBlocks.view" => new Route("/posts/{postId}/blocks/{postBlockId}", [\App\Controllers\Admin\Posts\ViewPostBlock::class, "getResponse"]),
+			"admin.posts.create" => new Route("/posts/create", [\App\Controllers\Admin\Posts\CreatePost::class, "getResponse"]),
+			"admin.posts.view" => new Route("/posts/{postId}", [\App\Controllers\Admin\Posts\ViewPost::class, "getResponse"]),
+			"admin.posts" => new Route("/posts", [\App\Controllers\Admin\Posts\Index::class, "getResponse"]),
+			"homepage" => new Route("/", [\App\Controllers\Homepage\Index::class, "getResponse"]),
+			"images.getVersion" => new Route("/images/{imagePackage}/{versionCode}.{extension}", [\App\Controllers\Images::class, "getVersion"]),
 		]);
 	}
 }

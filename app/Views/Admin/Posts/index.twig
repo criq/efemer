@@ -24,21 +24,28 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-auto">
+			<div class="col-12">
 
 				<table class="table">
 					<tbody>
 						{% for post in posts %}
 							<tr>
-								<td>
-									{{ post.getId }}
+								<td class="narrow nowrap">
+									<a href="{{ url("admin.posts.view", { postId: post.getId }) }}">
+										{{ post.getId }}
+									</a>
 								</td>
 								<td>
 									<img class="img-fluid" src="{{ post.getPostBlockFiles.getFirst.getImage.getImageVersion("THUMBNAIL") }}" alt="">
 								</td>
-								<td>
-									<a class="btn btn-primary" href="{{ url("admin.posts.edit", { postId: post.getId }) }}">
+								<td class="narrow nowrap">
+									<a class="btn btn-primary" href="{{ url("admin.posts.view", { postId: post.getId }) }}">
 										Upravit
+									</a>
+								</td>
+								<td class="narrow nowrap">
+									<a class="btn btn-danger" href="{{ url("admin.posts.view", { postId: post.getId }) }}">
+										Smazat
 									</a>
 								</td>
 							</tr>
