@@ -4,7 +4,7 @@
 
 	<div class="container">
 		<div class="row">
-			<div class="col-auto">
+			<div class="col-12">
 
 				<form action="" method="POST" enctype="multipart/form-data">
 					{% include "Blocks/formHeader.twig" %}
@@ -12,13 +12,28 @@
 					<h2>
 						Bloky
 					</h2>
-					<ul>
-						{% for postBlock in post.getPostBlocks %}
-							<li>
-								{% include "Admin/Posts/Blocks/Kinds/#{postBlock.getKind.getCode}/view.twig" %}
-							</li>
-						{% endfor %}
-					</ul>
+					<table class="table">
+						<tbody>
+							{% for postBlock in post.getPostBlocks %}
+								<tr>
+									<td class="narrow nowrap">
+										{{ postBlock.getPosition }}
+									</td>
+									<td class="narrow nowrap">
+										{{ postBlock.getKind.getTitle }}
+									</td>
+									<td>
+										{% include "Admin/Posts/Blocks/Kinds/#{postBlock.getKind.getCode}/preview.twig" %}
+									</td>
+									<td class="narrow nowrap">
+										<a class="btn btn-danger" href="">
+											Smazat
+										</a>
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
 
 					<h2>
 						Přidat blok
