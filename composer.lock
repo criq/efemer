@@ -191,11 +191,11 @@
         },
         {
             "name": "criq/katu",
-            "version": "4.20250404.2",
+            "version": "4.20250411.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/criq/katu",
-                "reference": "3752aec4a3343f89bf4fa39c6a27c1ff330daf1c"
+                "reference": "81f861fbf2f74d9ddd2a4ec59e090ce0dc18661e"
             },
             "require": {
                 "endroid/qr-code": "@stable",
@@ -245,7 +245,7 @@
                 }
             },
             "description": "katu",
-            "time": "2025-04-04T12:30:42+00:00"
+            "time": "2025-04-11T08:57:26+00:00"
         },
         {
             "name": "criq/sexy",

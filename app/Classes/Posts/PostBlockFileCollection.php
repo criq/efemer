@@ -11,7 +11,7 @@ class PostBlockFileCollection extends \ArrayObject
 	{
 		return new PostBlockFileCollection(array_map(function (Upload $upload) use ($postBlock) {
 			return PostBlockFile::createFromUpload($postBlock, $upload);
-		}, $uploads->getArrayCopy()));
+		}, $uploads->filterWithoutError()->getArrayCopy()));
 	}
 
 	public function getSlice(int $length): PostBlockFileCollection
