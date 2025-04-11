@@ -17,7 +17,7 @@ class CreatePost extends \Katu\Controllers\Controller
 
 		return $response
 			->withStatus(302)
-			->withHeader("Location", (string)\Katu\Tools\Routing\URL::getFor("posts.edit", [
+			->withHeader("Location", (string)\Katu\Tools\Routing\URL::getFor("admin.posts.view", [
 				"postId" => $post->getId(),
 			]))
 			;
