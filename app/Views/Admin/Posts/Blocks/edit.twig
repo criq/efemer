@@ -1,0 +1,24 @@
+{% extends "Templates/default.twig" %}
+
+{% block body %}
+
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+
+				<form action="" method="POST" enctype="multipart/form-data">
+					{% include "Blocks/formHeader.twig" %}
+
+					{% include "Admin/Posts/Blocks/Kinds/#{postBlock.getKind.getCode}/edit.twig" %}
+
+					<button class="btn btn-primary" type="submit">
+						Uložit
+					</button>
+
+				</form>
+
+			</div>
+		</div>
+	</div>
+
+{% endblock body %}

@@ -1,4 +1,0 @@
-noob
-====
-
-starter pack

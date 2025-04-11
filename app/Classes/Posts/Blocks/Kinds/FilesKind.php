@@ -3,7 +3,12 @@
 namespace App\Classes\Posts\Blocks\Kinds;
 
 use App\Classes\Posts\Blocks\Kind;
+use App\Classes\Posts\PostBlock;
+use App\Classes\Posts\PostBlockFileCollection;
+use Katu\Files\UploadCollection;
 use Katu\Tools\Strings\Code;
+use Psr\Http\Message\ServerRequestInterface;
+use Katu\Tools\Validation\Validation;
 
 class FilesKind extends Kind
 {
@@ -15,5 +20,23 @@ class FilesKind extends Kind
 	public static function getTitle(): string
 	{
 		return "Soubory";
+	}
+
+	public static function validate(PostBlock $postBlock, ServerRequestInterface $request): Validation
+	{
+		$validation = new Validation;
+
+		$output = UploadCollection::createFromInput($request->getUploadedFiles()["values"][$postBlock->getId()]);
+
+		$validation->setResponse($output);
+
+		return $validation;
+	}
+
+	public static function setFromValidation(PostBlock $postBlock, Validation $validation): PostBlock
+	{
+		PostBlockFileCollection::createFromUploads($postBlock, $validation->getResponse());
+
+		return $postBlock;
 	}
 }

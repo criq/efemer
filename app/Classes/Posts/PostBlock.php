@@ -31,6 +31,11 @@ class PostBlock extends \Katu\Models\Model
 		return $this;
 	}
 
+	public function getPost(): Post
+	{
+		return Post::get($this->postId);
+	}
+
 	public function setKind(Kind $kind): PostBlock
 	{
 		$this->kind = $kind->getCode()->getConstantFormat();
