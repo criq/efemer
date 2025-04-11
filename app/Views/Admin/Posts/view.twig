@@ -17,7 +17,9 @@
 							{% for postBlock in post.getPostBlocks %}
 								<tr>
 									<td class="narrow nowrap">
-										{{ postBlock.getPosition }}
+										<a href="{{ url("admin.postBlocks.view", { postId: post.getId, postBlockId: postBlock.getId }) }}">
+											{{ postBlock.getPosition }}
+										</a>
 									</td>
 									<td class="narrow nowrap">
 										{{ postBlock.getKind.getTitle }}
@@ -26,12 +28,12 @@
 										{% include "Admin/Posts/Blocks/Kinds/#{postBlock.getKind.getCode}/preview.twig" %}
 									</td>
 									<td class="narrow nowrap">
-										<a class="btn btn-primary" href="">
+										<a class="btn btn-primary" href="{{ url("admin.postBlocks.edit", { postId: post.getId, postBlockId: postBlock.getId }) }}">
 											Upravit
 										</a>
 									</td>
 									<td class="narrow nowrap">
-										<a class="btn btn-danger" href="">
+										<a class="btn btn-danger" href="{{ url("admin.postBlocks.delete", { postId: post.getId, postBlockId: postBlock.getId }) }}">
 											Smazat
 										</a>
 									</td>

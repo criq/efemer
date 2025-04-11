@@ -39,12 +39,12 @@
 									<img class="img-fluid" src="{{ post.getPostBlockFiles.getFirst.getImage.getImageVersion("THUMBNAIL") }}" alt="">
 								</td>
 								<td class="narrow nowrap">
-									<a class="btn btn-primary" href="{{ url("admin.posts.view", { postId: post.getId }) }}">
+									<a class="btn btn-primary" href="{{ url("admin.posts.edit", { postId: post.getId }) }}">
 										Upravit
 									</a>
 								</td>
 								<td class="narrow nowrap">
-									<a class="btn btn-danger" href="{{ url("admin.posts.view", { postId: post.getId }) }}">
+									<a class="btn btn-danger" href="{{ url("admin.posts.delete", { postId: post.getId }) }}">
 										Smazat
 									</a>
 								</td>
