@@ -2,7 +2,6 @@
 
 namespace App;
 
-use App\Classes\Users\User;
 use App\Classes\Views\HTMLEngine;
 use Katu\Errors\Error;
 use Katu\Errors\ErrorCollection;
@@ -58,14 +57,6 @@ class App extends \Katu\App
 						]))->getRestResponse()->getStream())
 						;
 				} else {
-					$user = User::getFromRequest($request);
-					if (!$user) {
-						return $response
-							->withStatus(302)
-							->withHeader("Location", (string)\Katu\Tools\Routing\URL::getFor("account.login"))
-							;
-					}
-
 					return $response
 						->withStatus(401)
 						->withBody((new HTMLEngine($request))->render("Errors/401.twig"))
