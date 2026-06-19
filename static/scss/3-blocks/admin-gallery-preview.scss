@@ -1,0 +1,24 @@
+.admin-gallery-preview {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .25rem;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+
+	li {
+		border-radius: calc(var(--admin-radius) - .0625rem);
+		flex: 0 0 2.5rem;
+		height: 2.5rem;
+		overflow: hidden;
+		width: 2.5rem;
+	}
+
+	img {
+		border-radius: inherit;
+		display: block;
+		height: 100%;
+		object-fit: cover;
+		width: 100%;
+	}
+}

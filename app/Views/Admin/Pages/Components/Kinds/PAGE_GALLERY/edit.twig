@@ -1,0 +1,193 @@
+
+<input type="hidden" name="values[{{ pageComponent.getId }}][pageOrder]" id="pageOrder" value="{% for linkedPage in pageComponent.getLinkedPages %}{{ linkedPage.getId }}{% if not loop.last %},{% endif %}{% endfor %}">
+
+<div class="admin-field">
+	<span class="admin-field__label">Vybrané stránky</span>
+	{% if pageComponent.getLinkedPages|length > 0 %}
+		<table class="admin-table">
+			<thead>
+				<tr>
+					<th class="admin-table__handle" aria-label="Pořadí"></th>
+					<th>Název</th>
+					<th>Cesta</th>
+					<th class="admin-table__actions">Akce</th>
+				</tr>
+			</thead>
+			<tbody class="admin-sortable" data-page-sortable>
+				{% for linkedPage in pageComponent.getLinkedPages %}
+					<tr data-page-id="{{ linkedPage.getId }}">
+						<td class="admin-table__handle" draggable="true">{% include "Blocks/adminIcon.twig" with { name: "drag_indicator", label: "Přesunout" } %}</td>
+						<td>{{ linkedPage.getTitle|default("—") }}</td>
+						<td class="nowrap">{{ linkedPage.getPublicPath }}</td>
+						<td class="admin-table__actions">
+							<button class="admin-button admin-button--danger admin-button--ghost" type="button" data-page-remove>{% include "Blocks/adminIcon.twig" with { name: "close" } %} Odebrat</button>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<p>Zatím nejsou vybrány žádné stránky.</p>
+	{% endif %}
+</div>
+
+<div class="admin-field">
+	<span class="admin-field__label">Přidat stránku</span>
+	<div class="admin-page__actions">
+		<select id="pageGalleryAddSelect">
+			<option value="">— vyberte stránku —</option>
+			{% for candidatePage in pages %}
+				{% if candidatePage.getId != pageComponent.getPage.getId %}
+					<option value="{{ candidatePage.getId }}">{{ candidatePage.getTitle|default("Stránka " ~ candidatePage.getId) }} ({{ candidatePage.getPublicPath }})</option>
+				{% endif %}
+			{% endfor %}
+		</select>
+		<button class="admin-button admin-button--ghost" type="button" id="pageGalleryAddButton">{% include "Blocks/adminIcon.twig" with { name: "add" } %} Přidat</button>
+	</div>
+</div>
+
+<script>
+	(() => {
+		const orderInput = document.getElementById("pageOrder");
+		const addSelect = document.getElementById("pageGalleryAddSelect");
+		const addButton = document.getElementById("pageGalleryAddButton");
+		let sortableBody = document.querySelector("[data-page-sortable]");
+		let draggedRow = null;
+
+		const updateOrder = () => {
+			if (!sortableBody) {
+				orderInput.value = "";
+
+				return;
+			}
+
+			const ids = [...sortableBody.querySelectorAll("tr[data-page-id]")].map((row) => row.dataset.pageId);
+			orderInput.value = ids.join(",");
+		};
+
+		const bindRow = (row) => {
+			const handle = row.querySelector(".admin-table__handle");
+
+			handle.addEventListener("dragstart", (event) => {
+				draggedRow = row;
+				row.classList.add("is-dragging");
+				event.dataTransfer.effectAllowed = "move";
+			});
+
+			handle.addEventListener("dragend", () => {
+				row.classList.remove("is-dragging");
+				draggedRow = null;
+				updateOrder();
+			});
+
+			row.addEventListener("dragover", (event) => {
+				event.preventDefault();
+
+				if (!draggedRow || draggedRow === row) {
+					return;
+				}
+
+				const rows = [...sortableBody.querySelectorAll("tr[data-page-id]:not(.is-dragging)")];
+				const nextRow = rows.find((candidate) => {
+					const rect = candidate.getBoundingClientRect();
+
+					return event.clientY <= rect.top + rect.height / 2;
+				});
+
+				if (nextRow) {
+					sortableBody.insertBefore(draggedRow, nextRow);
+				} else {
+					sortableBody.appendChild(draggedRow);
+				}
+			});
+
+			row.querySelector("[data-page-remove]").addEventListener("click", () => {
+				const option = addSelect.querySelector(`option[value="${row.dataset.pageId}"]`);
+				if (option) {
+					option.hidden = false;
+				}
+
+				row.remove();
+
+				if (!sortableBody.querySelector("tr[data-page-id]")) {
+					sortableBody.closest("table").remove();
+					sortableBody = null;
+				}
+
+				updateOrder();
+			});
+		};
+
+		const ensureSortableBody = () => {
+			if (sortableBody) {
+				return sortableBody;
+			}
+
+			const table = document.createElement("table");
+			table.className = "admin-table";
+			table.innerHTML = `
+				<thead>
+					<tr>
+						<th class="admin-table__handle" aria-label="Pořadí"></th>
+						<th>Název</th>
+						<th>Cesta</th>
+						<th class="admin-table__actions">Akce</th>
+					</tr>
+				</thead>
+				<tbody class="admin-sortable" data-page-sortable></tbody>
+			`;
+
+			const field = orderInput.closest(".admin-field");
+			const emptyMessage = field.querySelector(".admin-muted");
+			if (emptyMessage) {
+				emptyMessage.remove();
+			}
+
+			field.appendChild(table);
+			sortableBody = table.querySelector("[data-page-sortable]");
+
+			return sortableBody;
+		};
+
+		const addPage = (pageId, title, path) => {
+			const body = ensureSortableBody();
+			const row = document.createElement("tr");
+			row.dataset.pageId = pageId;
+			row.innerHTML = `
+				<td class="admin-table__handle" draggable="true"><span class="admin-icon material-symbols-outlined" aria-hidden="true">drag_indicator</span></td>
+				<td>${title}</td>
+				<td class="nowrap">${path}</td>
+				<td class="admin-table__actions">
+					<button class="admin-button admin-button--danger admin-button--ghost" type="button" data-page-remove><span class="admin-icon material-symbols-outlined" aria-hidden="true">close</span> Odebrat</button>
+				</td>
+			`;
+
+			body.appendChild(row);
+			bindRow(row);
+			updateOrder();
+		};
+
+		if (sortableBody) {
+			sortableBody.querySelectorAll("tr[data-page-id]").forEach(bindRow);
+			sortableBody.querySelectorAll("tr[data-page-id]").forEach((row) => {
+				const option = addSelect.querySelector(`option[value="${row.dataset.pageId}"]`);
+				if (option) {
+					option.hidden = true;
+				}
+			});
+		}
+
+		addButton.addEventListener("click", () => {
+			const option = addSelect.selectedOptions[0];
+			if (!option || !option.value) {
+				return;
+			}
+
+			addPage(option.value, option.textContent.split(" (")[0], option.textContent.match(/\(([^)]+)\)$/)?.[1] ?? "");
+			option.hidden = true;
+			addSelect.value = "";
+		});
+
+		updateOrder();
+	})();
+</script>

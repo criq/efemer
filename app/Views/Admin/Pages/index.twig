@@ -8,7 +8,7 @@
 		<div class="admin-page__header">
 			<h1 class="admin-page__title">Stránky</h1>
 			<div class="admin-page__actions">
-				<a class="admin-button" href="{{ url("admin.pages.createPage") }}">Přidat</a>
+				<a class="admin-button" href="{{ url("admin.pages.createPage") }}">{% include "Blocks/adminIcon.twig" with { name: "add" } %} Přidat</a>
 			</div>
 		</div>
 
@@ -17,6 +17,8 @@
 				<thead>
 					<tr>
 						<th class="admin-table__id">ID</th>
+						<th>Název</th>
+						<th>Cesta</th>
 						<th>Náhled</th>
 						<th class="admin-table__actions">Akce</th>
 					</tr>
@@ -28,14 +30,20 @@
 								<a href="{{ url("admin.pages.viewPage", { pageId: page.getId }) }}">{{ page.getId }}</a>
 							</td>
 							<td>
-								{% if page.getPageComponentFiles.getFirst and page.getPageComponentFiles.getFirst.getImage %}
-									<img class="admin-thumbnail" src="{{ page.getPageComponentFiles.getFirst.getImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+								<a href="{{ url("admin.pages.viewPage", { pageId: page.getId }) }}">{{ page.getTitle|default("—") }}</a>
+							</td>
+							<td class="nowrap">
+								<a href="{{ page.getPublicUrl }}" target="_blank" rel="noopener noreferrer">{% include "Blocks/adminIcon.twig" with { name: "open_in_new" } %} {{ page.getPublicPath }}</a>
+							</td>
+							<td>
+								{% if page.getStorageFiles.getFirst and page.getStorageFiles.getFirst.getImage %}
+									<img class="admin-thumbnail" src="{{ page.getStorageFiles.getFirst.getImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
 								{% endif %}
 							</td>
 							<td class="admin-table__actions">
 								<div class="admin-page__actions">
-									<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.editPage", { pageId: page.getId }) }}">Upravit</a>
-									<a class="admin-button admin-button--danger" href="{{ url("admin.pages.deletePage", { pageId: page.getId }) }}">Smazat</a>
+									<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.editPage", { pageId: page.getId }) }}">{% include "Blocks/adminIcon.twig" with { name: "edit" } %} Upravit</a>
+									<a class="admin-button admin-button--danger" href="{{ url("admin.pages.deletePage", { pageId: page.getId }) }}">{% include "Blocks/adminIcon.twig" with { name: "delete" } %} Smazat</a>
 								</div>
 							</td>
 						</tr>

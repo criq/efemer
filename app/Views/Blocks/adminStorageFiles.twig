@@ -1,0 +1,58 @@
+{% set page = pageComponent.getPage %}
+{% set token = getCsrfToken() %}
+
+<div
+	class="admin-storage-files"
+	data-storage-files
+	data-upload-url="{{ url("admin.pages.uploadStorageFiles", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}"
+	data-update-url-template="{{ url("admin.pages.updateStorageFile", { pageId: page.getId, pageComponentId: pageComponent.getId, storageFileId: "__id__" }) }}"
+	data-delete-url-template="{{ url("admin.pages.deleteStorageFile", { pageId: page.getId, pageComponentId: pageComponent.getId, storageFileId: "__id__" }) }}"
+	{% if multiple %}data-reorder-url="{{ url("admin.pages.reorderStorageFiles", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}"{% endif %}
+	data-token="{{ token }}"
+	{% if multiple %}data-storage-files-multiple{% endif %}
+>
+	<table class="admin-table admin-storage-files__table"{% if pageComponent.getStorageFiles|length == 0 %} hidden{% endif %}>
+			<thead>
+				<tr>
+					{% if multiple %}
+						<th class="admin-table__handle" aria-label="Pořadí"></th>
+					{% endif %}
+					<th class="admin-storage-files__preview-col">Náhled</th>
+					<th>Popisek</th>
+					<th class="admin-table__actions">Akce</th>
+				</tr>
+			</thead>
+			<tbody class="admin-storage-files__body{% if multiple %} admin-storage-files__body--sortable{% endif %}">
+				{% for storageFile in pageComponent.getStorageFiles %}
+					<tr data-storage-file-id="{{ storageFile.getId }}">
+						{% if multiple %}
+							<td class="admin-table__handle" draggable="true">{% include "Blocks/adminIcon.twig" with { name: "drag_indicator", label: "Přesunout" } %}</td>
+						{% endif %}
+						<td class="admin-storage-files__preview">
+							{% if storageFile.getImage %}
+								<img class="admin-storage-files__image" src="{{ storageFile.getImage.getImageVersion("THUMBNAIL").getURL }}" alt="" draggable="false">
+							{% endif %}
+						</td>
+						<td>
+							<input class="admin-storage-files__caption" type="text" value="{{ storageFile.getCaption|default("") }}" placeholder="Popisek obrázku">
+						</td>
+						<td class="admin-table__actions">
+							<button class="admin-button admin-button--danger" type="button" aria-label="Smazat">
+								{% include "Blocks/adminIcon.twig" with { name: "delete" } %}
+							</button>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+	</table>
+
+	<div class="admin-field">
+		<span class="admin-field__label">{{ label|default("Přidat obrázky") }}</span>
+		{% include "Blocks/adminFileDrop.twig" with {
+			text: dropText|default("Přetáhněte soubory sem nebo klikněte pro výběr"),
+			multiple: multiple,
+		} %}
+	</div>
+
+	<p class="admin-storage-files__error" hidden></p>
+</div>

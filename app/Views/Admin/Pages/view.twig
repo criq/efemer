@@ -1,32 +1,52 @@
 {% extends "Templates/admin.twig" %}
 
-{% block title %}Stránka {{ page.getId }}{% endblock %}
+{% block title %}{{ page.getTitle|default("Stránka " ~ page.getId) }}{% endblock %}
 
 {% block body %}
 
 	<div class="admin-page">
 		<div class="admin-page__header">
-			<h1 class="admin-page__title">Stránka {{ page.getId }}</h1>
+			<h1 class="admin-page__title">{{ page.getTitle|default("Stránka " ~ page.getId) }}</h1>
+			<div class="admin-page__actions">
+				<a class="admin-button admin-button--ghost" href="{{ page.getPublicUrl }}" target="_blank" rel="noopener noreferrer">{% include "Blocks/adminIcon.twig" with { name: "open_in_new" } %} {{ page.getPublicPath }}</a>
+			</div>
 		</div>
 
 		<form class="admin-form" action="" method="POST" enctype="multipart/form-data">
 			{% include "Blocks/formHeader.twig" %}
+			{% include "Blocks/formErrors.twig" %}
 
 			<section class="admin-section">
-				<h2 class="admin-section__title">Komponenty</h2>
+				<h2 class="admin-section__title">Nastavení</h2>
+				<div class="admin-panel admin-field">
+					<label class="admin-field">
+						<span class="admin-field__label">Název</span>
+						<input type="text" name="title" value="{{ page.getTitle }}" placeholder="Domovská stránka" autofocus>
+					</label>
+					<label class="admin-field">
+						<span class="admin-field__label">Cesta</span>
+						<input type="text" name="path" value="{{ page.getPublicPath }}" placeholder="/">
+					</label>
+				</div>
+			</section>
+
+			<section class="admin-section">
+				<h2 class="admin-section__title">Součásti</h2>
 				<div class="admin-panel">
 					<table class="admin-table">
 						<thead>
 							<tr>
+								<th class="admin-table__handle" aria-label="Pořadí"></th>
 								<th class="admin-table__id">#</th>
 								<th>Typ</th>
 								<th class="admin-table__preview">Náhled</th>
 								<th class="admin-table__actions">Akce</th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody class="admin-sortable" data-sortable>
 							{% for pageComponent in page.getPageComponents %}
-								<tr>
+								<tr data-component-id="{{ pageComponent.getId }}">
+									<td class="admin-table__handle" draggable="true">{% include "Blocks/adminIcon.twig" with { name: "drag_indicator", label: "Přesunout" } %}</td>
 									<td class="admin-table__id">
 										<a href="{{ url("admin.pages.viewPageComponent", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}">{{ pageComponent.getPosition }}</a>
 									</td>
@@ -36,8 +56,8 @@
 									</td>
 									<td class="admin-table__actions">
 										<div class="admin-page__actions">
-											<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.editPageComponent", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}">Upravit</a>
-											<a class="admin-button admin-button--danger" href="{{ url("admin.pages.deletePageComponent", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}">Smazat</a>
+											<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.editPageComponent", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}">{% include "Blocks/adminIcon.twig" with { name: "edit" } %} Upravit</a>
+											<a class="admin-button admin-button--danger" href="{{ url("admin.pages.deletePageComponent", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}">{% include "Blocks/adminIcon.twig" with { name: "delete" } %} Smazat</a>
 										</div>
 									</td>
 								</tr>
@@ -45,23 +65,75 @@
 						</tbody>
 					</table>
 				</div>
+				<input type="hidden" name="componentOrder" id="componentOrder" value="{% for pageComponent in page.getPageComponents %}{{ pageComponent.getId }}{% if not loop.last %},{% endif %}{% endfor %}">
 			</section>
 
 			<section class="admin-section">
-				<h2 class="admin-section__title">Přidat komponentu</h2>
+				<h2 class="admin-section__title">Přidat součást</h2>
 				<ul class="admin-kind-list">
 					{% for kind in kinds %}
 						<li>
-							<a href="{{ url("admin.pages.createPageComponent", { pageId: page.getId, kindCode: kind.getCode }) }}">{{ kind.getTitle }}</a>
+							<a href="{{ url("admin.pages.createPageComponent", { pageId: page.getId, kindCode: kind.getCode }) }}">{% include "Blocks/adminIcon.twig" with { name: kind.getCode == "TEXT" ? "article" : (kind.getCode == "IMAGE_GALLERY" ? "photo_library" : (kind.getCode == "PAGE_GALLERY" ? "library_books" : "image")) } %} {{ kind.getTitle }}</a>
 						</li>
 					{% endfor %}
 				</ul>
 			</section>
 
 			<div class="admin-form__footer">
-				<button class="admin-button" type="submit">Uložit</button>
+				<button class="admin-button" type="submit">{% include "Blocks/adminIcon.twig" with { name: "save" } %} Uložit</button>
 			</div>
 		</form>
 	</div>
+
+	<script>
+		document.querySelectorAll("[data-sortable]").forEach((tbody) => {
+			const orderInput = document.getElementById("componentOrder");
+			let draggedRow = null;
+
+			const updateOrder = () => {
+				const ids = [...tbody.querySelectorAll("tr[data-component-id]")].map((row) => row.dataset.componentId);
+				orderInput.value = ids.join(",");
+			};
+
+			tbody.querySelectorAll("tr[data-component-id]").forEach((row) => {
+				const handle = row.querySelector(".admin-table__handle");
+
+				handle.addEventListener("dragstart", (event) => {
+					draggedRow = row;
+					row.classList.add("is-dragging");
+					event.dataTransfer.effectAllowed = "move";
+				});
+
+				handle.addEventListener("dragend", () => {
+					row.classList.remove("is-dragging");
+					draggedRow = null;
+					updateOrder();
+				});
+
+				row.addEventListener("dragover", (event) => {
+					event.preventDefault();
+
+					if (!draggedRow || draggedRow === row) {
+						return;
+					}
+
+					const rows = [...tbody.querySelectorAll("tr[data-component-id]:not(.is-dragging)")];
+					const nextRow = rows.find((candidate) => {
+						const rect = candidate.getBoundingClientRect();
+
+						return event.clientY <= rect.top + rect.height / 2;
+					});
+
+					if (nextRow) {
+						tbody.insertBefore(draggedRow, nextRow);
+					} else {
+						tbody.appendChild(draggedRow);
+					}
+				});
+			});
+
+			updateOrder();
+		});
+	</script>
 
 {% endblock body %}

@@ -1,0 +1,9 @@
+<ul class="admin-gallery-preview">
+	{% for storageFile in pageComponent.getStorageFiles %}
+		<li>
+			{% if storageFile.getImage %}
+				<img src="{{ storageFile.getImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+			{% endif %}
+		</li>
+	{% endfor %}
+</ul>

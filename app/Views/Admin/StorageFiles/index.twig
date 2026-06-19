@@ -1,0 +1,54 @@
+{% extends "Templates/admin.twig" %}
+
+{% block title %}Soubory{% endblock %}
+
+{% block body %}
+
+	<div class="admin-page">
+		<div class="admin-page__header">
+			<h1 class="admin-page__title">Soubory</h1>
+		</div>
+
+		<div class="admin-panel">
+			<table class="admin-table">
+				<thead>
+					<tr>
+						<th class="admin-table__id">ID</th>
+						<th>Náhled</th>
+						<th>Soubor</th>
+						<th>Stránka</th>
+						<th>Součást</th>
+						<th class="admin-table__id">Pozice</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for storageFile in storageFiles %}
+						{% set pageComponent = storageFile.getPageComponent %}
+						{% set page = pageComponent.getPage %}
+						<tr>
+							<td class="admin-table__id">{{ storageFile.getId }}</td>
+							<td>
+								{% if storageFile.getImage %}
+									<img class="admin-thumbnail" src="{{ storageFile.getImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+								{% endif %}
+							</td>
+							<td class="admin-table__uri">{{ storageFile.getFileName }}</td>
+							<td>
+								<a href="{{ url("admin.pages.viewPage", { pageId: page.getId }) }}">{{ page.getTitle|default("—") }}</a>
+							</td>
+							<td>
+								<a href="{{ url("admin.pages.editPageComponent", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}">{{ pageComponent.getKind.getTitle }}</a>
+							</td>
+							<td class="admin-table__id">{{ storageFile.getPosition|default("—") }}</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="6">Žádné soubory.</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+{% endblock body %}

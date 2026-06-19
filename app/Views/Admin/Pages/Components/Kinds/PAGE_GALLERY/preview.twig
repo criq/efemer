@@ -1,0 +1,7 @@
+{% if pageComponent.getLinkedPages|length > 0 %}
+	<ul class="admin-page-gallery-preview">
+		{% for linkedPage in pageComponent.getLinkedPages %}
+			<li>{{ linkedPage.getTitle|default(linkedPage.getPublicPath) }}</li>
+		{% endfor %}
+	</ul>
+{% endif %}

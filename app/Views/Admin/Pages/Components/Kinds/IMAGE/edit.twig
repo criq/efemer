@@ -1,0 +1,5 @@
+{% include "Blocks/adminStorageFiles.twig" with {
+	label: pageComponent.getStorageFiles.getFirst ? "Nahradit obrázek" : "Obrázek",
+	dropText: "Přetáhněte obrázek sem nebo klikněte pro výběr",
+	multiple: false,
+} %}

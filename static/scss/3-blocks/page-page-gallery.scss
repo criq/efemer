@@ -1,0 +1,30 @@
+.page-page-gallery {
+	display: grid;
+	gap: .75rem;
+	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+	margin: 1rem 0;
+}
+
+.page-page-gallery__item {
+	border-radius: .25rem;
+	color: inherit;
+	display: block;
+	overflow: hidden;
+	text-decoration: none;
+
+	&:hover {
+		text-decoration: none;
+	}
+}
+
+.page-page-gallery__image {
+	display: block;
+	height: auto;
+	width: 100%;
+}
+
+.page-page-gallery__title {
+	display: block;
+	font-weight: 600;
+	padding: .5rem 0 0;
+}

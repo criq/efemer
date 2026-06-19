@@ -1,0 +1,12 @@
+<div class="admin-file-drop" data-file-drop{% if multiple %} data-file-drop-multiple{% endif %}>
+	<input
+		class="admin-file-drop__input"
+		type="file"
+		accept="{{ accept|default("image/*") }}"
+		{% if multiple %}multiple{% endif %}
+	>
+	<div class="admin-file-drop__zone" tabindex="0" role="button">
+		<span class="admin-file-drop__icon">{% include "Blocks/adminIcon.twig" with { name: "upload_file" } %}</span>
+		<span class="admin-file-drop__text">{{ text|default("Přetáhněte soubory sem nebo klikněte pro výběr") }}</span>
+	</div>
+</div>

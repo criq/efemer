@@ -1,0 +1,5 @@
+{% set storageFile = pageComponent.getStorageFiles.getFirst %}
+
+{% if storageFile and storageFile.getImage %}
+	<img class="admin-thumbnail" src="{{ storageFile.getImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+{% endif %}
