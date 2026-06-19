@@ -1,8 +1,29 @@
 {% set gallery = pageComponent.getGalleryProperties %}
+{% set templates = pageComponent.getKindTemplates %}
+{% set token = getCsrfToken() %}
 
-<div class="admin-gallery-properties" data-gallery-properties>
+<div
+	class="admin-gallery-properties"
+	data-gallery-properties
+	data-update-url="{{ url("admin.pages.updatePageComponentSettings", { pageId: pageComponent.getPage.getId, pageComponentId: pageComponent.getId }) }}"
+	data-token="{{ token }}"
+>
 	<span class="admin-field__label">Vlastnosti galerie</span>
 	<div class="admin-gallery-properties__fields">
+		{% if templates|length > 1 %}
+			<label class="admin-gallery-properties__field">
+				<span class="admin-gallery-properties__field-label">Šablona</span>
+				<select
+					class="admin-gallery-properties__input admin-gallery-properties__input--select"
+					name="values[{{ pageComponent.getId }}][template]"
+					data-component-template
+				>
+					{% for template in templates %}
+						<option value="{{ template.getCode.getConstantFormat }}"{% if pageComponent.getTemplate.getCode.getConstantFormat == template.getCode.getConstantFormat %} selected{% endif %}>{{ template.getTitle }}</option>
+					{% endfor %}
+				</select>
+			</label>
+		{% endif %}
 		<div class="admin-gallery-properties__columns" data-gallery-columns{% if pageComponent.isSlideshow %} hidden{% endif %}>
 			<label class="admin-gallery-properties__field">
 				<span class="admin-gallery-properties__field-label">Min. položek v řadě</span>
@@ -30,25 +51,73 @@
 			</label>
 		</div>
 	</div>
+	<p class="admin-gallery-properties__error" hidden></p>
 </div>
 
-{% if pageComponent.getKindTemplates|length > 1 %}
-	<script>
-		(() => {
-			const root = document.currentScript.previousElementSibling;
-			const templateSelect = document.querySelector("[data-component-template]");
-			const columns = root.querySelector("[data-gallery-columns]");
+<script>
+	(() => {
+		const root = document.currentScript.previousElementSibling;
+		const updateUrl = root.dataset.updateUrl;
+		const token = root.dataset.token;
+		const errorEl = root.querySelector(".admin-gallery-properties__error");
+		const templateSelect = root.querySelector("[data-component-template]");
+		const columns = root.querySelector("[data-gallery-columns]");
+		const columnsMin = root.querySelector("[name*='[gallery][columnsMin]']");
+		const columnsMax = root.querySelector("[name*='[gallery][columnsMax]']");
 
-			if (!templateSelect || !columns) {
-				return;
+		if (!updateUrl || !token || !columnsMin || !columnsMax) {
+			return;
+		}
+
+		const showError = (message) => {
+			errorEl.textContent = message;
+			errorEl.hidden = !message;
+		};
+
+		const sync = () => {
+			if (templateSelect && columns) {
+				columns.hidden = templateSelect.value === "SLIDESHOW";
+			}
+		};
+
+		const save = async () => {
+			const formData = new FormData();
+			formData.append("formToken", token);
+			formData.append("gallery[columnsMin]", columnsMin.value);
+			formData.append("gallery[columnsMax]", columnsMax.value);
+
+			if (templateSelect) {
+				formData.append("template", templateSelect.value);
 			}
 
-			const sync = () => {
-				columns.hidden = templateSelect.value === "SLIDESHOW";
-			};
+			const response = await fetch(updateUrl, {
+				method: "POST",
+				body: formData,
+				headers: { Accept: "application/json" },
+			});
 
-			templateSelect.addEventListener("change", sync);
-			sync();
-		})();
-	</script>
-{% endif %}
+			if (!response.ok) {
+				throw new Error("Uložení vlastností galerie se nezdařilo.");
+			}
+
+			showError("");
+		};
+
+		if (templateSelect) {
+			templateSelect.addEventListener("change", () => {
+				sync();
+				save().catch((error) => showError(error.message));
+			});
+		}
+
+		columnsMin.addEventListener("change", () => {
+			save().catch((error) => showError(error.message));
+		});
+
+		columnsMax.addEventListener("change", () => {
+			save().catch((error) => showError(error.message));
+		});
+
+		sync();
+	})();
+</script>

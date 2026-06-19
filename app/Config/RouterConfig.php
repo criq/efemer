@@ -14,6 +14,7 @@ class RouterConfig extends \Katu\Config\RouterConfig
 			"admin.pages.createPageComponent" => new Route("/admin/pages/{pageId}/components/create/{kindCode}", [\App\Controllers\Admin\Pages\CreatePageComponent::class, "getResponse"]),
 			"admin.pages.deletePageComponent" => new Route("/admin/pages/{pageId}/components/{pageComponentId}/delete", [\App\Controllers\Admin\Pages\DeletePageComponent::class, "getResponse"]),
 			"admin.pages.editPageComponent" => new Route("/admin/pages/{pageId}/components/{pageComponentId}/edit", [\App\Controllers\Admin\Pages\EditPageComponent::class, "getResponse"]),
+			"admin.pages.updatePageComponentSettings" => new Route("/admin/pages/{pageId}/components/{pageComponentId}/settings", [\App\Controllers\Admin\Pages\UpdatePageComponentSettings::class, "getResponse"]),
 			"admin.pages.uploadStorageFiles" => new Route("/admin/pages/{pageId}/components/{pageComponentId}/storage-files", [\App\Controllers\Admin\Pages\UploadStorageFiles::class, "getResponse"]),
 			"admin.pages.reorderStorageFiles" => new Route("/admin/pages/{pageId}/components/{pageComponentId}/storage-files/reorder", [\App\Controllers\Admin\Pages\ReorderStorageFiles::class, "getResponse"]),
 			"admin.pages.updateStorageFile" => new Route("/admin/pages/{pageId}/components/{pageComponentId}/storage-files/{storageFileId}", [\App\Controllers\Admin\Pages\UpdateStorageFile::class, "getResponse"]),

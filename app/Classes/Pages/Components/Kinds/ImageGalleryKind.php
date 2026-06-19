@@ -38,7 +38,7 @@ class ImageGalleryKind extends Kind
 
 	public static function validate(PageComponent $pageComponent, ServerRequestInterface $request): Validation
 	{
-		$output = $request->getParsedBody()["values"][$pageComponent->getId()] ?? [];
+		$output = static::getComponentFormValues($pageComponent, $request);
 		$uploads = UploadCollection::createFromInput($request->getUploadedFiles()["values"][$pageComponent->getId()] ?? [])->filterWithoutError();
 
 		return (new Validation)->setResponse([

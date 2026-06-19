@@ -36,4 +36,17 @@ abstract class Kind
 			$pageComponent->setTemplateCode($response["template"]);
 		}
 	}
+
+	protected static function getComponentFormValues(PageComponent $pageComponent, ServerRequestInterface $request): array
+	{
+		$body = $request->getParsedBody();
+		if (!is_array($body)) {
+			$body = $_POST;
+		}
+
+		$values = $body["values"] ?? [];
+		$id = $pageComponent->getId();
+
+		return $values[$id] ?? $values[(string)$id] ?? [];
+	}
 }

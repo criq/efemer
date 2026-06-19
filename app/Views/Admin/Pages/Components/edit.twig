@@ -12,12 +12,11 @@
 			</div>
 		</div>
 
-		{% if pageComponent.getKind.getCode in ["TEXT", "PAGE_GALLERY", "IMAGE_GALLERY", "GALLERY"] %}
-			<form class="admin-form" action="" method="POST" enctype="multipart/form-data">
+		{% if pageComponent.getKind.getCode.getConstantFormat in ["TEXT", "PAGE_GALLERY", "IMAGE_GALLERY", "GALLERY"] %}
+			<form class="admin-form" action="" method="POST">
 				{% include "Blocks/formHeader.twig" %}
 
 				<div class="admin-panel admin-field">
-					{% include "Blocks/adminComponentTemplate.twig" %}
 					{% include "Admin/Pages/Components/Kinds/#{pageComponent.getKind.getCode}/edit.twig" %}
 				</div>
 

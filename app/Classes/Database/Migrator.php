@@ -34,6 +34,19 @@ class Migrator
 			$migration->up($connection);
 			$this->markApplied($connection, $migration->getName());
 		}
+
+		$this->clearTableSchemaCache();
+	}
+
+	private function clearTableSchemaCache(): void
+	{
+		$cacheDir = new \Katu\Files\File(\App\App::getTemporaryDir(), "cache", "databases");
+		if ($cacheDir->exists()) {
+			$cacheDir->delete();
+		}
+
+		\Katu\Cache\General::clearMemory();
+		\Katu\Cache\Runtime::clear();
 	}
 
 	private function getMigrations(): array

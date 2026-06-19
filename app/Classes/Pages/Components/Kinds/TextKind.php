@@ -31,7 +31,7 @@ class TextKind extends Kind
 
 	public static function validate(PageComponent $pageComponent, ServerRequestInterface $request): Validation
 	{
-		$output = $request->getParsedBody()["values"][$pageComponent->getId()] ?? [];
+		$output = static::getComponentFormValues($pageComponent, $request);
 
 		return (new Validation)->setResponse([
 			"value" => $output["value"] ?? "",

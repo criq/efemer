@@ -33,7 +33,7 @@ class GalleryKind extends Kind
 
 	public static function validate(PageComponent $pageComponent, ServerRequestInterface $request): Validation
 	{
-		$output = $request->getParsedBody()["values"][$pageComponent->getId()] ?? [];
+		$output = static::getComponentFormValues($pageComponent, $request);
 		$componentOrder = trim((string)($output["componentOrder"] ?? ""));
 		$childComponentIds = array_values(array_filter(array_map("intval", explode(",", $componentOrder))));
 

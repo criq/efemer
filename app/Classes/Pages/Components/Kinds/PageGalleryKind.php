@@ -34,7 +34,7 @@ class PageGalleryKind extends Kind
 
 	public static function validate(PageComponent $pageComponent, ServerRequestInterface $request): Validation
 	{
-		$output = $request->getParsedBody()["values"][$pageComponent->getId()] ?? [];
+		$output = static::getComponentFormValues($pageComponent, $request);
 		$pageOrder = trim((string)($output["pageOrder"] ?? ""));
 		$pageIds = array_values(array_filter(array_map("intval", explode(",", $pageOrder))));
 
