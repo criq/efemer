@@ -18,6 +18,12 @@ class ImageConfig extends \Katu\Config\ImageConfig
 					"height" => 400,
 				]),
 			])),
+			new Version("GALLERY", "webp", 90, new FilterCollection([
+				new FitFilter([
+					"width" => 1200,
+					"height" => 1200,
+				]),
+			])),
 		]);
 	}
 }

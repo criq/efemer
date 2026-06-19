@@ -9,8 +9,10 @@ class KindCollection extends \ArrayObject
 	public static function createDefault(): KindCollection
 	{
 		return new static([
-			new \App\Classes\Pages\Components\Kinds\FilesKind,
 			new \App\Classes\Pages\Components\Kinds\TextKind,
+			new \App\Classes\Pages\Components\Kinds\ImageKind,
+			new \App\Classes\Pages\Components\Kinds\ImageGalleryKind,
+			new \App\Classes\Pages\Components\Kinds\PageGalleryKind,
 		]);
 	}
 

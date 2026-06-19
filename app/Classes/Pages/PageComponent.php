@@ -4,6 +4,8 @@ namespace App\Classes\Pages;
 
 use App\Classes\Pages\Components\Kind;
 use App\Classes\Pages\Components\KindCollection;
+use App\Classes\Storage\StorageFile;
+use App\Classes\Storage\StorageFileCollection;
 use Katu\Tools\Calendar\Time;
 use Katu\Tools\Strings\Code;
 
@@ -73,10 +75,53 @@ class PageComponent extends \Katu\Models\Model
 		return $this->value;
 	}
 
-	public function getPageComponentFiles(): PageComponentFileCollection
+	public function getStorageFiles(): StorageFileCollection
 	{
-		return new PageComponentFileCollection(PageComponentFile::getBy([
+		$storageFiles = StorageFile::getBy([
 			"pageComponentId" => $this->getId(),
-		])->getItems());
+		])->getItems();
+
+		usort($storageFiles, function (StorageFile $a, StorageFile $b) {
+			return ($a->getPosition() ?? 0) <=> ($b->getPosition() ?? 0);
+		});
+
+		return new StorageFileCollection($storageFiles);
+	}
+
+	public function reorderStorageFiles(array $orderedIds): void
+	{
+		$storageFiles = $this->getStorageFiles()->getArrayCopy();
+		$storageFilesById = [];
+
+		foreach ($storageFiles as $storageFile) {
+			$storageFilesById[(int)$storageFile->getId()] = $storageFile;
+		}
+
+		if (count($orderedIds) !== count($storageFilesById)) {
+			return;
+		}
+
+		foreach ($orderedIds as $id) {
+			if (!isset($storageFilesById[(int)$id])) {
+				return;
+			}
+		}
+
+		foreach ($orderedIds as $position => $id) {
+			$storageFilesById[(int)$id]->setPosition($position + 1)->persist();
+		}
+	}
+
+	public function getLinkedPages(): PageCollection
+	{
+		$pageComponentPages = PageComponentPage::getBy([
+			"pageComponentId" => $this->getId(),
+		])->getItems();
+
+		usort($pageComponentPages, function (PageComponentPage $a, PageComponentPage $b) {
+			return $a->getPosition() <=> $b->getPosition();
+		});
+
+		return (new PageComponentPageCollection($pageComponentPages))->getPages();
 	}
 }
