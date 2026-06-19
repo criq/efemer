@@ -1,0 +1,16 @@
+---
+description: Run Composer inside the PHP Docker container
+alwaysApply: true
+---
+
+# Composer
+
+Do **not** run `composer` on the host. Use the PHP container with your UID so `vendor/` stays owned by you:
+
+```bash
+docker compose exec -T -u "$(id -u):$(id -g)" php composer update
+docker compose exec -T -u "$(id -u):$(id -g)" php composer require vendor/package
+docker compose exec -T -u "$(id -u):$(id -g)" php composer install
+```
+
+Commit updated `composer.lock` after dependency changes. Production installs via `deploy/remote-setup.sh` in the same container.

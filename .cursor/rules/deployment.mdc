@@ -49,7 +49,7 @@ Reload after changes: `sudo caddy validate --config /etc/caddy/Caddyfile && sudo
 ./deploy.sh
 ```
 
-`deploy.sh` builds webpack assets, rsyncs the app (excluding `.env`, `vendor`, `data/mysql`), syncs `.secret/` and `vendor/`, then runs `deploy/remote-setup.sh` on the server.
+`deploy.sh` builds webpack assets, rsyncs the app (excluding `.env`, `vendor`, `data/mysql`), syncs `.secret/`, then runs `deploy/remote-setup.sh` on the server.
 
 ## Server `.env`
 
@@ -65,12 +65,26 @@ Set `APP_HOST=efemer.jabli.cz`, `APP_ENV=PRODUCTION`, `APP_SCHEMA=https`, `MYSQL
 `deploy/remote-setup.sh` on the server:
 
 ```bash
-docker compose -f docker-compose.production.yml build php
-docker compose -f docker-compose.production.yml up -d
+# Rebuilds PHP image only when docker/php/ changes (hash in .deploy/php-image.context-sha256)
+docker compose -f docker-compose.production.yml build php   # conditional
+docker compose -f docker-compose.production.yml up -d --no-build
+docker compose -f docker-compose.production.yml exec -T php composer install --no-dev --optimize-autoloader --no-interaction
 docker compose -f docker-compose.production.yml exec -T php php bin/migrate.php
 ```
 
-`vendor/` is installed locally and rsynced — the PHP image has no Composer.
+`vendor/` is installed in the PHP container on the server — the image includes Composer.
+
+## Composer
+
+Run Composer **inside the PHP container**, not on the host (use host UID so `vendor/` stays owned by you):
+
+```bash
+docker compose exec -T -u "$(id -u):$(id -g)" php composer update
+docker compose exec -T -u "$(id -u):$(id -g)" php composer require vendor/package
+docker compose exec -T -u "$(id -u):$(id -g)" php composer install
+```
+
+Production deploy runs `composer install --no-dev` via `remote-setup.sh` after containers start.
 
 ## Migrations on production
 
@@ -85,3 +99,13 @@ docker compose -f docker-compose.production.yml exec -T php php bin/migrate.php
 - If `~/efemer/vendor` is owned by root (from an old `docker compose run`), fix before rsync: `sudo rm -rf vendor && mkdir vendor && chown jan:jan vendor`
 - `aukce` uses port `54184`, `movies` uses `50184` — efemer uses `52184`
 - Run migrations locally after schema changes (see `migrations.mdc`), then deploy
+
+## Post-deploy verification
+
+After every deploy, confirm the site responds before finishing:
+
+```bash
+curl -sI -o /dev/null -w '%{http_code}' https://efemer.jabli.cz/admin   # expect 302
+```
+
+If down, investigate (containers, logs, `.env`, vendor permissions) and fix until `/admin` returns `302` again. See `.cursor/skills/deploy/SKILL.md`.

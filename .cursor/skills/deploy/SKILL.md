@@ -23,7 +23,8 @@ Deploy progress:
 - [ ] Local migrations (if schema changed)
 - [ ] Commit + push (logical chunks)
 - [ ] Run ./deploy.sh
-- [ ] Verify production
+- [ ] Verify production (public URL + loopback)
+- [ ] If down: investigate and fix until up again
 ```
 
 ## Step 1: Pre-flight
@@ -71,13 +72,15 @@ From repo root:
 This script:
 
 1. Builds webpack assets (`npm` + `webpack`)
-2. Runs `composer install --no-dev` locally
-3. Rsyncs app to `jan@34.179.230.234:~/efemer` (excludes `.env`, `vendor` in main sync — then syncs `vendor/` and `.secret/` separately)
-4. Runs `deploy/remote-setup.sh` on the server via `gcloud compute ssh`
+2. Rsyncs app to `jan@34.179.230.234:~/efemer` (excludes `.env`, `vendor`, `data/mysql` — then syncs `.secret/`)
+3. Runs `deploy/remote-setup.sh` on the server via `gcloud compute ssh`
 
-`remote-setup.sh` builds PHP image, starts containers, runs **production migrations**:
+`remote-setup.sh` rebuilds the PHP image **only when `docker/php/` changed** (hash in `.deploy/php-image.context-sha256`), runs `up -d --no-build`, **`composer install --no-dev` in the PHP container**, then migrations.
 
 ```bash
+docker compose -f docker-compose.production.yml build php   # skipped when context unchanged
+docker compose -f docker-compose.production.yml up -d --no-build
+docker compose -f docker-compose.production.yml exec -T php composer install --no-dev --optimize-autoloader --no-interaction
 docker compose -f docker-compose.production.yml exec -T php php bin/migrate.php
 ```
 
@@ -85,35 +88,45 @@ docker compose -f docker-compose.production.yml exec -T php php bin/migrate.php
 
 | Error | Fix |
 |-------|-----|
-| `composer: not found` in container | Should not happen — `deploy.sh` rsyncs `vendor/`. Re-run `./deploy.sh`. |
+| `composer: not found` in container | Rebuild PHP image (`docker/php/` changed) — Dockerfile includes Composer. Delete `.deploy/php-image.context-sha256` on server to force rebuild. |
 | rsync vendor permission denied | On server: `cd ~/efemer && docker compose -f docker-compose.production.yml down && sudo rm -rf vendor && mkdir vendor && chown jan:jan vendor`, then re-run `./deploy.sh`. |
 | Missing `.env` on server | Create `~/efemer/.env` from `deploy/env.production.example` (see deployment rule). |
 | SSH / gcloud auth | Use `~/.ssh/google_compute_engine`, project `aukce-496911`, zone `europe-west3-c`, VM `curios-vm`. |
 
-## Step 5: Verify production
+## Step 5: Verify production (required — do not stop here)
 
-After `Deployment complete.`:
+After `Deployment complete.`, confirm the site is **actually up**. This step is not optional.
 
 ```bash
+# Public HTTPS (primary check)
+curl -sI -o /dev/null -w '%{http_code}' https://efemer.jabli.cz/admin
+
 # Containers running
 gcloud compute ssh curios-vm --zone=europe-west3-c --project=aukce-496911 \
   --command="docker ps --format 'table {{.Names}}\t{{.Status}}' | grep efemer"
 
-# App responds (via Caddy on server)
+# App responds on loopback (via Caddy upstream)
 gcloud compute ssh curios-vm --zone=europe-west3-c --project=aukce-496911 \
   --command="curl -s -o /dev/null -w '%{http_code}' -H 'Host: efemer.jabli.cz' http://127.0.0.1:52184/admin"
 ```
 
-Expect HTTP `302` from `/admin` (redirect to login).
+**Success:** HTTP `302` from `/admin` (redirect to login). Homepage may be `404` if no public page exists — that is OK.
 
-Optional: `curl -sI https://efemer.jabli.cz/admin` from local machine — requires DNS A record to `34.179.230.234`.
+**If the site is down or unhealthy:** investigate and fix until it responds again. Do not report deploy as done while production is broken. Common fixes:
+
+1. Re-run `./deploy.sh` if rsync or remote-setup failed partway
+2. Check container logs: `docker compose -f docker-compose.production.yml logs --tail=50 php nginx`
+3. Fix vendor permissions (see deploy failures table)
+4. Ensure `.env` and `.secret/` exist on the server
+5. Restart stack: `docker compose -f docker-compose.production.yml up -d`
 
 Report to the user:
 
 - Commits pushed (SHAs or messages)
 - Deploy script result
 - Migration output (local + production if schema changed)
-- Verification status
+- Verification status (public URL + loopback)
+- What was broken and how it was fixed (if anything)
 - Any DNS/TLS issues if the public URL does not work
 
 ## First-time / infra changes

@@ -14,9 +14,6 @@ echo "Building frontend assets..."
 npm install --no-fund --no-audit --ignore-scripts
 npx webpack --config webpack.config.js
 
-echo "Installing production Composer dependencies..."
-composer install --no-dev --optimize-autoloader --no-interaction
-
 SSH_KEY_FILE="${HOME}/.ssh/google_compute_engine"
 
 echo "Syncing to ${VM_NAME}..."
@@ -40,10 +37,6 @@ rsync -avz \
 rsync -avz \
 	-e "ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no" \
 	.secret/ "jan@${VM_IP}:${REMOTE_DIR}/.secret/"
-
-rsync -avz \
-	-e "ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no" \
-	vendor/ "jan@${VM_IP}:${REMOTE_DIR}/vendor/"
 
 echo "Remote setup..."
 gcloud compute ssh "${VM_NAME}" \
