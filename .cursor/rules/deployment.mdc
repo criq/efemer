@@ -1,0 +1,87 @@
+---
+description: Production deployment to efemer.jabli.cz on curios-vm
+alwaysApply: true
+---
+
+# Production Deployment
+
+Efemer runs on **curios-vm** — the same GCP VM as aukce.jabli.cz.
+
+## Server
+
+| Item | Value |
+|------|-------|
+| VM | `curios-vm` |
+| GCP project (VM) | `aukce-496911` |
+| Zone | `europe-west3-c` |
+| IP | `34.179.230.234` |
+| SSH user | `jan` |
+| SSH key | `~/.ssh/google_compute_engine` |
+| Remote app dir | `/home/jan/efemer` |
+| Docker nginx port | `127.0.0.1:52184` |
+
+## Hostname & proxy
+
+- **Production URL**: https://efemer.jabli.cz
+- Host **Caddy** (`/etc/caddy/Caddyfile`) proxies to loopback:
+
+```
+efemer.jabli.cz {
+	reverse_proxy 127.0.0.1:52184
+}
+```
+
+Reload after changes: `sudo caddy validate --config /etc/caddy/Caddyfile && sudo systemctl reload caddy`
+
+## DNS
+
+`efemer.jabli.cz` must point to **34.179.230.234** (A record). A CNAME to `jabli.cz` breaks TLS (Let's Encrypt hits the wrong IP).
+
+## GCS (files)
+
+- GCP project: `efemer-456414` (see `gcloud-project.mdc`)
+- Bucket: `efemer-files`
+- Credentials: `.secret/` (gitignored, rsynced on deploy)
+
+## Deploy
+
+```bash
+./deploy.sh
+```
+
+`deploy.sh` builds webpack assets, rsyncs the app (excluding `.env`, `vendor`, `data/mysql`), syncs `.secret/` and `vendor/`, then runs `deploy/remote-setup.sh` on the server.
+
+## Server `.env`
+
+Not synced from local. On first setup, create `~/efemer/.env` from `deploy/env.production.example` plus:
+
+- `ENCRYPTION_KEY`, `ENCRYPTION_SALT`
+- `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`
+
+Set `APP_HOST=efemer.jabli.cz`, `APP_ENV=PRODUCTION`, `APP_SCHEMA=https`, `MYSQL_HOST=mysql`.
+
+## Remote setup
+
+`deploy/remote-setup.sh` on the server:
+
+```bash
+docker compose -f docker-compose.production.yml build php
+docker compose -f docker-compose.production.yml up -d
+docker compose -f docker-compose.production.yml exec -T php php bin/migrate.php
+```
+
+`vendor/` is installed locally and rsynced — the PHP image has no Composer.
+
+## Migrations on production
+
+After deploy, migrations run automatically via `remote-setup.sh`. To run manually:
+
+```bash
+docker compose -f docker-compose.production.yml exec -T php php bin/migrate.php
+```
+
+## Gotchas
+
+- If `~/efemer/vendor` is owned by root (from an old `docker compose run`), fix before rsync: `sudo rm -rf vendor && mkdir vendor && chown jan:jan vendor`
+- `aukce` uses port `54184`, `movies` uses `50184` — efemer uses `52184`
+- Run migrations locally after schema changes (see `migrations.mdc`), then deploy
