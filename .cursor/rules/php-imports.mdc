@@ -1,0 +1,12 @@
+---
+description: Remove unused PHP use imports when editing files
+alwaysApply: true
+---
+
+# PHP imports
+
+When editing PHP files, **remove unused `use` imports** before finishing.
+
+- Delete imports left over after refactors, renames, or deleted classes
+- Do not add imports for classes only referenced via fully qualified names
+- Prefer keeping the file’s existing import style (grouped `use` at the top)
