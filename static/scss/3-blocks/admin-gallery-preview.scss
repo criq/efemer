@@ -6,7 +6,7 @@
 	margin: 0;
 	padding: 0;
 
-	li:not(.admin-gallery-preview__mode) {
+	li {
 		border-radius: calc(var(--admin-radius) - .0625rem);
 		flex: 0 0 auto;
 		max-height: 5rem;
@@ -24,7 +24,7 @@
 	}
 }
 
-.admin-gallery-preview--square li:not(.admin-gallery-preview__mode) {
+.admin-gallery-preview--square li {
 	flex: 0 0 2.5rem;
 	height: 2.5rem;
 	max-height: none;
@@ -38,13 +38,4 @@
 	max-width: none;
 	object-fit: cover;
 	width: 100%;
-}
-
-.admin-gallery-preview__mode {
-	align-self: center;
-	flex: 0 0 auto;
-	font-size: .8125rem;
-	font-weight: 600;
-	height: auto;
-	width: auto;
 }

@@ -39,6 +39,7 @@
 								<th class="admin-table__handle" aria-label="Pořadí"></th>
 								<th class="admin-table__id">#</th>
 								<th>Typ</th>
+								<th class="admin-table__template">Šablona</th>
 								<th class="admin-table__preview">Náhled</th>
 								<th class="admin-table__actions">Akce</th>
 							</tr>
@@ -51,6 +52,13 @@
 										<a href="{{ url("admin.pages.viewPageComponent", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}">{{ pageComponent.getPosition }}</a>
 									</td>
 									<td>{{ pageComponent.getKind.getTitle }}</td>
+									<td class="admin-table__template">
+										{% if pageComponent.getKindTemplates|length > 1 %}
+											{{ pageComponent.getTemplate.getTitle }}
+										{% else %}
+											—
+										{% endif %}
+									</td>
 									<td class="admin-table__preview">
 										{% include "Admin/Pages/Components/Kinds/#{pageComponent.getKind.getCode}/preview.twig" %}
 									</td>

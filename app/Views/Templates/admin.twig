@@ -175,44 +175,85 @@
 					row.className = "is-uploading";
 
 					if (multiple) {
-						row.appendChild(document.createElement("td"));
+						const handleCell = document.createElement("td");
+						handleCell.className = "admin-table__handle";
+						row.appendChild(handleCell);
 					}
 
 					const previewCell = document.createElement("td");
 					previewCell.className = "admin-storage-files__preview";
 
-					const image = document.createElement("img");
-					image.className = "admin-storage-files__image";
-					image.src = URL.createObjectURL(file);
-					image.alt = file.name;
-					previewCell.appendChild(image);
+					const previewWrap = document.createElement("div");
+					previewWrap.className = "admin-storage-files__preview-wrap";
 
-					const progress = document.createElement("div");
-					progress.className = "admin-storage-files__upload-progress";
-					const progressBar = document.createElement("div");
-					progressBar.className = "admin-storage-files__upload-progress-bar";
-					progressBar.setAttribute("role", "progressbar");
-					progressBar.setAttribute("aria-valuemin", "0");
-					progressBar.setAttribute("aria-valuemax", "100");
-					progressBar.setAttribute("aria-valuenow", "0");
-					progress.appendChild(progressBar);
-					previewCell.appendChild(progress);
+					const provisionalImage = document.createElement("img");
+					provisionalImage.className = "admin-storage-files__image";
+					provisionalImage.src = URL.createObjectURL(file);
+					provisionalImage.alt = file.name;
+					previewWrap.appendChild(provisionalImage);
+
+					const overlay = document.createElement("div");
+					overlay.className = "admin-storage-files__upload-overlay";
+					overlay.setAttribute("role", "progressbar");
+					overlay.setAttribute("aria-valuemin", "0");
+					overlay.setAttribute("aria-valuemax", "100");
+					overlay.setAttribute("aria-valuenow", "0");
+					previewWrap.appendChild(overlay);
+
+					previewCell.appendChild(previewWrap);
 
 					row.appendChild(previewCell);
-					row.appendChild(document.createElement("td"));
-					row.appendChild(document.createElement("td"));
 
-					row.addEventListener("uploadComplete", () => {
-						URL.revokeObjectURL(image.src);
-					}, { once: true });
+					const captionCell = document.createElement("td");
+					const captionInput = document.createElement("input");
+					captionInput.className = "admin-storage-files__caption";
+					captionInput.type = "text";
+					captionInput.placeholder = "Popisek obrázku";
+					captionInput.disabled = true;
+					captionCell.appendChild(captionInput);
+					row.appendChild(captionCell);
 
-					return { row, progressBar };
+					const actionsCell = document.createElement("td");
+					actionsCell.className = "admin-table__actions";
+					const deleteButton = document.createElement("button");
+					deleteButton.className = "admin-button admin-button--danger";
+					deleteButton.type = "button";
+					deleteButton.disabled = true;
+					deleteButton.setAttribute("aria-label", "Smazat");
+					deleteButton.innerHTML = "<span class=\"admin-icon material-symbols-outlined\" aria-hidden=\"true\">delete</span>";
+					actionsCell.appendChild(deleteButton);
+					row.appendChild(actionsCell);
+
+					return { row, overlay, provisionalImage };
 				};
 
-				const setProgress = (progressBar, value) => {
-					const percent = Math.max(0, Math.min(100, Math.round(value * 100)));
-					progressBar.style.width = `${percent}%`;
-					progressBar.setAttribute("aria-valuenow", String(percent));
+				const finalizeUploadRow = (row, uploadedFile, uploadElements) => new Promise((resolve) => {
+					const { provisionalImage, overlay } = uploadElements;
+
+					const replaceRow = () => {
+						URL.revokeObjectURL(provisionalImage.src);
+						row.replaceWith(createRow(uploadedFile));
+						resolve();
+					};
+
+					setProgress(overlay, 1);
+
+					if (!uploadedFile.thumbnailUrl) {
+						replaceRow();
+						return;
+					}
+
+					const serverImage = new Image();
+					serverImage.onload = replaceRow;
+					serverImage.onerror = replaceRow;
+					serverImage.src = uploadedFile.thumbnailUrl;
+				});
+
+				const setProgress = (overlay, value) => {
+					const clamped = Math.max(0, Math.min(1, value));
+					const percent = Math.round(clamped * 100);
+					overlay.style.transform = `scaleX(${1 - clamped})`;
+					overlay.setAttribute("aria-valuenow", String(percent));
 				};
 
 				const registerSortableRow = (row) => {
@@ -267,14 +308,14 @@
 					});
 				};
 
-				const uploadFile = (file, progressBar) => new Promise((resolve, reject) => {
+				const uploadFile = (file, overlay) => new Promise((resolve, reject) => {
 					const xhr = new XMLHttpRequest();
 					xhr.open("POST", uploadUrl);
 					xhr.setRequestHeader("Accept", "application/json");
 
 					xhr.upload.addEventListener("progress", (event) => {
 						if (event.lengthComputable) {
-							setProgress(progressBar, event.loaded / event.total);
+							setProgress(overlay, event.loaded / event.total);
 						}
 					});
 
@@ -321,28 +362,28 @@
 					}
 
 					const uploads = fileList.map((file) => {
-						const { row, progressBar } = createUploadRow(file);
-						body.appendChild(row);
-						return { file, row, progressBar };
+						const uploadElements = createUploadRow(file);
+						body.appendChild(uploadElements.row);
+						return { file, ...uploadElements };
 					});
 
 					activeUploads += uploads.length;
 					setUploading(true);
 
-					await Promise.all(uploads.map(async ({ file, row, progressBar }) => {
+					await Promise.all(uploads.map(async ({ file, row, overlay, provisionalImage }) => {
+						const uploadElements = { provisionalImage, overlay };
+
 						try {
-							const data = await uploadFile(file, progressBar);
-							setProgress(progressBar, 1);
-							row.dispatchEvent(new Event("uploadComplete"));
+							const data = await uploadFile(file, overlay);
 
 							const uploadedFile = (data.files || [])[0];
 							if (!uploadedFile) {
 								throw new Error("Nahrávání se nezdařilo.");
 							}
 
-							row.replaceWith(createRow(uploadedFile));
+							await finalizeUploadRow(row, uploadedFile, uploadElements);
 						} catch (error) {
-							row.dispatchEvent(new Event("uploadComplete"));
+							URL.revokeObjectURL(provisionalImage.src);
 							row.remove();
 							showError(error.message);
 						} finally {

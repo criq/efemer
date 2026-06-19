@@ -177,6 +177,14 @@
 	padding-top: .375rem;
 }
 
+.admin-table__template {
+	color: var(--admin-text);
+	font-size: .8125rem;
+	font-weight: 400;
+	white-space: nowrap;
+	width: 1px;
+}
+
 .admin-table__handle {
 	color: var(--admin-muted);
 	cursor: grab;
@@ -318,14 +326,21 @@
 }
 
 .admin-select {
-	background: var(--admin-surface);
+	appearance: none;
+	background-color: var(--admin-surface);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236f6a60' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+	background-position: right .5rem center;
+	background-repeat: no-repeat;
+	background-size: 1rem;
 	border: 1px solid var(--admin-border);
 	border-radius: var(--admin-radius);
 	box-sizing: border-box;
 	color: var(--admin-text);
+	cursor: pointer;
 	font: inherit;
 	max-width: 100%;
-	padding: .5rem .625rem;
+	padding: .5rem 2rem .5rem .625rem;
+	width: 100%;
 
 	&:focus {
 		border-color: var(--admin-accent);
@@ -349,7 +364,6 @@
 	height: auto;
 	max-height: 2.5rem;
 	max-width: 2.5rem;
-	object-fit: cover;
 }
 
 .admin-table__uri {

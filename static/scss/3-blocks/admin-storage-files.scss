@@ -52,20 +52,30 @@
 	opacity: .5;
 }
 
-.admin-storage-files__upload-progress {
-	background: var(--admin-border);
-	border-radius: 999px;
-	height: .25rem;
-	margin-top: .375rem;
+.admin-storage-files__preview-wrap {
+	border-radius: calc(var(--admin-radius) - .0625rem);
+	display: inline-block;
+	line-height: 0;
 	overflow: hidden;
-	width: 5rem;
+	position: relative;
 }
 
-.admin-storage-files__upload-progress-bar {
-	background: var(--admin-accent);
+.admin-storage-files__preview-wrap .admin-storage-files__image {
+	border-radius: 0;
+	display: block;
+}
+
+.admin-storage-files__upload-overlay {
+	background: var(--admin-bg);
 	height: 100%;
-	transition: width .1s linear;
-	width: 0;
+	left: 0;
+	opacity: .75;
+	position: absolute;
+	top: 0;
+	transform: scaleX(1);
+	transform-origin: right center;
+	transition: transform .1s linear;
+	width: 100%;
 }
 
 .admin-storage-files__error {
