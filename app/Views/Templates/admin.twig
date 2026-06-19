@@ -33,6 +33,16 @@
 		<script src="/javascript/app.js"></script>
 
 		<script>
+			document.querySelectorAll("a[data-confirm]").forEach((link) => {
+				link.addEventListener("click", (event) => {
+					if (!confirm(link.dataset.confirm)) {
+						event.preventDefault();
+					}
+				});
+			});
+		</script>
+
+		<script>
 			document.querySelectorAll("[data-storage-files]").forEach((root) => {
 				const table = root.querySelector(".admin-storage-files__table");
 				const body = root.querySelector(".admin-storage-files__body");

@@ -3,13 +3,14 @@
 	<script>
 	  tinymce.init({
 	    selector: "textarea",
+	    auto_focus: true,
 	    plugins: [
 	      "anchor", "autolink", "charmap", "codesample", "emoticons", "image", "link", "lists", "media", "searchreplace", "table", "visualblocks", "wordcount"
 	    ],
 	    toolbar: "undo redo | blocks | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat",
 	  });
 	</script>
-	<textarea name="values[{{ pageComponent.getId }}][value]" id="" autofocus>
+	<textarea name="values[{{ pageComponent.getId }}][value]">
 		{{ pageComponent.getValue }}
 	</textarea>
 </label>

@@ -47,7 +47,7 @@
 							<td class="admin-table__actions">
 								<div class="admin-page__actions">
 									<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.editPage", { pageId: page.getId }) }}">{% include "Blocks/adminIcon.twig" with { name: "edit" } %} Upravit</a>
-									<a class="admin-button admin-button--danger" href="{{ url("admin.pages.deletePage", { pageId: page.getId }) }}">{% include "Blocks/adminIcon.twig" with { name: "delete" } %} Smazat</a>
+									<a class="admin-button admin-button--danger" href="{{ url("admin.pages.deletePage", { pageId: page.getId }) }}" data-confirm='Opravdu chcete smazat stránku „{{ page.getTitle|default("Stránka " ~ page.getId) }}"?'>{% include "Blocks/adminIcon.twig" with { name: "delete" } %} Smazat</a>
 								</div>
 							</td>
 						</tr>
