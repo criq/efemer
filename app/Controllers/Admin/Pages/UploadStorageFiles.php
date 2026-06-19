@@ -4,7 +4,7 @@ namespace App\Controllers\Admin\Pages;
 
 use App\Classes\Forms\RequestToken;
 use App\Classes\Pages\PageComponent;
-use App\Classes\Storage\StorageFileCollection;
+use App\Classes\Pages\PageComponentStorageFileCollection;
 use Katu\Errors\Error;
 use Katu\Errors\ErrorCollection;
 use Katu\Files\UploadCollection;
@@ -46,16 +46,16 @@ class UploadStorageFiles extends \Katu\Controllers\Controller
 		}
 
 		if ($kindCode === "IMAGE") {
-			StorageFileCollection::replaceWithUpload($pageComponent, $uploads->getFirst());
-			$storageFiles = array_filter([$pageComponent->getStorageFiles()->getFirst()]);
+			PageComponentStorageFileCollection::replaceWithUpload($pageComponent, $uploads->getFirst());
+			$links = array_filter([$pageComponent->getStorageFiles()->getFirst()]);
 		} else {
-			$storageFiles = StorageFileCollection::createFromUploads($pageComponent, $uploads)->getArrayCopy();
+			$links = PageComponentStorageFileCollection::createFromUploads($pageComponent, $uploads)->getArrayCopy();
 		}
 
 		return $this->jsonResponse($response, [
-			"files" => array_map(function ($storageFile) {
-				return $storageFile->getAdminPayload();
-			}, $storageFiles),
+			"files" => array_map(function ($link) {
+				return $link->getAdminPayload();
+			}, $links),
 		]);
 	}
 

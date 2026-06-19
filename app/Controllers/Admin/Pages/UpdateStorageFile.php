@@ -3,7 +3,7 @@
 namespace App\Controllers\Admin\Pages;
 
 use App\Classes\Forms\RequestToken;
-use App\Classes\Storage\StorageFile;
+use App\Classes\Pages\PageComponentStorageFile;
 use Katu\Errors\Error;
 use Katu\Errors\ErrorCollection;
 use Katu\Tools\Rest\RestResponse;
@@ -22,12 +22,12 @@ class UpdateStorageFile extends \Katu\Controllers\Controller
 			throw new \Katu\Exceptions\ForbiddenException;
 		}
 
-		$storageFile = StorageFile::get($storageFileId);
-		if (!$storageFile) {
+		$link = PageComponentStorageFile::get($storageFileId);
+		if (!$link) {
 			throw new \Katu\Exceptions\ModelNotFoundException;
 		}
 
-		$pageComponent = $storageFile->getPageComponent();
+		$pageComponent = $link->getPageComponent();
 		if ((string)$pageComponent->getId() !== $pageComponentId || (string)$pageComponent->getPage()->getId() !== $pageId) {
 			throw new \Katu\Exceptions\ForbiddenException;
 		}
@@ -48,12 +48,12 @@ class UpdateStorageFile extends \Katu\Controllers\Controller
 		}
 
 		$caption = trim((string)$parsedBody["caption"]);
-		$storageFile->setCaption($caption !== "" ? $caption : null)->persist();
+		$link->setCaption($caption !== "" ? $caption : null)->persist();
 
 		return $response
 			->withStatus(200)
 			->withHeader("Content-Type", "application/json; charset=UTF-8")
-			->withBody((new RestResponse($storageFile->getAdminPayload()))->getStream())
+			->withBody((new RestResponse($link->getAdminPayload()))->getStream())
 			;
 	}
 }

@@ -3,8 +3,13 @@
 namespace App\Classes\Pages\Components\Kinds;
 
 use App\Classes\Pages\Components\Kind;
+use App\Classes\Pages\Components\Templates\ImageGallery\NaturalTemplate;
+use App\Classes\Pages\Components\Templates\ImageGallery\SlideshowTemplate;
+use App\Classes\Pages\Components\Templates\ImageGallery\SquareTemplate;
+use App\Classes\Pages\Components\Templates\TemplateCollection;
+use App\Classes\Pages\GalleryProperties;
 use App\Classes\Pages\PageComponent;
-use App\Classes\Storage\StorageFileCollection;
+use App\Classes\Pages\PageComponentStorageFileCollection;
 use Katu\Files\UploadCollection;
 use Katu\Tools\Strings\Code;
 use Psr\Http\Message\ServerRequestInterface;
@@ -19,19 +24,40 @@ class ImageGalleryKind extends Kind
 
 	public static function getTitle(): string
 	{
-		return "Galerie";
+		return "Galerie obrázků";
+	}
+
+	public static function getTemplates(): TemplateCollection
+	{
+		return new TemplateCollection([
+			new NaturalTemplate,
+			new SquareTemplate,
+			new SlideshowTemplate,
+		]);
 	}
 
 	public static function validate(PageComponent $pageComponent, ServerRequestInterface $request): Validation
 	{
-		$output = UploadCollection::createFromInput($request->getUploadedFiles()["values"][$pageComponent->getId()] ?? [])->filterWithoutError();
+		$output = $request->getParsedBody()["values"][$pageComponent->getId()] ?? [];
+		$uploads = UploadCollection::createFromInput($request->getUploadedFiles()["values"][$pageComponent->getId()] ?? [])->filterWithoutError();
 
-		return (new Validation)->setResponse($output);
+		return (new Validation)->setResponse([
+			"gallery" => GalleryProperties::fromArray($output["gallery"] ?? []),
+			"template" => $output["template"] ?? null,
+			"uploads" => $uploads,
+		]);
 	}
 
 	public static function setFromValidation(PageComponent $pageComponent, Validation $validation): PageComponent
 	{
-		StorageFileCollection::createFromUploads($pageComponent, $validation->getResponse());
+		$response = $validation->getResponse();
+		$pageComponent->setGalleryProperties($response["gallery"]);
+		static::applyTemplateFromResponse($pageComponent, $response);
+		$pageComponent->persist();
+
+		if (count($response["uploads"])) {
+			PageComponentStorageFileCollection::createFromUploads($pageComponent, $response["uploads"]);
+		}
 
 		return $pageComponent;
 	}

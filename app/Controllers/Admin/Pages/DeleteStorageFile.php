@@ -3,7 +3,7 @@
 namespace App\Controllers\Admin\Pages;
 
 use App\Classes\Forms\RequestToken;
-use App\Classes\Storage\StorageFile;
+use App\Classes\Pages\PageComponentStorageFile;
 use Katu\Tools\Rest\RestResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,17 +20,17 @@ class DeleteStorageFile extends \Katu\Controllers\Controller
 			throw new \Katu\Exceptions\ForbiddenException;
 		}
 
-		$storageFile = StorageFile::get($storageFileId);
-		if (!$storageFile) {
+		$link = PageComponentStorageFile::get($storageFileId);
+		if (!$link) {
 			throw new \Katu\Exceptions\ModelNotFoundException;
 		}
 
-		$pageComponent = $storageFile->getPageComponent();
+		$pageComponent = $link->getPageComponent();
 		if ((string)$pageComponent->getId() !== $pageComponentId || (string)$pageComponent->getPage()->getId() !== $pageId) {
 			throw new \Katu\Exceptions\ForbiddenException;
 		}
 
-		$storageFile->delete();
+		$link->delete();
 
 		return $response
 			->withStatus(200)

@@ -3,8 +3,10 @@
 namespace App\Classes\Pages\Components\Kinds;
 
 use App\Classes\Pages\Components\Kind;
+use App\Classes\Pages\Components\Templates\Image\DefaultTemplate;
+use App\Classes\Pages\Components\Templates\TemplateCollection;
 use App\Classes\Pages\PageComponent;
-use App\Classes\Storage\StorageFileCollection;
+use App\Classes\Pages\PageComponentStorageFileCollection;
 use Katu\Files\UploadCollection;
 use Katu\Tools\Strings\Code;
 use Psr\Http\Message\ServerRequestInterface;
@@ -22,6 +24,13 @@ class ImageKind extends Kind
 		return "Obrázek";
 	}
 
+	public static function getTemplates(): TemplateCollection
+	{
+		return new TemplateCollection([
+			new DefaultTemplate,
+		]);
+	}
+
 	public static function validate(PageComponent $pageComponent, ServerRequestInterface $request): Validation
 	{
 		$output = UploadCollection::createFromInput($request->getUploadedFiles()["values"][$pageComponent->getId()] ?? null)->filterWithoutError();
@@ -36,7 +45,7 @@ class ImageKind extends Kind
 			return $pageComponent;
 		}
 
-		StorageFileCollection::replaceWithUpload($pageComponent, $upload);
+		PageComponentStorageFileCollection::replaceWithUpload($pageComponent, $upload);
 
 		return $pageComponent;
 	}
