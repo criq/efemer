@@ -1,0 +1,10 @@
+---
+description: Google Cloud project for this repository
+alwaysApply: true
+---
+
+# Google Cloud Project
+
+- **gcloud project ID**: `efemer-456414`
+- **files bucket**: `efemer-files` (GCS bucket for all uploaded/stored files)
+- Use this project when running `gcloud` commands, deploying to GCP, or working with Google Cloud resources for this repository.

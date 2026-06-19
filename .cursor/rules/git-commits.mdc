@@ -1,0 +1,36 @@
+---
+description: Git commit conventions — logical chunks and push after commit
+alwaysApply: true
+---
+
+# Git Commits
+
+## Logical chunks
+
+Split work into **separate commits** when changes serve different purposes. One commit = one logical unit of work.
+
+- **Do** group: one feature, one bug fix, one refactor, one migration, or one config change
+- **Don't** mix unrelated changes (e.g. feature + unrelated style fix + dependency bump in one commit)
+- **Order** commits so each builds on the last (schema/migrations before code that depends on them)
+
+When multiple logical chunks exist in the working tree, make **multiple commits** — stage and commit each chunk separately.
+
+## Push after commit
+
+**Always push** after a successful commit:
+
+```bash
+git push
+```
+
+If the branch has no upstream yet:
+
+```bash
+git push -u origin HEAD
+```
+
+Do not leave commits only on local without pushing unless the user explicitly asks not to push.
+
+## Only commit when asked
+
+Create commits only when the user explicitly requests it. If unclear, ask first.
