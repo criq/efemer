@@ -4,6 +4,7 @@ namespace App\Config;
 
 use Katu\Tools\Images\FilterCollection;
 use Katu\Tools\Images\Filters\FitFilter;
+use Katu\Tools\Images\Filters\ResizeFilter;
 use Katu\Tools\Images\Version;
 use Katu\Tools\Images\VersionCollection;
 
@@ -13,9 +14,10 @@ class ImageConfig extends \Katu\Config\ImageConfig
 	{
 		return new VersionCollection([
 			new Version("THUMBNAIL", "webp", 100, new FilterCollection([
-				new FitFilter([
+				new ResizeFilter([
 					"width" => 400,
 					"height" => 400,
+					"dontUpsize" => true,
 				]),
 			])),
 			new Version("GALLERY", "webp", 90, new FilterCollection([
