@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin\Pages;
 
 use App\Classes\Pages\Page;
+use App\Classes\Pages\PageGallery\TemplateCollection;
 use App\Classes\Pages\PageComponent;
 use App\Classes\Views\HTMLEngine;
 use Psr\Http\Message\ResponseInterface;
@@ -34,6 +35,7 @@ class EditPageComponent extends \Katu\Controllers\Controller
 		return $response->withBody((new HTMLEngine($request))->render("Admin/Pages/Components/edit.twig", [
 			"pageComponent" => $pageComponent,
 			"pages" => Page::getAll(),
+			"pageGalleryTemplates" => TemplateCollection::createDefault(),
 		]));
 	}
 }

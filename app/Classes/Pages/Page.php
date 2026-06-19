@@ -2,7 +2,7 @@
 
 namespace App\Classes\Pages;
 
-use App\Classes\Storage\StorageFileCollection;
+use App\Classes\Pages\PageComponentStorageFileCollection;
 use App\Classes\Tools\Slugger;
 use Katu\Tools\Calendar\Time;
 
@@ -94,6 +94,22 @@ class Page extends \Katu\Models\Model
 		return new PageComponentCollection($pageComponents);
 	}
 
+	public function getRootPageComponents(): PageComponentCollection
+	{
+		$assignedChildIds = array_flip(PageComponentGalleryItemCollection::getAssignedChildIdsForPage($this));
+		$rootComponents = [];
+
+		foreach ($this->getPageComponents() as $pageComponent) {
+			if (isset($assignedChildIds[(int)$pageComponent->getId()])) {
+				continue;
+			}
+
+			$rootComponents[] = $pageComponent;
+		}
+
+		return new PageComponentCollection($rootComponents);
+	}
+
 	public function reorderPageComponents(array $orderedIds): void
 	{
 		$components = $this->getPageComponents()->getArrayCopy();
@@ -118,14 +134,14 @@ class Page extends \Katu\Models\Model
 		}
 	}
 
-	public function getStorageFiles(): StorageFileCollection
+	public function getStorageFiles(): PageComponentStorageFileCollection
 	{
-		$storageFiles = [];
+		$links = [];
 
 		foreach ($this->getPageComponents() as $pageComponent) {
-			$storageFiles = array_merge($storageFiles, $pageComponent->getStorageFiles()->getArrayCopy());
+			$links = array_merge($links, $pageComponent->getStorageFiles()->getArrayCopy());
 		}
 
-		return new StorageFileCollection($storageFiles);
+		return new PageComponentStorageFileCollection($links);
 	}
 }

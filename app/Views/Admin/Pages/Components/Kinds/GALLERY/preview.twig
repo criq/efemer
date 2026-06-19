@@ -1,0 +1,7 @@
+{% if pageComponent.getGalleryChildComponents|length > 0 %}
+	<ul class="admin-page-gallery-preview">
+		{% for child in pageComponent.getGalleryChildComponents %}
+			<li>{{ child.getKind.getTitle }}</li>
+		{% endfor %}
+	</ul>
+{% endif %}

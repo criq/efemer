@@ -1,0 +1,54 @@
+{% set gallery = pageComponent.getGalleryProperties %}
+
+<div class="admin-gallery-properties" data-gallery-properties>
+	<span class="admin-field__label">Vlastnosti galerie</span>
+	<div class="admin-gallery-properties__fields">
+		<div class="admin-gallery-properties__columns" data-gallery-columns{% if pageComponent.isSlideshow %} hidden{% endif %}>
+			<label class="admin-gallery-properties__field">
+				<span class="admin-gallery-properties__field-label">Min. položek v řadě</span>
+				<input
+					class="admin-gallery-properties__input"
+					type="number"
+					name="values[{{ pageComponent.getId }}][gallery][columnsMin]"
+					min="1"
+					max="12"
+					value="{{ gallery.columnsMin }}"
+					required
+				>
+			</label>
+			<label class="admin-gallery-properties__field">
+				<span class="admin-gallery-properties__field-label">Max. položek v řadě</span>
+				<input
+					class="admin-gallery-properties__input"
+					type="number"
+					name="values[{{ pageComponent.getId }}][gallery][columnsMax]"
+					min="1"
+					max="12"
+					value="{{ gallery.columnsMax }}"
+					required
+				>
+			</label>
+		</div>
+	</div>
+</div>
+
+{% if pageComponent.getKindTemplates|length > 1 %}
+	<script>
+		(() => {
+			const root = document.currentScript.previousElementSibling;
+			const templateSelect = document.querySelector("[data-component-template]");
+			const columns = root.querySelector("[data-gallery-columns]");
+
+			if (!templateSelect || !columns) {
+				return;
+			}
+
+			const sync = () => {
+				columns.hidden = templateSelect.value === "SLIDESHOW";
+			};
+
+			templateSelect.addEventListener("change", sync);
+			sync();
+		})();
+	</script>
+{% endif %}

@@ -2,6 +2,10 @@
 
 namespace App\Classes\Pages;
 
+use App\Classes\Pages\PageGallery\Template;
+use App\Classes\Pages\PageGallery\TemplateCollection;
+use Katu\Tools\Strings\Code;
+
 class PageComponentPage extends \Katu\Models\Model
 {
 	const TABLE = "page_component_pages";
@@ -10,6 +14,7 @@ class PageComponentPage extends \Katu\Models\Model
 	public int|string|null $pageComponentId = null;
 	public int|string|null $pageId = null;
 	public int $position = 0;
+	public ?string $template = null;
 
 	public function setPageComponent(PageComponent $pageComponent): PageComponentPage
 	{
@@ -35,6 +40,25 @@ class PageComponentPage extends \Katu\Models\Model
 	public function getPosition(): int
 	{
 		return $this->position;
+	}
+
+	public function setTemplate(Template $template): PageComponentPage
+	{
+		$this->template = $template->getCode()->getConstantFormat();
+
+		return $this;
+	}
+
+	public function getTemplate(): Template
+	{
+		$code = new Code($this->template ?: TemplateCollection::getDefaultCode());
+		$template = TemplateCollection::createDefault()->filterByCode($code)->getFirst();
+
+		if ($template) {
+			return $template;
+		}
+
+		return TemplateCollection::createDefault()->filterByCode(new Code(TemplateCollection::getDefaultCode()))->getFirst();
 	}
 
 	public function getPage(): Page

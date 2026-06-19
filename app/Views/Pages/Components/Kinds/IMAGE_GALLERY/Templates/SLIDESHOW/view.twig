@@ -1,0 +1,29 @@
+{% if pageComponent.getStorageFiles|length > 0 %}
+<div class="page-gallery-slideshow" data-gallery-slideshow>
+	<div class="page-gallery-slideshow__viewport">
+		<div class="page-gallery-slideshow__track" data-gallery-slideshow-track>
+			{% for storageFile in pageComponent.getStorageFiles %}
+				{% if storageFile.getImage %}
+					<figure class="page-gallery-slideshow__slide">
+						<img class="page-gallery-slideshow__image" src="{{ storageFile.getImage.getImageVersion("GALLERY").getURL }}" alt="{{ storageFile.getCaption|default("") }}">
+						{% if storageFile.getCaption %}
+							<figcaption class="page-gallery-slideshow__caption">{{ storageFile.getCaption }}</figcaption>
+						{% endif %}
+					</figure>
+				{% endif %}
+			{% endfor %}
+		</div>
+	</div>
+	{% if pageComponent.getStorageFiles|length > 1 %}
+		<div class="page-gallery-slideshow__controls">
+			<button class="page-gallery-slideshow__button" type="button" data-gallery-slideshow-prev aria-label="Předchozí">
+				<span aria-hidden="true">‹</span>
+			</button>
+			<button class="page-gallery-slideshow__button" type="button" data-gallery-slideshow-next aria-label="Další">
+				<span aria-hidden="true">›</span>
+			</button>
+		</div>
+		<div class="page-gallery-slideshow__dots" data-gallery-slideshow-dots></div>
+	{% endif %}
+</div>
+{% endif %}

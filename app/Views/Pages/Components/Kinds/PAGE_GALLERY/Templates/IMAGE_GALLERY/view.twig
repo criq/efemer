@@ -1,0 +1,11 @@
+<a class="page-page-gallery__item page-page-gallery__item--image-gallery" href="{{ linkedPage.getPublicUrl }}">
+	{% if linkedPage.getStorageFiles|length > 0 %}
+		<div class="page-page-gallery__images">
+			{% for file in linkedPage.getStorageFiles %}
+				{% if file.getImage %}
+					<img class="page-page-gallery__image" src="{{ file.getImage.getImageVersion("GALLERY").getURL }}" alt="">
+				{% endif %}
+			{% endfor %}
+		</div>
+	{% endif %}
+</a>

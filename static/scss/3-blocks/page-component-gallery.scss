@@ -1,0 +1,18 @@
+@import "../1-packages/gallery-grid.scss";
+
+.page-component {
+	width: 100%;
+}
+
+.page-component-gallery {
+	@include gallery-grid;
+	margin: 1rem 0;
+}
+
+.page-component-gallery__item {
+	min-width: 0;
+}
+
+.page-component-gallery__item > .page-component {
+	margin: 0;
+}

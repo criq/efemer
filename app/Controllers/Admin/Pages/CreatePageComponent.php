@@ -22,6 +22,7 @@ class CreatePageComponent extends \Katu\Controllers\Controller
 		$pageComponent->setPage($page);
 		$pageComponent->setKind($kind);
 		$pageComponent->setPosition($page->getPageComponents()->getMaxPosition() + 1);
+		$pageComponent->setTemplateCode($kind::getTemplates()->getDefaultCode());
 		$pageComponent->persist();
 
 		return $response

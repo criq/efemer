@@ -1,0 +1,44 @@
+.admin-gallery-properties {
+	display: grid;
+	gap: .5rem;
+	margin-bottom: 1rem;
+}
+
+.admin-gallery-properties__fields {
+	display: grid;
+	gap: .75rem;
+}
+
+.admin-gallery-properties__columns {
+	display: grid;
+	gap: .75rem;
+	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+.admin-gallery-properties__field {
+	display: grid;
+	gap: .25rem;
+}
+
+.admin-gallery-properties__field-label {
+	color: var(--admin-muted);
+	font-size: .8125rem;
+}
+
+.admin-gallery-properties__input {
+	background: var(--admin-surface);
+	border: 1px solid var(--admin-border);
+	border-radius: var(--admin-radius);
+	box-sizing: border-box;
+	color: var(--admin-text);
+	font: inherit;
+	max-width: 8rem;
+	padding: .5rem .625rem;
+	width: 100%;
+
+	&:focus {
+		border-color: var(--admin-accent);
+		outline: 2px solid rgb(23 23 23 / 10%);
+		outline-offset: 1px;
+	}
+}

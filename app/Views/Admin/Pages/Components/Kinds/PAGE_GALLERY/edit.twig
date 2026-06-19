@@ -1,24 +1,36 @@
 
-<input type="hidden" name="values[{{ pageComponent.getId }}][pageOrder]" id="pageOrder" value="{% for linkedPage in pageComponent.getLinkedPages %}{{ linkedPage.getId }}{% if not loop.last %},{% endif %}{% endfor %}">
+{% include "Blocks/adminGalleryProperties.twig" %}
+
+<input type="hidden" name="values[{{ pageComponent.getId }}][pageOrder]" id="pageOrder" value="{% for entry in pageComponent.getPageComponentPages %}{{ entry.getPage.getId }}{% if not loop.last %},{% endif %}{% endfor %}">
+<input type="hidden" name="values[{{ pageComponent.getId }}][pageTemplates]" id="pageTemplates" value="{% if pageComponent.getPageComponentPages|length > 0 %}{{ "{" }}{% for entry in pageComponent.getPageComponentPages %}"{{ entry.getPage.getId }}":"{{ entry.getTemplate.getCode.getConstantFormat }}"{% if not loop.last %},{% endif %}{% endfor %}{{ "}" }}{% else %}{}{% endif %}">
 
 <div class="admin-field">
 	<span class="admin-field__label">Vybrané stránky</span>
-	{% if pageComponent.getLinkedPages|length > 0 %}
+	{% if pageComponent.getPageComponentPages|length > 0 %}
 		<table class="admin-table">
 			<thead>
 				<tr>
 					<th class="admin-table__handle" aria-label="Pořadí"></th>
 					<th>Název</th>
 					<th>Cesta</th>
+					<th>Šablona</th>
 					<th class="admin-table__actions">Akce</th>
 				</tr>
 			</thead>
 			<tbody class="admin-sortable" data-page-sortable>
-				{% for linkedPage in pageComponent.getLinkedPages %}
+				{% for entry in pageComponent.getPageComponentPages %}
+					{% set linkedPage = entry.getPage %}
 					<tr data-page-id="{{ linkedPage.getId }}">
 						<td class="admin-table__handle" draggable="true">{% include "Blocks/adminIcon.twig" with { name: "drag_indicator", label: "Přesunout" } %}</td>
 						<td>{{ linkedPage.getTitle|default("—") }}</td>
 						<td class="nowrap">{{ linkedPage.getPublicPath }}</td>
+						<td>
+							<select class="admin-select" data-page-template>
+								{% for template in pageGalleryTemplates %}
+									<option value="{{ template.getCode.getConstantFormat }}"{% if entry.getTemplate.getCode.getConstantFormat == template.getCode.getConstantFormat %} selected{% endif %}>{{ template.getTitle }}</option>
+								{% endfor %}
+							</select>
+						</td>
 						<td class="admin-table__actions">
 							<button class="admin-button admin-button--danger admin-button--ghost" type="button" data-page-remove>{% include "Blocks/adminIcon.twig" with { name: "close" } %} Odebrat</button>
 						</td>
@@ -49,24 +61,77 @@
 <script>
 	(() => {
 		const orderInput = document.getElementById("pageOrder");
+		const templatesInput = document.getElementById("pageTemplates");
 		const addSelect = document.getElementById("pageGalleryAddSelect");
 		const addButton = document.getElementById("pageGalleryAddButton");
+		const defaultTemplate = "IMAGE_AND_TEXT";
+		const templateOptions = [
+			{% for template in pageGalleryTemplates %}
+			{ value: "{{ template.getCode.getConstantFormat }}", label: "{{ template.getTitle|e("js") }}" }{% if not loop.last %},{% endif %}
+			{% endfor %}
+		];
 		let sortableBody = document.querySelector("[data-page-sortable]");
 		let draggedRow = null;
+
+		const readTemplates = () => {
+			try {
+				return JSON.parse(templatesInput.value || "{}");
+			} catch {
+				return {};
+			}
+		};
+
+		const writeTemplates = (templates) => {
+			templatesInput.value = JSON.stringify(templates);
+		};
 
 		const updateOrder = () => {
 			if (!sortableBody) {
 				orderInput.value = "";
+				writeTemplates({});
 
 				return;
 			}
 
 			const ids = [...sortableBody.querySelectorAll("tr[data-page-id]")].map((row) => row.dataset.pageId);
 			orderInput.value = ids.join(",");
+
+			const templates = {};
+			sortableBody.querySelectorAll("tr[data-page-id]").forEach((row) => {
+				const select = row.querySelector("[data-page-template]");
+				templates[row.dataset.pageId] = select ? select.value : defaultTemplate;
+			});
+			writeTemplates(templates);
+		};
+
+		const buildTemplateSelect = (pageId) => {
+			const select = document.createElement("select");
+			select.className = "admin-select";
+			select.dataset.pageTemplate = "";
+
+			const templates = readTemplates();
+			const selected = templates[pageId] || defaultTemplate;
+
+			templateOptions.forEach((option) => {
+				const element = document.createElement("option");
+				element.value = option.value;
+				element.textContent = option.label;
+				element.selected = option.value === selected;
+				select.appendChild(element);
+			});
+
+			select.addEventListener("change", updateOrder);
+
+			return select;
 		};
 
 		const bindRow = (row) => {
 			const handle = row.querySelector(".admin-table__handle");
+			const templateSelect = row.querySelector("[data-page-template]");
+
+			if (templateSelect) {
+				templateSelect.addEventListener("change", updateOrder);
+			}
 
 			handle.addEventListener("dragstart", (event) => {
 				draggedRow = row;
@@ -131,6 +196,7 @@
 						<th class="admin-table__handle" aria-label="Pořadí"></th>
 						<th>Název</th>
 						<th>Cesta</th>
+						<th>Šablona</th>
 						<th class="admin-table__actions">Akce</th>
 					</tr>
 				</thead>
@@ -138,7 +204,7 @@
 			`;
 
 			const field = orderInput.closest(".admin-field");
-			const emptyMessage = field.querySelector(".admin-muted");
+			const emptyMessage = field.querySelector("p");
 			if (emptyMessage) {
 				emptyMessage.remove();
 			}
@@ -153,15 +219,27 @@
 			const body = ensureSortableBody();
 			const row = document.createElement("tr");
 			row.dataset.pageId = pageId;
-			row.innerHTML = `
-				<td class="admin-table__handle" draggable="true"><span class="admin-icon material-symbols-outlined" aria-hidden="true">drag_indicator</span></td>
-				<td>${title}</td>
-				<td class="nowrap">${path}</td>
-				<td class="admin-table__actions">
-					<button class="admin-button admin-button--danger admin-button--ghost" type="button" data-page-remove><span class="admin-icon material-symbols-outlined" aria-hidden="true">close</span> Odebrat</button>
-				</td>
-			`;
 
+			const handleCell = document.createElement("td");
+			handleCell.className = "admin-table__handle";
+			handleCell.draggable = true;
+			handleCell.innerHTML = '<span class="admin-icon material-symbols-outlined" aria-hidden="true">drag_indicator</span>';
+
+			const titleCell = document.createElement("td");
+			titleCell.textContent = title;
+
+			const pathCell = document.createElement("td");
+			pathCell.className = "nowrap";
+			pathCell.textContent = path;
+
+			const templateCell = document.createElement("td");
+			templateCell.appendChild(buildTemplateSelect(pageId));
+
+			const actionsCell = document.createElement("td");
+			actionsCell.className = "admin-table__actions";
+			actionsCell.innerHTML = '<button class="admin-button admin-button--danger admin-button--ghost" type="button" data-page-remove><span class="admin-icon material-symbols-outlined" aria-hidden="true">close</span> Odebrat</button>';
+
+			row.append(handleCell, titleCell, pathCell, templateCell, actionsCell);
 			body.appendChild(row);
 			bindRow(row);
 			updateOrder();
@@ -182,6 +260,10 @@
 			if (!option || !option.value) {
 				return;
 			}
+
+			const templates = readTemplates();
+			templates[option.value] = defaultTemplate;
+			writeTemplates(templates);
 
 			addPage(option.value, option.textContent.split(" (")[0], option.textContent.match(/\(([^)]+)\)$/)?.[1] ?? "");
 			option.hidden = true;

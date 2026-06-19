@@ -1,0 +1,14 @@
+{% if pageComponent.getStorageFiles|length > 0 %}
+<div class="page-gallery page-gallery--natural" style="{{ pageComponent.getGalleryStyleAttribute }}">
+	{% for storageFile in pageComponent.getStorageFiles %}
+		{% if storageFile.getImage %}
+			<figure class="page-gallery__item">
+				<img class="page-gallery__image" src="{{ storageFile.getImage.getImageVersion("GALLERY").getURL }}" alt="{{ storageFile.getCaption|default("") }}">
+				{% if storageFile.getCaption %}
+					<figcaption class="page-gallery__caption">{{ storageFile.getCaption }}</figcaption>
+				{% endif %}
+			</figure>
+		{% endif %}
+	{% endfor %}
+</div>
+{% endif %}

@@ -1,0 +1,188 @@
+{% include "Blocks/adminGalleryProperties.twig" %}
+
+<input type="hidden" name="values[{{ pageComponent.getId }}][componentOrder]" id="componentOrder" value="{% for child in pageComponent.getGalleryChildComponents %}{{ child.getId }}{% if not loop.last %},{% endif %}{% endfor %}">
+
+<div class="admin-field">
+	<span class="admin-field__label">Vybrané součásti</span>
+	{% if pageComponent.getGalleryChildComponents|length > 0 %}
+		<table class="admin-table">
+			<thead>
+				<tr>
+					<th class="admin-table__handle" aria-label="Pořadí"></th>
+					<th>Typ</th>
+					<th class="admin-table__actions">Akce</th>
+				</tr>
+			</thead>
+			<tbody class="admin-sortable" data-component-sortable>
+				{% for child in pageComponent.getGalleryChildComponents %}
+					<tr data-component-id="{{ child.getId }}">
+						<td class="admin-table__handle" draggable="true">{% include "Blocks/adminIcon.twig" with { name: "drag_indicator", label: "Přesunout" } %}</td>
+						<td>{{ child.getKind.getTitle }}</td>
+						<td class="admin-table__actions">
+							<button class="admin-button admin-button--danger admin-button--ghost" type="button" data-component-remove>{% include "Blocks/adminIcon.twig" with { name: "close" } %} Odebrat</button>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<p>Zatím nejsou vybrány žádné součásti.</p>
+	{% endif %}
+</div>
+
+<div class="admin-field">
+	<span class="admin-field__label">Přidat součást</span>
+	<div class="admin-page__actions">
+		<select id="componentGalleryAddSelect">
+			<option value="">— vyberte součást —</option>
+			{% for candidate in pageComponent.getAssignableGalleryChildComponents %}
+				<option value="{{ candidate.getId }}">{{ candidate.getKind.getTitle }} (#{{ candidate.getPosition }})</option>
+			{% endfor %}
+		</select>
+		<button class="admin-button admin-button--ghost" type="button" id="componentGalleryAddButton">{% include "Blocks/adminIcon.twig" with { name: "add" } %} Přidat</button>
+	</div>
+</div>
+
+<script>
+	(() => {
+		const orderInput = document.getElementById("componentOrder");
+		const addSelect = document.getElementById("componentGalleryAddSelect");
+		const addButton = document.getElementById("componentGalleryAddButton");
+		let sortableBody = document.querySelector("[data-component-sortable]");
+		let draggedRow = null;
+
+		const updateOrder = () => {
+			if (!sortableBody) {
+				orderInput.value = "";
+
+				return;
+			}
+
+			const ids = [...sortableBody.querySelectorAll("tr[data-component-id]")].map((row) => row.dataset.componentId);
+			orderInput.value = ids.join(",");
+		};
+
+		const bindRow = (row) => {
+			const handle = row.querySelector(".admin-table__handle");
+
+			handle.addEventListener("dragstart", (event) => {
+				draggedRow = row;
+				row.classList.add("is-dragging");
+				event.dataTransfer.effectAllowed = "move";
+			});
+
+			handle.addEventListener("dragend", () => {
+				row.classList.remove("is-dragging");
+				draggedRow = null;
+				updateOrder();
+			});
+
+			row.addEventListener("dragover", (event) => {
+				event.preventDefault();
+
+				if (!draggedRow || draggedRow === row) {
+					return;
+				}
+
+				const rows = [...sortableBody.querySelectorAll("tr[data-component-id]:not(.is-dragging)")];
+				const nextRow = rows.find((candidate) => {
+					const rect = candidate.getBoundingClientRect();
+
+					return event.clientY <= rect.top + rect.height / 2;
+				});
+
+				if (nextRow) {
+					sortableBody.insertBefore(draggedRow, nextRow);
+				} else {
+					sortableBody.appendChild(draggedRow);
+				}
+			});
+
+			row.querySelector("[data-component-remove]").addEventListener("click", () => {
+				const option = addSelect.querySelector(`option[value="${row.dataset.componentId}"]`);
+				if (option) {
+					option.hidden = false;
+				}
+
+				row.remove();
+
+				if (!sortableBody.querySelector("tr[data-component-id]")) {
+					sortableBody.closest("table").remove();
+					sortableBody = null;
+				}
+
+				updateOrder();
+			});
+		};
+
+		const ensureSortableBody = () => {
+			if (sortableBody) {
+				return sortableBody;
+			}
+
+			const table = document.createElement("table");
+			table.className = "admin-table";
+			table.innerHTML = `
+				<thead>
+					<tr>
+						<th class="admin-table__handle" aria-label="Pořadí"></th>
+						<th>Typ</th>
+						<th class="admin-table__actions">Akce</th>
+					</tr>
+				</thead>
+				<tbody class="admin-sortable" data-component-sortable></tbody>
+			`;
+
+			const field = orderInput.closest(".admin-field");
+			const emptyMessage = field.querySelector("p");
+			if (emptyMessage) {
+				emptyMessage.remove();
+			}
+
+			field.appendChild(table);
+			sortableBody = table.querySelector("[data-component-sortable]");
+
+			return sortableBody;
+		};
+
+		const addComponent = (componentId, kindTitle) => {
+			const body = ensureSortableBody();
+			const row = document.createElement("tr");
+			row.dataset.componentId = componentId;
+			row.innerHTML = `
+				<td class="admin-table__handle" draggable="true"><span class="admin-icon material-symbols-outlined" aria-hidden="true">drag_indicator</span></td>
+				<td>${kindTitle}</td>
+				<td class="admin-table__actions">
+					<button class="admin-button admin-button--danger admin-button--ghost" type="button" data-component-remove><span class="admin-icon material-symbols-outlined" aria-hidden="true">close</span> Odebrat</button>
+				</td>
+			`;
+
+			body.appendChild(row);
+			bindRow(row);
+			updateOrder();
+		};
+
+		if (sortableBody) {
+			sortableBody.querySelectorAll("tr[data-component-id]").forEach(bindRow);
+			sortableBody.querySelectorAll("tr[data-component-id]").forEach((row) => {
+				const option = addSelect.querySelector(`option[value="${row.dataset.componentId}"]`);
+				if (option) {
+					option.hidden = true;
+				}
+			});
+		}
+
+		addButton.addEventListener("click", () => {
+			const option = addSelect.selectedOptions[0];
+			if (!option || !option.value) {
+				return;
+			}
+
+			addComponent(option.value, option.textContent.split(" (")[0]);
+			option.hidden = true;
+			addSelect.value = "";
+		});
+
+		updateOrder();
+	})();
+</script>

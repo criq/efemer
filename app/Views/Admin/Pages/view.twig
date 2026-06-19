@@ -73,7 +73,7 @@
 				<ul class="admin-kind-list">
 					{% for kind in kinds %}
 						<li>
-							<a href="{{ url("admin.pages.createPageComponent", { pageId: page.getId, kindCode: kind.getCode }) }}">{% include "Blocks/adminIcon.twig" with { name: kind.getCode == "TEXT" ? "article" : (kind.getCode == "IMAGE_GALLERY" ? "photo_library" : (kind.getCode == "PAGE_GALLERY" ? "library_books" : "image")) } %} {{ kind.getTitle }}</a>
+							<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.createPageComponent", { pageId: page.getId, kindCode: kind.getCode }) }}">{% include "Blocks/adminIcon.twig" with { name: kind.getCode == "TEXT" ? "article" : (kind.getCode == "IMAGE_GALLERY" ? "photo_library" : (kind.getCode == "PAGE_GALLERY" ? "library_books" : (kind.getCode == "GALLERY" ? "dashboard" : "image"))) } %} {{ kind.getTitle }}</a>
 						</li>
 					{% endfor %}
 				</ul>

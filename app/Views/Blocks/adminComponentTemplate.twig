@@ -1,0 +1,16 @@
+{% set templates = pageComponent.getKindTemplates %}
+
+{% if templates|length > 1 %}
+	<label class="admin-field admin-component-template">
+		<span class="admin-field__label">Šablona</span>
+		<select
+			class="admin-select"
+			name="values[{{ pageComponent.getId }}][template]"
+			data-component-template
+		>
+			{% for template in templates %}
+				<option value="{{ template.getCode.getConstantFormat }}"{% if pageComponent.getTemplate.getCode.getConstantFormat == template.getCode.getConstantFormat %} selected{% endif %}>{{ template.getTitle }}</option>
+			{% endfor %}
+		</select>
+	</label>
+{% endif %}

@@ -1,7 +1,7 @@
+@import "../1-packages/gallery-grid.scss";
+
 .page-page-gallery {
-	display: grid;
-	gap: .75rem;
-	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+	@include gallery-grid;
 	margin: 1rem 0;
 }
 
@@ -21,6 +21,17 @@
 	display: block;
 	height: auto;
 	width: 100%;
+}
+
+.page-page-gallery__images {
+	display: grid;
+	gap: .25rem;
+	grid-template-columns: repeat(2, 1fr);
+}
+
+.page-page-gallery__item--image-gallery .page-page-gallery__image {
+	aspect-ratio: 1;
+	object-fit: cover;
 }
 
 .page-page-gallery__title {

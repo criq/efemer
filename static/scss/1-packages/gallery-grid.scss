@@ -1,0 +1,17 @@
+@mixin gallery-grid {
+	--gallery-gap: .75rem;
+	--gallery-cols-min: 2;
+	--gallery-cols-max: 4;
+	display: grid;
+	gap: var(--gallery-gap);
+	grid-template-columns: repeat(auto-fill, minmax(
+		max(
+			5rem,
+			calc((100% - (var(--gallery-cols-max) - 1) * var(--gallery-gap)) / var(--gallery-cols-max))
+		),
+		min(
+			100%,
+			calc((100% - (var(--gallery-cols-min) - 1) * var(--gallery-gap)) / var(--gallery-cols-min))
+		)
+	));
+}

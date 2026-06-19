@@ -1,0 +1,10 @@
+{% if pageComponent.getPageComponentPages|length > 0 %}
+	<div class="page-page-gallery" style="{{ pageComponent.getGalleryStyleAttribute }}">
+		{% for entry in pageComponent.getPageComponentPages %}
+			{% include entry.getTemplate.getViewPath with {
+				entry: entry,
+				linkedPage: entry.getPage,
+			} %}
+		{% endfor %}
+	</div>
+{% endif %}

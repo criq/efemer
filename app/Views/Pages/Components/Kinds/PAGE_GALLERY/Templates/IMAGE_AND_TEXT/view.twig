@@ -1,0 +1,7 @@
+<a class="page-page-gallery__item page-page-gallery__item--image-and-text" href="{{ linkedPage.getPublicUrl }}">
+	{% set thumbnail = linkedPage.getStorageFiles.getFirst %}
+	{% if thumbnail and thumbnail.getImage %}
+		<img class="page-page-gallery__image" src="{{ thumbnail.getImage.getImageVersion("GALLERY").getURL }}" alt="">
+	{% endif %}
+	<span class="page-page-gallery__title">{{ linkedPage.getTitle|default(linkedPage.getPublicPath) }}</span>
+</a>

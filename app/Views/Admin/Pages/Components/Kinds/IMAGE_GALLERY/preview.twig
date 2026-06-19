@@ -1,4 +1,5 @@
-<ul class="admin-gallery-preview">
+<ul class="admin-gallery-preview{% if pageComponent.getTemplate.getCode.getConstantFormat == "SQUARE" %} admin-gallery-preview--square{% else %} admin-gallery-preview--natural{% endif %}">
+	<li class="admin-gallery-preview__mode">{{ pageComponent.getTemplate.getTitle }}</li>
 	{% for storageFile in pageComponent.getStorageFiles %}
 		<li>
 			{% if storageFile.getImage %}
