@@ -36,7 +36,11 @@ class Page extends \Katu\Models\Model
 
 	public function setPath(?string $path): Page
 	{
-		$this->path = $path;
+		if ($path === "" || Slugger::isHomepagePath($path)) {
+			$this->path = Slugger::HOMEPAGE_PATH;
+		} else {
+			$this->path = $path;
+		}
 
 		return $this;
 	}
@@ -68,7 +72,19 @@ class Page extends \Katu\Models\Model
 
 	public static function getHomepage(): ?Page
 	{
-		return static::getOneBy(["path" => Slugger::HOMEPAGE_PATH]);
+		$page = static::getOneBy(["path" => Slugger::HOMEPAGE_PATH]);
+		if ($page !== null) {
+			return $page;
+		}
+
+		foreach (static::getBy([])->getItems() as $candidate) {
+			$storedPath = $candidate->getPath();
+			if ($storedPath === null || $storedPath === "") {
+				return $candidate;
+			}
+		}
+
+		return null;
 	}
 
 	public static function getByPath(string $path): ?Page

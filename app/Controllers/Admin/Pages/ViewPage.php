@@ -62,7 +62,8 @@ class ViewPage extends \Katu\Controllers\Controller
 		$rawPath = $request->getParsedBody()["path"] ?? "";
 		$path = Slugger::slugifyPagePath($rawPath);
 
-		$validation = (new Validation)->setResponse($path === "" ? null : $path);
+		$storedPath = Slugger::isHomepagePath($path) ? Slugger::HOMEPAGE_PATH : ($path === "" ? null : $path);
+		$validation = (new Validation)->setResponse($storedPath);
 
 		$title = $this->parseTitle($request);
 		if ($title !== null && mb_strlen($title) > 200) {
@@ -73,10 +74,15 @@ class ViewPage extends \Katu\Controllers\Controller
 			$validation->addError(new Error("Cesta musí obsahovat alespoň jedno písmeno nebo číslici."));
 		}
 
-		if ($path !== "") {
+		if (Slugger::isHomepagePath($path)) {
+			$existingHomepage = Page::getHomepage();
+			if ($existingHomepage && (int)$existingHomepage->getId() !== (int)$page->getId()) {
+				$validation->addError(new Error("Domovská stránka je již nastavena."));
+			}
+		} elseif ($path !== "") {
 			$existing = Page::getOneBy(["path" => $path]);
 			if ($existing && (int)$existing->getId() !== (int)$page->getId()) {
-				$validation->addError(new Error(Slugger::isHomepagePath($path) ? "Domovská stránka je již nastavena." : "Cesta je již použita."));
+				$validation->addError(new Error("Cesta je již použita."));
 			}
 		}
 
