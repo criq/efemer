@@ -1,0 +1,67 @@
+{% extends "Templates/admin.twig" %}
+
+{% block title %}Stránka {{ page.getId }}{% endblock %}
+
+{% block body %}
+
+	<div class="admin-page">
+		<div class="admin-page__header">
+			<h1 class="admin-page__title">Stránka {{ page.getId }}</h1>
+		</div>
+
+		<form class="admin-form" action="" method="POST" enctype="multipart/form-data">
+			{% include "Blocks/formHeader.twig" %}
+
+			<section class="admin-section">
+				<h2 class="admin-section__title">Komponenty</h2>
+				<div class="admin-panel">
+					<table class="admin-table">
+						<thead>
+							<tr>
+								<th class="admin-table__id">#</th>
+								<th>Typ</th>
+								<th class="admin-table__preview">Náhled</th>
+								<th class="admin-table__actions">Akce</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for pageComponent in page.getPageComponents %}
+								<tr>
+									<td class="admin-table__id">
+										<a href="{{ url("admin.pages.viewPageComponent", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}">{{ pageComponent.getPosition }}</a>
+									</td>
+									<td>{{ pageComponent.getKind.getTitle }}</td>
+									<td class="admin-table__preview">
+										{% include "Admin/Pages/Components/Kinds/#{pageComponent.getKind.getCode}/preview.twig" %}
+									</td>
+									<td class="admin-table__actions">
+										<div class="admin-page__actions">
+											<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.editPageComponent", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}">Upravit</a>
+											<a class="admin-button admin-button--danger" href="{{ url("admin.pages.deletePageComponent", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}">Smazat</a>
+										</div>
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</section>
+
+			<section class="admin-section">
+				<h2 class="admin-section__title">Přidat komponentu</h2>
+				<ul class="admin-kind-list">
+					{% for kind in kinds %}
+						<li>
+							<a href="{{ url("admin.pages.createPageComponent", { pageId: page.getId, kindCode: kind.getCode }) }}">{{ kind.getTitle }}</a>
+						</li>
+					{% endfor %}
+				</ul>
+			</section>
+
+			<div class="admin-form__footer">
+				<button class="admin-button" type="submit">Uložit</button>
+			</div>
+		</form>
+	</div>
+
+{% endblock body %}

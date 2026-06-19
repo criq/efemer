@@ -1,0 +1,28 @@
+{% extends "Templates/admin.twig" %}
+
+{% block title %}Komponenta {{ pageComponent.getKind.getTitle }}{% endblock %}
+
+{% block body %}
+
+	<div class="admin-page">
+		<div class="admin-page__header">
+			<h1 class="admin-page__title">{{ pageComponent.getKind.getTitle }}</h1>
+			<div class="admin-page__actions">
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.viewPage", { pageId: page.getId }) }}">Zpět</a>
+			</div>
+		</div>
+
+		<form class="admin-form" action="" method="POST" enctype="multipart/form-data">
+			{% include "Blocks/formHeader.twig" %}
+
+			<div class="admin-panel admin-field">
+				{% include "Admin/Pages/Components/Kinds/#{pageComponent.getKind.getCode}/edit.twig" %}
+			</div>
+
+			<div class="admin-form__footer">
+				<button class="admin-button" type="submit">Uložit</button>
+			</div>
+		</form>
+	</div>
+
+{% endblock body %}

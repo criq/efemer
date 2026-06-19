@@ -1,0 +1,48 @@
+{% extends "Templates/admin.twig" %}
+
+{% block title %}Stránky{% endblock %}
+
+{% block body %}
+
+	<div class="admin-page">
+		<div class="admin-page__header">
+			<h1 class="admin-page__title">Stránky</h1>
+			<div class="admin-page__actions">
+				<a class="admin-button" href="{{ url("admin.pages.createPage") }}">Přidat</a>
+			</div>
+		</div>
+
+		<div class="admin-panel">
+			<table class="admin-table">
+				<thead>
+					<tr>
+						<th class="admin-table__id">ID</th>
+						<th>Náhled</th>
+						<th class="admin-table__actions">Akce</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for page in pages %}
+						<tr>
+							<td class="admin-table__id">
+								<a href="{{ url("admin.pages.viewPage", { pageId: page.getId }) }}">{{ page.getId }}</a>
+							</td>
+							<td>
+								{% if page.getPageComponentFiles.getFirst and page.getPageComponentFiles.getFirst.getImage %}
+									<img class="admin-thumbnail" src="{{ page.getPageComponentFiles.getFirst.getImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+								{% endif %}
+							</td>
+							<td class="admin-table__actions">
+								<div class="admin-page__actions">
+									<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.editPage", { pageId: page.getId }) }}">Upravit</a>
+									<a class="admin-button admin-button--danger" href="{{ url("admin.pages.deletePage", { pageId: page.getId }) }}">Smazat</a>
+								</div>
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+{% endblock body %}

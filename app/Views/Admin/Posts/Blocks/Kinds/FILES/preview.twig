@@ -1,7 +1,0 @@
-<ul class="admin-post-block-files">
-	{% for postBlockFile in postBlock.getPostBlockFiles %}
-		<li>
-			<img class="img-fluid rounded" src="{{ postBlockFile.getImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
-		</li>
-	{% endfor %}
-</ul>

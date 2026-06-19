@@ -1,0 +1,15 @@
+<label class="admin-field">
+	<span class="admin-field__label">Text</span>
+	<script>
+	  tinymce.init({
+	    selector: "textarea",
+	    plugins: [
+	      "anchor", "autolink", "charmap", "codesample", "emoticons", "image", "link", "lists", "media", "searchreplace", "table", "visualblocks", "wordcount"
+	    ],
+	    toolbar: "undo redo | blocks | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat",
+	  });
+	</script>
+	<textarea name="values[{{ pageComponent.getId }}]" id="">
+		{{ pageComponent.getValue }}
+	</textarea>
+</label>

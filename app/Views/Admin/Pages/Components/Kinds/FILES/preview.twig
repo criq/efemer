@@ -1,0 +1,9 @@
+<ul class="admin-page-component-files">
+	{% for pageComponentFile in pageComponent.getPageComponentFiles %}
+		<li>
+			{% if pageComponentFile.getImage %}
+				<img class="admin-thumbnail" src="{{ pageComponentFile.getImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+			{% endif %}
+		</li>
+	{% endfor %}
+</ul>

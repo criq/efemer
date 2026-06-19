@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="cs">
+	<head>
+
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{% block title %}Admin{% endblock %} · Efemer</title>
+
+		<link rel="stylesheet" href="/css/main.css">
+
+		<script src="https://cdn.tiny.cloud/1/e20azgvvzznqr9wr35zn4pjkyr7zqrj0klyaa9dq1nkm1zeg/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+
+	</head>
+	<body class="admin">
+
+		<header class="admin-header">
+			<div class="admin-header__inner">
+				<a class="admin-header__brand" href="{{ url("admin.pages.index") }}">Efemer</a>
+				<nav class="admin-header__nav">
+					<a class="admin-header__link" href="{{ url("admin.pages.index") }}">Stránky</a>
+					<a class="admin-header__link admin-header__link--muted" href="{{ url("homepage.index") }}">Web</a>
+				</nav>
+			</div>
+		</header>
+
+		<main class="admin-main">
+			{% block body %}
+			{% endblock body %}
+		</main>
+
+		<script src="/javascript/app.js"></script>
+
+	</body>
+</html>
