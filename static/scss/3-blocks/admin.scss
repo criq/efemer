@@ -330,6 +330,20 @@
 	list-style: none;
 	margin: 0;
 	padding: 0;
+
+	.admin-button--ghost {
+		background: var(--admin-surface);
+		box-shadow: var(--admin-shadow);
+		transition: background .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease, transform .15s ease;
+
+		&:hover {
+			background: var(--admin-surface);
+			border-color: var(--admin-accent);
+			box-shadow: 0 2px 6px rgb(23 23 23 / 12%);
+			color: var(--admin-accent);
+			transform: translateY(-1px);
+		}
+	}
 }
 
 .admin-thumbnail {

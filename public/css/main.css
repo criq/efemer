@@ -355,6 +355,18 @@ html {
   margin: 0;
   padding: 0;
 }
+.admin-kind-list .admin-button--ghost {
+  background: var(--admin-surface);
+  box-shadow: var(--admin-shadow);
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.admin-kind-list .admin-button--ghost:hover {
+  background: var(--admin-surface);
+  border-color: var(--admin-accent);
+  box-shadow: 0 2px 6px rgba(23, 23, 23, 0.12);
+  color: var(--admin-accent);
+  transform: translateY(-1px);
+}
 
 .admin-thumbnail {
   border-radius: calc(var(--admin-radius) - 0.0625rem);
