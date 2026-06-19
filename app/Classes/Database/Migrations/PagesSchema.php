@@ -103,7 +103,7 @@ class PagesSchema implements MigrationInterface
 				id int unsigned NOT NULL AUTO_INCREMENT,
 				timeCreated datetime NOT NULL,
 				title varchar(200) COLLATE utf8mb4_czech_ci DEFAULT NULL,
-				path varchar(200) COLLATE utf8mb4_czech_ci DEFAULT NULL,
+				path varchar(200) COLLATE utf8mb4_czech_ci NOT NULL,
 				PRIMARY KEY (id),
 				UNIQUE KEY pages_path (path)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci

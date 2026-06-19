@@ -7,7 +7,9 @@ use App\Classes\Database\Migrations\AddPageComponentTemplate;
 use App\Classes\Database\Migrations\AddPagePath;
 use App\Classes\Database\Migrations\AddStorageFileCaption;
 use App\Classes\Database\Migrations\PageComponentStorageFilesSchema;
+use App\Classes\Database\Migrations\EnsurePagePaths;
 use App\Classes\Database\Migrations\NormalizePagePaths;
+use App\Classes\Database\Migrations\RequireUniquePagePath;
 use App\Classes\Database\Migrations\PageComponentGalleryItemsSchema;
 use App\Classes\Database\Migrations\PageComponentPagesSchema;
 use App\Classes\Database\Migrations\PagesSchema;
@@ -55,6 +57,8 @@ class Migrator
 			new PagesSchema,
 			new AddPagePath,
 			new NormalizePagePaths,
+			new EnsurePagePaths,
+			new RequireUniquePagePath,
 			new RenameFilesKindToGallery,
 			new StorageFilesSchema,
 			new PageComponentPagesSchema,
