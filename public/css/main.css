@@ -246,6 +246,7 @@ html {
   background: var(--admin-surface);
   border: 1px solid var(--admin-accent);
   border-radius: var(--admin-radius);
+  box-shadow: var(--admin-shadow);
   color: var(--admin-accent);
   cursor: pointer;
   display: inline-flex;
@@ -257,34 +258,42 @@ html {
   padding: 0.375rem 0.625rem;
   -webkit-text-decoration: none;
   text-decoration: none;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 .admin-button:hover {
-  background: var(--admin-accent);
+  background: var(--admin-surface);
   border-color: var(--admin-accent);
-  color: #fff;
+  box-shadow: 0 2px 6px rgba(23, 23, 23, 0.12);
+  color: var(--admin-accent);
   -webkit-text-decoration: none;
   text-decoration: none;
+  transform: translateY(-1px);
 }
 .admin-button--danger {
-  background: var(--admin-surface);
   border-color: var(--admin-danger);
   color: var(--admin-danger);
 }
 .admin-button--danger:hover {
-  background: var(--admin-danger);
   border-color: var(--admin-danger);
-  color: #fff;
+  box-shadow: 0 2px 6px rgba(163, 58, 58, 0.18);
+  color: var(--admin-danger);
 }
 .admin-button--ghost {
-  background: transparent;
+  background: var(--admin-surface);
   border-color: var(--admin-border);
   color: var(--admin-text);
 }
 .admin-button--ghost:hover {
-  background: rgba(242, 240, 234, 0.65);
-  border-color: var(--admin-border);
-  color: var(--admin-text);
+  border-color: var(--admin-accent);
+  color: var(--admin-accent);
+}
+.admin-button--ghost.admin-button--danger {
+  color: var(--admin-danger);
+}
+.admin-button--ghost.admin-button--danger:hover {
+  border-color: var(--admin-danger);
+  box-shadow: 0 2px 6px rgba(163, 58, 58, 0.18);
+  color: var(--admin-danger);
 }
 
 .admin-form {
@@ -354,18 +363,6 @@ html {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-.admin-kind-list .admin-button--ghost {
-  background: var(--admin-surface);
-  box-shadow: var(--admin-shadow);
-  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
-}
-.admin-kind-list .admin-button--ghost:hover {
-  background: var(--admin-surface);
-  border-color: var(--admin-accent);
-  box-shadow: 0 2px 6px rgba(23, 23, 23, 0.12);
-  color: var(--admin-accent);
-  transform: translateY(-1px);
 }
 
 .admin-thumbnail {
