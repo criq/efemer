@@ -2,8 +2,14 @@
 
 namespace App\Classes\Database;
 
-use App\Classes\Database\Migrations\MigrationInterface;
+use App\Classes\Database\Migrations\AddPagePath;
+use App\Classes\Database\Migrations\AddStorageFileCaption;
+use App\Classes\Database\Migrations\NormalizePagePaths;
+use App\Classes\Database\Migrations\PageComponentPagesSchema;
 use App\Classes\Database\Migrations\PagesSchema;
+use App\Classes\Database\Migrations\RenameFilesKindToGallery;
+use App\Classes\Database\Migrations\RenameGalleryKindToImageGallery;
+use App\Classes\Database\Migrations\StorageFilesSchema;
 use Katu\PDO\Connection;
 use Katu\Tools\Calendar\Time;
 
@@ -29,6 +35,13 @@ class Migrator
 	{
 		return [
 			new PagesSchema,
+			new AddPagePath,
+			new NormalizePagePaths,
+			new RenameFilesKindToGallery,
+			new StorageFilesSchema,
+			new PageComponentPagesSchema,
+			new RenameGalleryKindToImageGallery,
+			new AddStorageFileCaption,
 		];
 	}
 

@@ -103,7 +103,9 @@ class PagesSchema implements MigrationInterface
 				id int unsigned NOT NULL AUTO_INCREMENT,
 				timeCreated datetime NOT NULL,
 				title varchar(200) COLLATE utf8mb4_czech_ci DEFAULT NULL,
-				PRIMARY KEY (id)
+				path varchar(200) COLLATE utf8mb4_czech_ci DEFAULT NULL,
+				PRIMARY KEY (id),
+				UNIQUE KEY pages_path (path)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci
 		")->getResult();
 
@@ -122,15 +124,16 @@ class PagesSchema implements MigrationInterface
 		")->getResult();
 
 		$connection->createQuery("
-			CREATE TABLE page_component_files (
+			CREATE TABLE storage_files (
 				id int unsigned NOT NULL AUTO_INCREMENT,
 				timeCreated datetime NOT NULL,
 				pageComponentId int unsigned NOT NULL,
 				uri varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_czech_ci NOT NULL,
 				position smallint unsigned DEFAULT NULL,
+				caption varchar(500) COLLATE utf8mb4_czech_ci DEFAULT NULL,
 				PRIMARY KEY (id),
-				KEY page_component_files_fk_pageComponentId (pageComponentId),
-				CONSTRAINT page_component_files_fk_pageComponentId FOREIGN KEY (pageComponentId) REFERENCES page_components (id) ON DELETE CASCADE ON UPDATE CASCADE
+				KEY storage_files_fk_pageComponentId (pageComponentId),
+				CONSTRAINT storage_files_fk_pageComponentId FOREIGN KEY (pageComponentId) REFERENCES page_components (id) ON DELETE CASCADE ON UPDATE CASCADE
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci
 		")->getResult();
 	}
