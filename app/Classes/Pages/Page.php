@@ -53,7 +53,7 @@ class Page extends \Katu\Models\Model
 	public function getPublicPath(): string
 	{
 		if ($this->path === null || $this->path === "") {
-			return Slugger::HOMEPAGE_PATH;
+			return "";
 		}
 
 		return str_starts_with($this->path, "/") ? $this->path : "/" . $this->path;
@@ -61,30 +61,23 @@ class Page extends \Katu\Models\Model
 
 	public function getPublicUrl(): string
 	{
-		if (Slugger::isHomepagePath($this->getPublicPath())) {
+		$publicPath = $this->getPublicPath();
+		if ($publicPath === "") {
+			return "";
+		}
+
+		if (Slugger::isHomepagePath($publicPath)) {
 			return (string)\Katu\Tools\Routing\URL::getFor("homepage.index");
 		}
 
 		return (string)\Katu\Tools\Routing\URL::getFor("pages.view", [
-			"path" => Slugger::getRoutePath($this->getPublicPath()),
+			"path" => Slugger::getRoutePath($publicPath),
 		]);
 	}
 
 	public static function getHomepage(): ?Page
 	{
-		$page = static::getOneBy(["path" => Slugger::HOMEPAGE_PATH]);
-		if ($page !== null) {
-			return $page;
-		}
-
-		foreach (static::getBy([])->getItems() as $candidate) {
-			$storedPath = $candidate->getPath();
-			if ($storedPath === null || $storedPath === "") {
-				return $candidate;
-			}
-		}
-
-		return null;
+		return static::getOneBy(["path" => Slugger::HOMEPAGE_PATH]);
 	}
 
 	public static function getByPath(string $path): ?Page
@@ -159,5 +152,25 @@ class Page extends \Katu\Models\Model
 		}
 
 		return new PageComponentStorageFileCollection($links);
+	}
+
+	public function persist(): static
+	{
+		$needsIdBasedPath = $this->path === null || $this->path === "";
+
+		if ($needsIdBasedPath && $this->id !== null) {
+			$this->path = "/stranka-" . $this->id;
+		} elseif ($needsIdBasedPath) {
+			$this->path = "/stranka-pending-" . uniqid("", true);
+		}
+
+		$result = parent::persist();
+
+		if ($needsIdBasedPath && str_starts_with((string)$this->path, "/stranka-pending-") && $this->id !== null) {
+			$this->path = "/stranka-" . $this->id;
+			parent::persist();
+		}
+
+		return $result;
 	}
 }

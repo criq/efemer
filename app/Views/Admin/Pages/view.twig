@@ -8,7 +8,9 @@
 		<div class="admin-page__header">
 			<h1 class="admin-page__title">{{ page.getTitle|default("Stránka " ~ page.getId) }}</h1>
 			<div class="admin-page__actions">
-				<a class="admin-button admin-button--ghost" href="{{ page.getPublicUrl }}" target="_blank" rel="noopener noreferrer">{% include "Blocks/adminIcon.twig" with { name: "open_in_new" } %} {{ page.getPublicPath }}</a>
+				{% if page.getPublicPath %}
+					<a class="admin-button admin-button--ghost" href="{{ page.getPublicUrl }}" target="_blank" rel="noopener noreferrer">{% include "Blocks/adminIcon.twig" with { name: "open_in_new" } %} {{ page.getPublicPath }}</a>
+				{% endif %}
 			</div>
 		</div>
 

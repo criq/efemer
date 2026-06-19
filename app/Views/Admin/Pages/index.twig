@@ -33,7 +33,11 @@
 								<a href="{{ url("admin.pages.viewPage", { pageId: page.getId }) }}">{{ page.getTitle|default("—") }}</a>
 							</td>
 							<td class="nowrap">
-								<a href="{{ page.getPublicUrl }}" target="_blank" rel="noopener noreferrer">{% include "Blocks/adminIcon.twig" with { name: "open_in_new" } %} {{ page.getPublicPath }}</a>
+								{% if page.getPublicPath %}
+									<a href="{{ page.getPublicUrl }}" target="_blank" rel="noopener noreferrer">{% include "Blocks/adminIcon.twig" with { name: "open_in_new" } %} {{ page.getPublicPath }}</a>
+								{% else %}
+									—
+								{% endif %}
 							</td>
 							<td>
 								{% if page.getStorageFiles.getFirst and page.getStorageFiles.getFirst.getImage %}
