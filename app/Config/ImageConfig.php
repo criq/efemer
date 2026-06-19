@@ -3,7 +3,6 @@
 namespace App\Config;
 
 use Katu\Tools\Images\FilterCollection;
-use Katu\Tools\Images\Filters\FitFilter;
 use Katu\Tools\Images\Filters\ResizeFilter;
 use Katu\Tools\Images\Version;
 use Katu\Tools\Images\VersionCollection;
@@ -21,9 +20,10 @@ class ImageConfig extends \Katu\Config\ImageConfig
 				]),
 			])),
 			new Version("GALLERY", "webp", 90, new FilterCollection([
-				new FitFilter([
+				new ResizeFilter([
 					"width" => 1200,
 					"height" => 1200,
+					"dontUpsize" => true,
 				]),
 			])),
 		]);
