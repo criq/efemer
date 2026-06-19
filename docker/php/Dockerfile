@@ -5,6 +5,7 @@ RUN apk add --no-cache \
     $PHPIZE_DEPS \
     curl \
     git \
+    gmp-dev \
     icu-dev \
     libjpeg-turbo-dev \
     libpng-dev \
@@ -14,7 +15,7 @@ RUN apk add --no-cache \
     oniguruma-dev \
     unzip \
     && docker-php-ext-configure gd --with-jpeg --with-webp \
-    && docker-php-ext-install -j$(nproc) pdo_mysql mbstring exif pcntl bcmath gd intl \
+    && docker-php-ext-install -j$(nproc) pdo_mysql mbstring exif pcntl bcmath gd gmp intl \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
     && apk del $PHPIZE_DEPS linux-headers

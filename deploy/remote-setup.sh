@@ -30,8 +30,11 @@ else
 fi
 
 "${COMPOSE[@]}" up -d --no-build
+mkdir -p tmp/composer
 echo "Installing Composer dependencies..."
-"${COMPOSE[@]}" exec -T -u "$(id -u):$(id -g)" php composer install --no-dev --optimize-autoloader --no-interaction
+"${COMPOSE[@]}" exec -T -e COMPOSER_HOME="${ROOT}/tmp/composer" -u "$(id -u):$(id -g)" php composer install --no-dev --optimize-autoloader --no-interaction
 "${COMPOSE[@]}" exec -T php php bin/migrate.php
+echo "Restarting PHP to refresh cached table schemas..."
+"${COMPOSE[@]}" restart php
 
 echo "Efemer containers are up."
