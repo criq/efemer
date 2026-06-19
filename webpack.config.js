@@ -5,8 +5,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = [
 	{
-		mode: "development", // Use development mode for better watching behavior
-		watch: true, // Enable file watching
+		mode: "development",
 		entry: {
 			app: path.resolve(__dirname, "static", "javascript", "index.js"),
 		},
@@ -53,7 +52,6 @@ module.exports = [
 	},
 	{
 		mode: "development",
-		watch: true,
 		entry: path.resolve(__dirname, "static", "scss", "screen.scss"),
 		output: {
 			path: path.resolve(__dirname, "public", "css"),
