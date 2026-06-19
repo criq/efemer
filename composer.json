@@ -13,7 +13,8 @@
   "require": {
     "criq/katu": "^4",
     "criq/sexy": "^4",
-    "google/cloud": "@stable"
+    "google/cloud": "@stable",
+    "nyholm/psr7": "^1.8"
   },
   "autoload": {
     "psr-4": {
@@ -23,6 +24,12 @@
   "scripts": {
     "post-create-project-cmd": [
       "npm install"
-    ]
+    ],
+    "migrate": "php bin/migrate.php"
+  },
+  "config": {
+    "audit": {
+      "block-insecure": false
+    }
   }
 }

@@ -1,12 +1,22 @@
-FROM php:8.2-fpm
+FROM php:8.4-fpm-alpine
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
-    zip unzip git curl libpng-dev libonig-dev libxml2-dev libicu-dev libjpeg-dev libwebp-dev \
+RUN apk add --no-cache \
+    $PHPIZE_DEPS \
+    curl \
+    git \
+    icu-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    libwebp-dev \
+    libxml2-dev \
+    linux-headers \
+    oniguruma-dev \
     && docker-php-ext-configure gd --with-jpeg --with-webp \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl \
+    && docker-php-ext-install -j$(nproc) pdo_mysql mbstring exif pcntl bcmath gd intl \
     && pecl install xdebug \
-    && docker-php-ext-enable xdebug
+    && docker-php-ext-enable xdebug \
+    && apk del $PHPIZE_DEPS linux-headers
 
 # Create log directory
 RUN mkdir -p /var/logs && chown -R www-data:www-data /var/logs
