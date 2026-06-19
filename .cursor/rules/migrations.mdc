@@ -1,0 +1,31 @@
+---
+description: Always run database migrations locally after schema changes
+alwaysApply: true
+---
+
+# Database Migrations
+
+## Run locally after every migration change
+
+When adding or modifying migrations (`app/Classes/Database/Migrations/`, `Migrator.php`), **always run them locally** before finishing the task:
+
+```bash
+docker compose exec -T php php bin/migrate.php
+```
+
+If the PHP container was recreated or `bin/` is not mounted, restart it first:
+
+```bash
+docker compose up -d php
+```
+
+Confirm success: output ends with `Migrations complete.`
+
+## Order
+
+1. Add/update migration class
+2. Register it in `Migrator.php` if new
+3. Run `bin/migrate.php` locally via Docker
+4. Then commit or continue with code that depends on the schema
+
+Do not leave new migrations unapplied on the local database.

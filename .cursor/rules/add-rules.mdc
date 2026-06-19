@@ -1,0 +1,46 @@
+---
+description: Add Cursor rules as project conventions emerge during work
+alwaysApply: true
+---
+
+# Growing Project Rules
+
+Capture durable project knowledge in `.cursor/rules/` as you learn it — do not wait for the user to ask.
+
+## When to add a rule
+
+Add or update a rule when you discover something that should persist across sessions:
+
+- Repeated conventions (naming, paths, UI copy, stack choices)
+- Required workflows (migrations, builds, deploy steps)
+- Project-specific constraints (GCP project, Docker setup, Czech admin copy)
+- Patterns worth reusing (Slugger for paths, Material Symbols in admin)
+
+**Do not** add a rule for one-off task details, temporary debugging notes, or preferences already covered elsewhere.
+
+## How to add a rule
+
+1. Create a focused `.mdc` file in `.cursor/rules/` — **one concern per file**
+2. Use YAML frontmatter with `description` and `alwaysApply` or `globs`
+3. Keep it concise (aim for under 50 lines), actionable, with examples/commands where helpful
+4. Match the style of existing rules (`git-commits.mdc`, `migrations.mdc`)
+
+```markdown
+---
+description: Short summary for the rule picker
+alwaysApply: true
+---
+
+# Rule Title
+
+Concrete instructions...
+```
+
+## When to update vs create
+
+- **Update** an existing rule when the convention extends or clarifies the same topic
+- **Create** a new rule when the topic is distinct (e.g. admin UI vs database vs git)
+
+## Propose to the user
+
+When adding a rule mid-task, mention it briefly in your response (e.g. "Added `.cursor/rules/admin-ui.mdc` for Czech copy conventions"). Do not commit rules unless the user asks to commit.
