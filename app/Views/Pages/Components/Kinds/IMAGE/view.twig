@@ -1,0 +1,10 @@
+{% set storageFile = pageComponent.getStorageFiles.getFirst %}
+
+{% if storageFile and storageFile.getImage %}
+	<figure class="page-image">
+		<img class="page-image__img" src="{{ storageFile.getImage.getImageVersion("GALLERY").getURL }}" alt="{{ storageFile.getCaption|default("") }}">
+		{% if storageFile.getCaption %}
+			<figcaption class="page-image__caption">{{ storageFile.getCaption }}</figcaption>
+		{% endif %}
+	</figure>
+{% endif %}

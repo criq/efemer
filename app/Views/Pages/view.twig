@@ -1,0 +1,15 @@
+{% extends "Templates/default.twig" %}
+
+{% block title %}{{ page.getTitle|default("Efemer") }}{% endblock %}
+
+{% block body %}
+
+	{% if page.getTitle %}
+		<h1 class="a-title">{{ page.getTitle }}</h1>
+	{% endif %}
+
+	{% for pageComponent in page.getPageComponents %}
+		{% include "Pages/Components/Kinds/#{pageComponent.getKind.getCode}/view.twig" %}
+	{% endfor %}
+
+{% endblock body %}
