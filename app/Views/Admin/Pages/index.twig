@@ -8,7 +8,8 @@
 		<div class="admin-page__header">
 			<h1 class="admin-page__title">Stránky</h1>
 			<div class="admin-page__actions">
-				<a class="admin-button" href="{{ url("admin.pages.createPage") }}">{% include "Blocks/adminIcon.twig" with { name: "add" } %} Přidat</a>
+				<a class="admin-button" href="{{ url("admin.pages.createPost") }}">{% include "Blocks/adminIcon.twig" with { name: "add" } %} Nový příspěvek</a>
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.createPage") }}">{% include "Blocks/adminIcon.twig" with { name: "note_add" } %} Prázdná stránka</a>
 			</div>
 		</div>
 
@@ -27,10 +28,10 @@
 					{% for page in pages %}
 						<tr>
 							<td class="admin-table__id">
-								<a href="{{ url("admin.pages.viewPage", { pageId: page.getId }) }}">{{ page.getId }}</a>
+								<a href="{{ url("admin.pages.builder", { pageId: page.getId }) }}">{{ page.getId }}</a>
 							</td>
 							<td>
-								<a href="{{ url("admin.pages.viewPage", { pageId: page.getId }) }}">{{ page.getTitle|default("—") }}</a>
+								<a href="{{ url("admin.pages.builder", { pageId: page.getId }) }}">{{ page.getTitle|default("—") }}</a>
 							</td>
 							<td class="nowrap">
 								{% if page.getPublicPath %}
@@ -46,7 +47,7 @@
 							</td>
 							<td class="admin-table__actions">
 								<div class="admin-page__actions">
-									<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.editPage", { pageId: page.getId }) }}">{% include "Blocks/adminIcon.twig" with { name: "edit" } %} Upravit</a>
+									<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.builder", { pageId: page.getId }) }}">{% include "Blocks/adminIcon.twig" with { name: "edit" } %} Upravit</a>
 									<a class="admin-button admin-button--danger" href="{{ url("admin.pages.deletePage", { pageId: page.getId }) }}" data-confirm='Opravdu chcete smazat stránku „{{ page.getTitle|default("Stránka " ~ page.getId) }}"?'>{% include "Blocks/adminIcon.twig" with { name: "delete" } %} Smazat</a>
 								</div>
 							</td>

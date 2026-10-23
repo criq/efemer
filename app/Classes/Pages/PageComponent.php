@@ -285,6 +285,23 @@ class PageComponent extends \Katu\Models\Model
 		return $this->getPageComponentPages()->getPages();
 	}
 
+	public function getBuilderPageLinksPayload(): array
+	{
+		$payload = [];
+
+		foreach ($this->getPageComponentPages() as $link) {
+			$page = $link->getPage();
+			$payload[] = [
+				"pageId" => (int)$page->getId(),
+				"title" => $page->getTitle() ?: ("Stránka " . $page->getId()),
+				"path" => $page->getPublicPath(),
+				"template" => $link->getTemplate()->getCode()->getConstantFormat(),
+			];
+		}
+
+		return $payload;
+	}
+
 	public function delete(): bool
 	{
 		foreach ($this->getChildComponents() as $child) {

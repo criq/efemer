@@ -1,0 +1,123 @@
+{% extends "Templates/default.twig" %}
+
+{% block title %}Upravit · {{ page.getTitle|default("Stránka") }}{% endblock %}
+
+{% block head %}
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+{% endblock %}
+
+{% block bodyClass %}builder{% if page.getPath == "/" %} site--index{% else %} site--page{% endif %}{% endblock %}
+
+{% block body %}
+
+	<div
+		class="builder-chrome"
+		data-builder
+		data-page-id="{{ page.getId }}"
+		data-token="{{ getCsrfToken() }}"
+		data-create-url="{{ url("admin.pages.builder.create", { pageId: page.getId }) }}"
+		data-tree-url="{{ url("admin.pages.builder.tree", { pageId: page.getId }) }}"
+		data-candidate-pages="{{ candidatePages|json_encode|e("html_attr") }}"
+		data-page-gallery-templates="{{ pageGalleryTemplates|json_encode|e("html_attr") }}"
+	>
+		<header class="builder-bar">
+			<div class="builder-bar__left">
+				<a class="builder-bar__link" href="{{ url("admin.pages.index") }}">Stránky</a>
+				<span class="builder-bar__title">{{ page.getTitle|default("Stránka") }}</span>
+				<span class="builder-bar__status" data-builder-status>Uloženo</span>
+			</div>
+			<div class="builder-bar__right">
+				<div class="builder-bar__widths" role="group" aria-label="Šířka náhledu">
+					<button type="button" class="builder-bar__button is-active" data-builder-width="desktop" title="Počítač">{% include "Blocks/adminIcon.twig" with { name: "computer", label: "Počítač" } %}</button>
+					<button type="button" class="builder-bar__button" data-builder-width="phone" title="Telefon">{% include "Blocks/adminIcon.twig" with { name: "smartphone", label: "Telefon" } %}</button>
+				</div>
+				{% if page.getPublicUrl %}
+					<a class="builder-bar__link" href="{{ page.getPublicUrl }}" target="_blank" rel="noopener noreferrer">Otevřít veřejnou stránku</a>
+				{% endif %}
+				<button type="button" class="builder-bar__button" data-builder-toggle-settings>Nastavení</button>
+				<button type="button" class="builder-bar__button builder-bar__button--primary" data-builder-toggle-add>Přidat</button>
+				<a class="builder-bar__link builder-bar__link--muted" href="{{ url("admin.pages.viewPage", { pageId: page.getId }) }}">Klasické úpravy</a>
+			</div>
+		</header>
+
+		<aside class="builder-drawer" data-builder-settings hidden>
+			<form class="builder-drawer__form" method="POST" action="">
+				{% include "Blocks/formHeader.twig" %}
+				<input type="hidden" name="builderAction" value="settings">
+				{% include "Blocks/formErrors.twig" %}
+				<label class="builder-field">
+					<span class="builder-field__label">Název</span>
+					<input type="text" name="title" value="{{ page.getTitle }}">
+				</label>
+				<label class="builder-field">
+					<span class="builder-field__label">Cesta (pokročilé)</span>
+					<input type="text" name="path" value="{{ page.getPublicPath }}">
+				</label>
+				<button type="submit" class="builder-bar__button builder-bar__button--primary">Uložit nastavení</button>
+			</form>
+		</aside>
+
+		<aside class="builder-drawer builder-drawer--add" data-builder-add hidden>
+			<p class="builder-drawer__hint">Co chcete přidat?</p>
+			<ul class="builder-add-list">
+				<li><button type="button" data-builder-add-kind="TEXT">Text</button></li>
+				<li><button type="button" data-builder-add-kind="IMAGE">Fotka</button></li>
+				<li><button type="button" data-builder-add-kind="IMAGE_GALLERY">Galerie fotek</button></li>
+				<li><button type="button" data-builder-add-kind="PAGE_GALLERY">Galerie stránek</button></li>
+				<li><button type="button" data-builder-add-kind="COLUMNS">Sloupce</button></li>
+			</ul>
+		</aside>
+
+		<aside class="builder-drawer builder-drawer--pages" data-builder-pages hidden>
+			<p class="builder-drawer__hint">Odkazy na stránky</p>
+			<div class="builder-pages-list" data-builder-pages-list></div>
+			<label class="builder-field">
+				<span class="builder-field__label">Přidat stránku</span>
+				<select data-builder-pages-add>
+					<option value="">— vyberte stránku —</option>
+				</select>
+			</label>
+			<button type="button" class="builder-bar__button builder-bar__button--primary" data-builder-pages-add-button>Přidat</button>
+		</aside>
+
+		<aside class="builder-drawer builder-drawer--layout" data-builder-layout hidden>
+			<p class="builder-drawer__hint">Rozložení</p>
+			<label class="builder-field">
+				<span class="builder-field__label">Min. položek v řadě</span>
+				<input type="number" min="1" max="12" data-builder-columns-min>
+			</label>
+			<label class="builder-field">
+				<span class="builder-field__label">Max. položek v řadě</span>
+				<input type="number" min="1" max="12" data-builder-columns-max>
+			</label>
+			<button type="button" class="builder-bar__button builder-bar__button--primary" data-builder-layout-save>Uložit</button>
+		</aside>
+	</div>
+
+	<div class="builder-canvas" data-builder-canvas>
+		{% if page.getPath == "/" %}
+			<section class="site-hero" data-reveal>
+				<p class="site-hero__eyebrow">ekologické květinářství</p>
+				<h1 class="site-hero__title">Efemér</h1>
+				<p class="site-hero__lede">Lokální, přirozený a ohleduplný přístup ke kytici — podle místa, člověka a ročního období.</p>
+			</section>
+		{% elseif page.getTitle %}
+			<header class="page-header" data-reveal>
+				<h1 class="page-header__title">{{ page.getTitle }}</h1>
+			</header>
+		{% endif %}
+
+		<div class="builder-blocks" data-builder-root>
+			{% for pageComponent in page.getRootPageComponents %}
+				<section class="page-component" data-reveal>
+					{% include "Admin/Pages/Builder/block.twig" with { pageComponent: pageComponent, page: page } %}
+				</section>
+			{% else %}
+				<p class="builder-empty" data-builder-empty>Zatím tu nic není — přidejte text nebo fotku.</p>
+			{% endfor %}
+		</div>
+	</div>
+
+	<script src="/javascript/builder.js"></script>
+
+{% endblock body %}

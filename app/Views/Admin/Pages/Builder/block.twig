@@ -1,0 +1,67 @@
+{% set kindCode = pageComponent.getKind.getCode.getConstantFormat %}
+{% set parentId = pageComponent.getParentId %}
+<div
+	class="builder-block{% if kindCode == "COLUMNS" %} builder-block--columns{% endif %}"
+	data-builder-block
+	data-component-id="{{ pageComponent.getId }}"
+	data-kind="{{ kindCode }}"
+	data-parent-id="{{ parentId|default("") }}"
+	data-upload-url="{% if kindCode in ["IMAGE", "IMAGE_GALLERY"] %}{{ url("admin.pages.uploadStorageFiles", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}{% endif %}"
+	data-reorder-files-url="{% if kindCode == "IMAGE_GALLERY" %}{{ url("admin.pages.reorderStorageFiles", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}{% endif %}"
+	data-fragment-url="{{ url("admin.pages.builder.fragment", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}"
+	data-value-url="{% if kindCode == "TEXT" %}{{ url("admin.pages.builder.value", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}{% endif %}"
+	data-page-links-url="{% if kindCode == "PAGE_GALLERY" %}{{ url("admin.pages.builder.pageLinks", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}{% endif %}"
+	data-settings-url="{% if kindCode in ["IMAGE_GALLERY", "PAGE_GALLERY", "COLUMNS"] %}{{ url("admin.pages.updatePageComponentSettings", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}{% endif %}"
+	data-delete-url="{{ url("admin.pages.builder.delete", { pageId: page.getId, pageComponentId: pageComponent.getId }) }}"
+	{% if kindCode == "PAGE_GALLERY" %}data-linked-pages="{{ pageComponent.getBuilderPageLinksPayload|json_encode|e("html_attr") }}"{% endif %}
+	{% if kindCode in ["IMAGE_GALLERY", "PAGE_GALLERY", "COLUMNS"] %}
+		data-columns-min="{{ pageComponent.getGalleryProperties.columnsMin }}"
+		data-columns-max="{{ pageComponent.getGalleryProperties.columnsMax }}"
+		data-template-code="{{ pageComponent.getTemplate.getCode.getConstantFormat }}"
+	{% endif %}
+>
+	<div class="builder-block__chrome">
+		<button type="button" class="builder-block__action builder-block__action--drag" data-builder-drag title="Přesunout">{% include "Blocks/adminIcon.twig" with { name: "drag_indicator", label: "Přesunout" } %}</button>
+		<span class="builder-block__label">
+			{% if kindCode == "TEXT" %}Text
+			{% elseif kindCode == "IMAGE" %}Fotka
+			{% elseif kindCode == "IMAGE_GALLERY" %}Galerie fotek
+			{% elseif kindCode == "PAGE_GALLERY" %}Galerie stránek
+			{% elseif kindCode == "COLUMNS" %}Sloupce
+			{% else %}{{ pageComponent.getKind.getTitle }}{% endif %}
+		</span>
+		{% if kindCode in ["IMAGE_GALLERY", "PAGE_GALLERY", "COLUMNS"] %}
+			<button type="button" class="builder-block__action" data-builder-layout-settings title="Rozložení">{% include "Blocks/adminIcon.twig" with { name: "tune", label: "Rozložení" } %}</button>
+		{% endif %}
+		<button type="button" class="builder-block__action" data-builder-delete title="Smazat">{% include "Blocks/adminIcon.twig" with { name: "delete", label: "Smazat" } %}</button>
+	</div>
+	<div class="builder-block__content{% if kindCode == "TEXT" %} builder-block__content--text{% endif %}" {% if kindCode == "TEXT" %}data-builder-text{% endif %}>
+		{% if kindCode == "COLUMNS" %}
+			<div class="page-component-columns" style="{{ pageComponent.getGalleryStyleAttribute }}" data-builder-columns>
+				{% for child in pageComponent.getChildComponents %}
+					<div class="page-component-columns__item" data-builder-column-item>
+						{% include "Admin/Pages/Builder/block.twig" with { pageComponent: child, page: page } %}
+					</div>
+				{% else %}
+					<div class="builder-block__empty" data-builder-drop-hint>Přetáhněte sem text nebo fotku</div>
+				{% endfor %}
+			</div>
+		{% elseif kindCode == "IMAGE_GALLERY" %}
+			{% include "Admin/Pages/Builder/imageGallery.twig" with { pageComponent: pageComponent, page: page } %}
+		{% else %}
+			{% include "Pages/Components/view.twig" with { pageComponent: pageComponent } %}
+		{% endif %}
+	</div>
+	{% if kindCode == "IMAGE" %}
+		<button type="button" class="builder-block__media-action" data-builder-replace-image>Nahradit fotku</button>
+		<input type="file" accept="image/*" hidden data-builder-file-input>
+	{% elseif kindCode == "IMAGE_GALLERY" %}
+		<button type="button" class="builder-block__media-action" data-builder-add-images>Přidat fotky</button>
+		<input type="file" accept="image/*" multiple hidden data-builder-file-input>
+		<div class="builder-upload-progress" data-builder-upload-progress hidden></div>
+	{% elseif kindCode == "PAGE_GALLERY" %}
+		<button type="button" class="builder-block__media-action" data-builder-edit-pages>Upravit odkazy na stránky</button>
+	{% elseif kindCode == "COLUMNS" %}
+		<button type="button" class="builder-block__media-action" data-builder-layout-settings>Upravit sloupce</button>
+	{% endif %}
+</div>

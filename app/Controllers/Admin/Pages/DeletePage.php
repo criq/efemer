@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin\Pages;
 
 use App\Classes\Pages\Page;
+use App\Classes\Pages\PostScaffolder;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -13,6 +14,12 @@ class DeletePage extends \Katu\Controllers\Controller
 		$page = Page::get($pageId);
 		if (!$page) {
 			throw new \Katu\Exceptions\ModelNotFoundException;
+		}
+
+		PostScaffolder::unlinkFromHomepageDiary($page);
+
+		foreach ($page->getPageComponents() as $pageComponent) {
+			$pageComponent->delete();
 		}
 
 		$page->delete();

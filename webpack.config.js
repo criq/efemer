@@ -8,6 +8,7 @@ module.exports = [
 		mode: "development",
 		entry: {
 			app: path.resolve(__dirname, "static", "javascript", "index.js"),
+			builder: path.resolve(__dirname, "static", "javascript", "builder", "index.js"),
 		},
 		output: {
 			path: path.resolve(__dirname, "public", "javascript"),
@@ -42,9 +43,7 @@ module.exports = [
 			}),
 		],
 		optimization: {
-			splitChunks: {
-				chunks: "all",
-			},
+			splitChunks: false,
 			minimize: true,
 		},
 		devtool: "source-map",

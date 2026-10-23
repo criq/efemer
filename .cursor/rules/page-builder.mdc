@@ -1,5 +1,5 @@
 ---
-description: Modular page builder (components tree) and efemer.cz import
+description: Modular page builder (components tree), visual builder, and efemer.cz import
 alwaysApply: true
 ---
 
@@ -20,6 +20,18 @@ Pages are built from a **tree** of components (`page_components.parentId` + `pos
 Public render walks **root** components (`parentId IS NULL`) in order; `COLUMNS` recursively renders children.
 
 Add a kind by implementing `Kind` + templates + admin `edit`/`preview` twig, then register in `KindCollection`.
+
+## Visual builder (primary admin UX)
+
+Primary edit surface: `/admin/pages/{id}/builder` (Czech florist UI). Classic table UI remains at `/admin/pages/{id}` as “Klasické úpravy”.
+
+- Canvas reuses public Twig + `builder` chrome (`Admin/Pages/Builder/block.twig`)
+- Mutations via JSON under `admin.pages.builder.*` (value, tree, create, delete, fragment)
+- TEXT HTML is sanitized server-side (`App\Classes\Html\Sanitizer`)
+- New diary posts: **Nový příspěvek** → `PostScaffolder` (dated path, IMAGE+TEXT+IMAGE_GALLERY, prepend homepage diary `PAGE_GALLERY`)
+- Builder UI copy is Czech only (Fotka, Galerie fotek, …) — never show kind codes in chrome
+- Frontend: `static/javascript/builder/` → `public/javascript/builder.js` (bundles SortableJS + self-hosted TinyMCE); styles in `static/scss/3-blocks/builder.scss`
+- Gallery photos: drag reorder + per-photo delete; between-block “+ Přidat sem”; layout drawer for column min/max on Sloupce / galleries
 
 ## Import from efemer.cz
 
