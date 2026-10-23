@@ -413,50 +413,101 @@ function initBuilder(chrome) {
 		}
 	};
 
-	const collectTree = () => {
-		const items = [];
-		const walk = (container, parentId) => {
-			const blocks = [...container.children].flatMap((child) => {
-				if (child.matches?.("[data-builder-block]")) {
-					return [child];
-				}
-				if (child.matches?.(".page-component")) {
-					return [...child.querySelectorAll(":scope > [data-builder-block]")];
-				}
-				if (child.matches?.("[data-builder-column-item]")) {
-					return [...child.querySelectorAll(":scope > [data-builder-block]")];
-				}
-				return [];
-			});
+	const pushTreeItem = (items, seen, block, parentId) => {
+		const id = Number(block.dataset.componentId);
+		if (!id || seen.has(id)) {
+			return;
+		}
+		seen.add(id);
+		items.push({ id, parentId });
+	};
 
-			blocks.forEach((block) => {
-				const id = Number(block.dataset.componentId);
-				items.push({ id, parentId });
-				if (block.dataset.kind === "COLUMNS") {
-					const columns = block.querySelector("[data-builder-columns]");
-					if (columns) {
-						[...columns.querySelectorAll(":scope > [data-builder-column-item] > [data-builder-block]")].forEach((childBlock) => {
-							items.push({ id: Number(childBlock.dataset.componentId), parentId: id });
-							// Nested columns not allowed; skip deeper.
-						});
-					}
-				}
-			});
-		};
+	const collectColumnChildren = (items, seen, columnsBlock) => {
+		const columns = columnsBlock.querySelector("[data-builder-columns]");
+		if (!columns) {
+			return;
+		}
+		const parentId = Number(columnsBlock.dataset.componentId);
+		columns.querySelectorAll(":scope > [data-builder-column-item] > [data-builder-block]").forEach((childBlock) => {
+			pushTreeItem(items, seen, childBlock, parentId);
+		});
+	};
 
+	/** Pull .page-component sections that Sortable dropped into insert file zones back to root. */
+	const rescueMisplacedRootSections = () => {
 		const rootList = document.querySelector("[data-builder-root]");
-		walk(rootList, null);
+		if (!rootList) {
+			return;
+		}
+		rootList.querySelectorAll("[data-builder-insert] .page-component, [data-builder-file-list] > .page-component").forEach((section) => {
+			const insert = section.closest("[data-builder-insert]");
+			if (insert && insert.parentElement === rootList) {
+				rootList.insertBefore(section, insert);
+			} else {
+				rootList.appendChild(section);
+			}
+		});
+	};
 
-		// Include any blocks not captured (safety): dump all blocks with DOM parent.
-		const all = [...document.querySelectorAll("[data-builder-block]")];
-		if (items.length !== all.length) {
-			return all.map((block) => ({
-				id: Number(block.dataset.componentId),
-				parentId: block.dataset.parentId ? Number(block.dataset.parentId) : null,
-			}));
+	const collectTree = () => {
+		rescueMisplacedRootSections();
+
+		const items = [];
+		const seen = new Set();
+		const rootList = document.querySelector("[data-builder-root]");
+		if (!rootList) {
+			return items;
 		}
 
+		[...rootList.children].forEach((child) => {
+			let block = null;
+			if (child.matches?.(".page-component")) {
+				block = child.querySelector(":scope > [data-builder-block]");
+			} else if (child.matches?.("[data-builder-block]")) {
+				block = child;
+			}
+			if (!block) {
+				return;
+			}
+			pushTreeItem(items, seen, block, null);
+			if (block.dataset.kind === "COLUMNS") {
+				collectColumnChildren(items, seen, block);
+			}
+		});
+
+		// Orphans still under the canvas (e.g. column children after a partial move).
+		document.querySelectorAll("[data-builder-canvas] [data-builder-block]").forEach((block) => {
+			const id = Number(block.dataset.componentId);
+			if (!id || seen.has(id)) {
+				return;
+			}
+			const column = block.closest("[data-builder-columns]");
+			const parentBlock = column?.closest("[data-builder-block]");
+			const parentId = parentBlock ? Number(parentBlock.dataset.componentId) : null;
+			pushTreeItem(items, seen, block, parentId);
+			if (block.dataset.kind === "COLUMNS") {
+				collectColumnChildren(items, seen, block);
+			}
+		});
+
 		return items;
+	};
+
+	const readApiErrorMessage = async (response, fallback) => {
+		const payload = await response.json().catch(() => null);
+		if (!payload) {
+			return fallback;
+		}
+		if (Array.isArray(payload) && payload[0]?.message) {
+			return payload[0].message;
+		}
+		if (payload.errors?.[0]?.message) {
+			return payload.errors[0].message;
+		}
+		if (payload.message) {
+			return payload.message;
+		}
+		return fallback;
 	};
 
 	const persistTree = async () => {
@@ -467,9 +518,7 @@ function initBuilder(chrome) {
 			formData.append("items", JSON.stringify(collectTree()));
 			const response = await fetch(treeUrl, { method: "POST", body: formData, credentials: "same-origin" });
 			if (!response.ok) {
-				const payload = await response.json().catch(() => null);
-				const message = payload?.errors?.[0]?.message || "Nepodařilo se uložit pořadí.";
-				throw new Error(message);
+				throw new Error(await readApiErrorMessage(response, "Nepodařilo se uložit pořadí."));
 			}
 			// Refresh parentId attributes from DOM structure.
 			document.querySelectorAll("[data-builder-block]").forEach((block) => {
@@ -478,9 +527,11 @@ function initBuilder(chrome) {
 				block.dataset.parentId = parentBlock ? parentBlock.dataset.componentId : "";
 			});
 			endSave(true);
+			return true;
 		} catch (error) {
 			endSave(false);
 			alert(error.message || "Nepodařilo se uložit pořadí.");
+			return false;
 		}
 	};
 
@@ -1102,8 +1153,21 @@ function initBuilder(chrome) {
 				animation: 150,
 				handle: "[data-builder-drag]",
 				draggable: ".page-component",
-				onEnd: () => {
-					persistTree();
+				filter: "[data-builder-insert]",
+				preventOnFilter: false,
+				onMove: (evt) => {
+					// Keep root blocks as siblings of insert points — never nest into file drop zones.
+					if (evt.to !== rootList) {
+						return false;
+					}
+					if (evt.related?.closest?.("[data-builder-file-list]")) {
+						return false;
+					}
+					return true;
+				},
+				onEnd: async () => {
+					rescueMisplacedRootSections();
+					await persistTree();
 					renderInsertPoints();
 					initSortables();
 				},
@@ -1130,7 +1194,8 @@ function initBuilder(chrome) {
 				group: {
 					name: "builder-files",
 					pull: true,
-					put: true,
+					// Only accept gallery/image file chips — not whole page blocks from the root list.
+					put: (_to, _from, dragEl) => dragEl?.classList?.contains("builder-file-item") === true,
 				},
 				emptyInsertThreshold: 24,
 				onAdd: (evt) => {
