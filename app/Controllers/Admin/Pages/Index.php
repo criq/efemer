@@ -11,7 +11,10 @@ class Index extends \Katu\Controllers\Controller
 {
 	public function getResponse(ServerRequestInterface $request, ResponseInterface $response)
 	{
-		$pages = Page::getAll();
+		$pages = Page::getAll()->getItems();
+		usort($pages, function (Page $a, Page $b) {
+			return strcasecmp((string)$a->getPublicPath(), (string)$b->getPublicPath());
+		});
 
 		return $response->withBody((new HTMLEngine($request))->render("Admin/Pages/index.twig", [
 			"pages" => $pages,
