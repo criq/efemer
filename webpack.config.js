@@ -40,6 +40,7 @@ module.exports = [
 				$: "jquery",
 				jQuery: "jquery",
 				Popper: ["@popperjs/core", "default"],
+				tinymce: "tinymce/tinymce",
 			}),
 		],
 		optimization: {
