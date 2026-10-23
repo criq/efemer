@@ -30,10 +30,13 @@ else
 fi
 
 "${COMPOSE[@]}" up -d --no-build
-mkdir -p tmp/composer
+mkdir -p tmp/composer public/tmp tmp
 echo "Installing Composer dependencies..."
 "${COMPOSE[@]}" exec -T -e COMPOSER_HOME="${ROOT}/tmp/composer" -u "$(id -u):$(id -g)" php composer install --no-dev --optimize-autoloader --no-interaction
 "${COMPOSE[@]}" exec -T php php bin/migrate.php
+# PHP-FPM runs as www-data; image versions and GCS downloads need writable tmp dirs.
+echo "Ensuring www-data can write image/tmp caches..."
+"${COMPOSE[@]}" exec -T php sh -c "mkdir -p /var/www/public/tmp /var/www/tmp && chown -R www-data:www-data /var/www/public/tmp /var/www/tmp && chmod -R ug+rwX /var/www/public/tmp /var/www/tmp"
 echo "Restarting PHP to refresh cached table schemas..."
 "${COMPOSE[@]}" restart php
 
