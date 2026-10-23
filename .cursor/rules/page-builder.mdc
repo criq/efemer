@@ -1,0 +1,30 @@
+---
+description: Modular page builder (components tree) and efemer.cz import
+alwaysApply: true
+---
+
+# Page builder
+
+Pages are built from a **tree** of components (`page_components.parentId` + `position`).
+
+## Kinds
+
+| Kind | Role |
+|---|---|
+| `TEXT` | HTML body |
+| `IMAGE` | Single linked storage file |
+| `IMAGE_GALLERY` | Ordered files + display template |
+| `PAGE_GALLERY` | Links to other pages |
+| `COLUMNS` | Layout container; children nest via `parentId` |
+
+Public render walks **root** components (`parentId IS NULL`) in order; `COLUMNS` recursively renders children.
+
+Add a kind by implementing `Kind` + templates + admin `edit`/`preview` twig, then register in `KindCollection`.
+
+## Import from efemer.cz
+
+```bash
+docker compose exec -T php php bin/import-efemer-cz.php
+```
+
+Wipes existing pages, recreates homepage (Principy / Já / Pro vás + diary `PAGE_GALLERY`) and all diary posts (hero `IMAGE` + optional `TEXT` + `IMAGE_GALLERY`). Images go to GCS bucket `efemer-files`.
