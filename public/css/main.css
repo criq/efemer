@@ -9939,14 +9939,66 @@ body.builder {
   padding-top: 3.5rem;
 }
 
+body.builder.builder--phone {
+  background: #dfe2dc;
+}
+
 body.builder.builder--phone .site {
-  max-width: 390px;
+  box-sizing: border-box;
+  width: 390px;
+  max-width: calc(100% - 1.5rem);
   margin-left: auto;
   margin-right: auto;
-  border-left: 1px solid rgba(40, 36, 32, 0.12);
-  border-right: 1px solid rgba(40, 36, 32, 0.12);
+  border-left: 1px solid rgba(40, 36, 32, 0.14);
+  border-right: 1px solid rgba(40, 36, 32, 0.14);
   min-height: calc(100vh - 3.5rem);
-  box-shadow: 0 0 0 12px rgba(40, 36, 32, 0.04);
+  overflow-x: hidden;
+  background: #f2f4f0;
+  box-shadow: 0 0 0 12px rgba(40, 36, 32, 0.05);
+}
+
+body.builder.builder--phone .site-header {
+  top: 3.5rem;
+}
+
+body.builder.builder--phone .site-header__inner,
+body.builder.builder--phone .site-main__inner,
+body.builder.builder--phone .site-footer {
+  box-sizing: border-box;
+  max-width: 100%;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+body.builder.builder--phone .site-header__inner {
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+}
+
+body.builder.builder--phone .site-nav {
+  min-width: 0;
+}
+
+body.builder.builder--phone .site-main,
+body.builder.builder--phone .builder-canvas,
+body.builder.builder--phone .builder-blocks,
+body.builder.builder--phone .page-component,
+body.builder.builder--phone .builder-block,
+body.builder.builder--phone .builder-block__content,
+body.builder.builder--phone .site-hero {
+  max-width: 100%;
+  min-width: 0;
+}
+
+body.builder.builder--phone .builder-block__toolbar {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+body.builder.builder--phone .page-component,
+body.builder.builder--phone .builder-block__content--text {
+  word-wrap: anywhere;
+  word-break: break-word;
 }
 
 .builder-chrome {
@@ -10122,6 +10174,7 @@ body.builder.builder--phone .site {
   grid-gap: 0;
   gap: 0;
   min-height: 4rem;
+  min-width: 0;
 }
 
 .builder-empty {
@@ -10134,6 +10187,7 @@ body.builder.builder--phone .site {
 
 .builder-block {
   position: relative;
+  min-width: 0;
   outline: 1px solid transparent;
   transition: outline-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -10362,6 +10416,8 @@ body.builder.builder--phone .site {
 }
 
 .site {
+  container-name: site;
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -10384,7 +10440,7 @@ body.builder.builder--phone .site {
   justify-content: space-between;
   margin: 0 auto;
   max-width: 56rem;
-  padding: 1.25rem max(1rem, min(3vw, 2rem));
+  padding: 1.25rem max(1rem, min(3cqw, 2rem));
 }
 
 .site-brand {
@@ -10457,17 +10513,17 @@ body.builder.builder--phone .site {
 
 .site-main {
   flex: 1 0 auto;
-  padding: max(2rem, min(5vw, 4rem)) 0 max(3rem, min(8vw, 6rem));
+  padding: max(2rem, min(5cqw, 4rem)) 0 max(3rem, min(8cqw, 6rem));
 }
 
 .site-main__inner {
   margin: 0 auto;
   max-width: 42rem;
-  padding: 0 max(1rem, min(3vw, 1.5rem));
+  padding: 0 max(1rem, min(3cqw, 1.5rem));
 }
 
 .site-hero {
-  margin: 0 0 max(2.5rem, min(7vw, 4.5rem));
+  margin: 0 0 max(2.5rem, min(7cqw, 4.5rem));
   max-width: 28rem;
   padding-top: 0.5rem;
 }
@@ -10484,7 +10540,7 @@ body.builder.builder--phone .site {
 .site-hero > h1,
 .site-hero .builder-block__content--text > h1 {
   font-family: "Fraunces", "Times New Roman", Times, serif;
-  font-size: max(3rem, min(9vw, 5.25rem));
+  font-size: max(3rem, min(9cqw, 5.25rem));
   font-weight: 300;
   letter-spacing: -0.03em;
   line-height: 0.95;
@@ -10501,12 +10557,12 @@ body.builder.builder--phone .site {
 }
 
 .page-header {
-  margin: 0 0 max(2rem, min(5vw, 3rem));
+  margin: 0 0 max(2rem, min(5cqw, 3rem));
 }
 
 .page-header__title {
   font-family: "Fraunces", "Times New Roman", Times, serif;
-  font-size: max(1.85rem, min(4vw, 2.75rem));
+  font-size: max(1.85rem, min(4cqw, 2.75rem));
   font-weight: 300;
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -10514,14 +10570,14 @@ body.builder.builder--phone .site {
 }
 
 .page-component {
-  margin: 0 0 max(2.5rem, min(6vw, 4rem));
+  margin: 0 0 max(2.5rem, min(6cqw, 4rem));
 }
 .page-component.site-hero {
-  margin: 0 0 max(2.5rem, min(7vw, 4.5rem));
+  margin: 0 0 max(2.5rem, min(7cqw, 4.5rem));
 }
 .page-component h2 {
   font-family: "Fraunces", "Times New Roman", Times, serif;
-  font-size: max(1.65rem, min(3.5vw, 2.15rem));
+  font-size: max(1.65rem, min(3.5cqw, 2.15rem));
   font-style: italic;
   font-weight: 300;
   letter-spacing: -0.01em;
@@ -10564,7 +10620,7 @@ body.builder.builder--phone .site {
 .site-footer {
   border-top: 1px solid rgba(28, 33, 28, 0.1);
   margin-top: auto;
-  padding: 2rem max(1rem, min(3vw, 2rem)) 2.5rem;
+  padding: 2rem max(1rem, min(3cqw, 2rem)) 2.5rem;
   text-align: center;
 }
 

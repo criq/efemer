@@ -2,12 +2,64 @@ body.builder {
 	padding-top: 3.5rem;
 }
 
+body.builder.builder--phone {
+	background: #dfe2dc;
+}
+
 body.builder.builder--phone .site {
-	max-width: 390px;
+	box-sizing: border-box;
+	width: 390px;
+	max-width: calc(100% - 1.5rem);
 	margin-inline: auto;
-	border-inline: 1px solid rgba(40, 36, 32, 0.12);
+	border-inline: 1px solid rgba(40, 36, 32, 0.14);
 	min-height: calc(100vh - 3.5rem);
-	box-shadow: 0 0 0 12px rgba(40, 36, 32, 0.04);
+	overflow-x: hidden;
+	background: $color-bg;
+	box-shadow: 0 0 0 12px rgba(40, 36, 32, 0.05);
+}
+
+body.builder.builder--phone .site-header {
+	top: 3.5rem;
+}
+
+body.builder.builder--phone .site-header__inner,
+body.builder.builder--phone .site-main__inner,
+body.builder.builder--phone .site-footer {
+	box-sizing: border-box;
+	max-width: 100%;
+	padding-left: 1.25rem;
+	padding-right: 1.25rem;
+}
+
+body.builder.builder--phone .site-header__inner {
+	flex-wrap: wrap;
+	gap: 0.65rem 1rem;
+}
+
+body.builder.builder--phone .site-nav {
+	min-width: 0;
+}
+
+body.builder.builder--phone .site-main,
+body.builder.builder--phone .builder-canvas,
+body.builder.builder--phone .builder-blocks,
+body.builder.builder--phone .page-component,
+body.builder.builder--phone .builder-block,
+body.builder.builder--phone .builder-block__content,
+body.builder.builder--phone .site-hero {
+	max-width: 100%;
+	min-width: 0;
+}
+
+body.builder.builder--phone .builder-block__toolbar {
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+body.builder.builder--phone .page-component,
+body.builder.builder--phone .builder-block__content--text {
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 
 .builder-chrome {
@@ -172,6 +224,7 @@ body.builder.builder--phone .site {
 	display: grid;
 	gap: 0;
 	min-height: 4rem;
+	min-width: 0;
 }
 
 .builder-empty {
@@ -184,6 +237,7 @@ body.builder.builder--phone .site {
 
 .builder-block {
 	position: relative;
+	min-width: 0;
 	outline: 1px solid transparent;
 	transition: outline-color 0.15s ease, box-shadow 0.15s ease;
 }
