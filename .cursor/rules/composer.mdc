@@ -13,4 +13,4 @@ docker compose exec -T -u "$(id -u):$(id -g)" php composer require vendor/packag
 docker compose exec -T -u "$(id -u):$(id -g)" php composer install
 ```
 
-Commit updated `composer.lock` after dependency changes. Production installs via `deploy/remote-setup.sh` in the same container.
+`criq/katu` and `criq/sexy` come from Packagist (`^8`). Commit updated `composer.lock` after dependency changes. Production installs via `deploy/remote-setup.sh` in the same container.

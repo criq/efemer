@@ -1,18 +1,9 @@
 {
   "name": "efemer/efemer",
-  "repositories": [
-    {
-      "url": "https://github.com/criq/katu",
-      "type": "git"
-    },
-    {
-      "url": "https://github.com/criq/sexy",
-      "type": "git"
-    }
-  ],
   "require": {
-    "criq/katu": "^4",
-    "criq/sexy": "^4",
+    "php": ">=8.4",
+    "criq/katu": "^8",
+    "criq/sexy": "^8",
     "google/cloud": "@stable",
     "nyholm/psr7": "^1.8"
   },
@@ -28,6 +19,9 @@
     "migrate": "php bin/migrate.php"
   },
   "config": {
+    "platform": {
+      "php": "8.4.0"
+    },
     "audit": {
       "block-insecure": false
     }
