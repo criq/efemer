@@ -72,7 +72,7 @@ From repo root:
 This script:
 
 1. Builds webpack assets (`npm` + `webpack`)
-2. Rsyncs app to `jan@34.179.230.234:~/efemer` (excludes `.env`, `vendor`, `data/mysql` — then syncs `.secret/`)
+2. Rsyncs app to `jan@34.179.230.234:~/efemer2` (excludes `.env`, `vendor`, `data/mysql` — then syncs `.secret/`)
 3. Runs `deploy/remote-setup.sh` on the server via `gcloud compute ssh`
 
 `remote-setup.sh` rebuilds the PHP image **only when `docker/php/` changed** (hash in `.deploy/php-image.context-sha256`), runs `up -d --no-build`, **`composer install --no-dev` in the PHP container**, then migrations.
@@ -89,8 +89,8 @@ docker compose -f docker-compose.production.yml exec -T php php bin/migrate.php
 | Error | Fix |
 |-------|-----|
 | `composer: not found` in container | Rebuild PHP image (`docker/php/` changed) — Dockerfile includes Composer. Delete `.deploy/php-image.context-sha256` on server to force rebuild. |
-| rsync vendor permission denied | On server: `cd ~/efemer && docker compose -f docker-compose.production.yml down && sudo rm -rf vendor && mkdir vendor && chown jan:jan vendor`, then re-run `./deploy.sh`. |
-| Missing `.env` on server | Create `~/efemer/.env` from `deploy/env.production.example` (see deployment rule). |
+| rsync vendor permission denied | On server: `cd ~/efemer2 && docker compose -f docker-compose.production.yml down && sudo rm -rf vendor && mkdir vendor && chown jan:jan vendor`, then re-run `./deploy.sh`. |
+| Missing `.env` on server | Create `~/efemer2/.env` from `deploy/env.production.example` (see deployment rule). |
 | SSH / gcloud auth | Use `~/.ssh/google_compute_engine`, project `aukce-496911`, zone `europe-west3-c`, VM `curios-vm`. |
 
 ## Step 5: Verify production (required — do not stop here)
@@ -135,7 +135,7 @@ Not part of routine deploy — only when setting up or changing hosting:
 
 - Add Caddy block for `efemer.jabli.cz` → `127.0.0.1:52184` in `/etc/caddy/Caddyfile`, reload Caddy
 - DNS A record `efemer.jabli.cz` → `34.179.230.234`
-- Initial `~/efemer/.env` and `.secret/` on server
+- Initial `~/efemer2/.env` and `.secret/` on server
 
 See `.cursor/rules/deployment.mdc`.
 

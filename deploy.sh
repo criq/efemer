@@ -5,7 +5,7 @@ GCP_PROJECT="aukce-496911"
 GCP_ZONE="europe-west3-c"
 VM_NAME="curios-vm"
 VM_IP="34.179.230.234"
-REMOTE_DIR="/home/jan/efemer"
+REMOTE_DIR="/home/jan/efemer2"
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
