@@ -35,6 +35,9 @@
 		{% endif %}
 		<button type="button" class="builder-block__action" data-builder-delete title="Smazat">{% include "Blocks/adminIcon.twig" with { name: "delete", label: "Smazat" } %}</button>
 	</div>
+	{% if kindCode == "TEXT" %}
+		<div class="builder-block__toolbar" data-builder-text-toolbar></div>
+	{% endif %}
 	<div class="builder-block__content{% if kindCode == "TEXT" %} builder-block__content--text{% endif %}" {% if kindCode == "TEXT" %}data-builder-text{% endif %}>
 		{% if kindCode == "COLUMNS" %}
 			<div class="page-component-columns" style="{{ pageComponent.getGalleryStyleAttribute }}" data-builder-columns>

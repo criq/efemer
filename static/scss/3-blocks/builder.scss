@@ -261,6 +261,28 @@ body.builder.builder--phone .site {
 	border-radius: 0.4rem;
 }
 
+.builder-block__toolbar {
+	display: none;
+	margin: 0 0 0.75rem;
+	min-height: 2.5rem;
+	background: rgba(255, 255, 255, 0.98);
+	border: 1px solid rgba(40, 36, 32, 0.12);
+	border-radius: 0.4rem;
+	overflow-x: auto;
+}
+
+.builder-block.is-selected > .builder-block__toolbar {
+	display: block;
+}
+
+.builder-block__toolbar .tox-editor-header,
+.builder-block__toolbar .tox-toolbar-overlord,
+.builder-block__toolbar .tox-toolbar__primary {
+	background: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
+}
+
 .builder-block__content--text {
 	min-height: 1.5em;
 }

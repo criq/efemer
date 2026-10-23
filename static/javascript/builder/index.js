@@ -151,6 +151,8 @@ function initBuilder(chrome) {
 			return;
 		}
 
+		const toolbar = block.querySelector("[data-builder-text-toolbar]");
+
 		tinymce.init({
 			target,
 			inline: true,
@@ -159,8 +161,10 @@ function initBuilder(chrome) {
 			content_css: false,
 			license_key: "gpl",
 			plugins: "lists link",
-			toolbar: "undo redo | blocks | bold italic | link | bullist numlist",
-			block_formats: "Odstavec=p; Nadpis 2=h2; Nadpis 3=h3",
+			toolbar: "undo redo | blocks | bold italic underline strikethrough | link | bullist numlist | removeformat",
+			block_formats: "Odstavec=p; Nadpis 1=h1; Nadpis 2=h2; Nadpis 3=h3",
+			fixed_toolbar_container_target: toolbar || undefined,
+			toolbar_persist: true,
 			valid_elements: "p,br,strong/b,em/i,u,s,a[href|title|target|rel],ul,ol,li,h1[id],h2[id],h3[id],h4[id],blockquote,hr",
 			paste_as_text: false,
 			setup: (editor) => {

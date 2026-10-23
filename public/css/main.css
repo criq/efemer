@@ -990,6 +990,28 @@ body.builder.builder--phone .site {
   border-radius: 0.4rem;
 }
 
+.builder-block__toolbar {
+  display: none;
+  margin: 0 0 0.75rem;
+  min-height: 2.5rem;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(40, 36, 32, 0.12);
+  border-radius: 0.4rem;
+  overflow-x: auto;
+}
+
+.builder-block.is-selected > .builder-block__toolbar {
+  display: block;
+}
+
+.builder-block__toolbar .tox-editor-header,
+.builder-block__toolbar .tox-toolbar-overlord,
+.builder-block__toolbar .tox-toolbar__primary {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
 .builder-block__content--text {
   min-height: 1.5em;
 }
@@ -1223,8 +1245,8 @@ body.builder.builder--phone .site {
   max-width: 28rem;
   padding-top: 0.5rem;
 }
-
-.site-hero__eyebrow {
+.site-hero > p:first-child,
+.site-hero .builder-block__content--text > p:first-child {
   color: #8b9488;
   font-family: "Syne", "Helvetica Neue", sans-serif;
   font-size: 0.72rem;
@@ -1233,8 +1255,8 @@ body.builder.builder--phone .site {
   margin: 0 0 1rem;
   text-transform: uppercase;
 }
-
-.site-hero__title {
+.site-hero > h1,
+.site-hero .builder-block__content--text > h1 {
   font-family: "Fraunces", "Times New Roman", Times, serif;
   font-size: max(3rem, min(9vw, 5.25rem));
   font-weight: 300;
@@ -1242,8 +1264,8 @@ body.builder.builder--phone .site {
   line-height: 0.95;
   margin: 0 0 1.25rem;
 }
-
-.site-hero__lede {
+.site-hero > h1 + p,
+.site-hero .builder-block__content--text > h1 + p {
   color: #5e675c;
   font-size: 1.05rem;
   font-weight: 300;
@@ -1267,6 +1289,9 @@ body.builder.builder--phone .site {
 
 .page-component {
   margin: 0 0 max(2.5rem, min(6vw, 4rem));
+}
+.page-component.site-hero {
+  margin: 0 0 max(2.5rem, min(7vw, 4.5rem));
 }
 .page-component h2 {
   font-family: "Fraunces", "Times New Roman", Times, serif;
