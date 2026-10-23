@@ -27,6 +27,7 @@ function initBuilder(chrome) {
 	const token = chrome.dataset.token;
 	const createUrl = chrome.dataset.createUrl;
 	const treeUrl = chrome.dataset.treeUrl;
+	const moveFileUrlBase = chrome.dataset.moveFileUrlBase || "";
 	const settings = chrome.querySelector("[data-builder-settings]");
 	const addDrawer = chrome.querySelector("[data-builder-add]");
 	const pagesDrawer = chrome.querySelector("[data-builder-pages]");
@@ -242,6 +243,22 @@ function initBuilder(chrome) {
 		image.src = url;
 	});
 
+	const replaceBlockHtml = (block, html) => {
+		const wrapper = document.createElement("div");
+		wrapper.innerHTML = html;
+		const next = wrapper.firstElementChild;
+		if (!next || !block) {
+			return null;
+		}
+		block.replaceWith(next);
+		if (selected && selected.dataset.componentId === next.dataset.componentId) {
+			selected = next;
+			next.classList.add("is-selected");
+		}
+		bindBlock(next);
+		return next;
+	};
+
 	const refreshBlock = async (block) => {
 		const url = block.dataset.fragmentUrl;
 		if (!url) {
@@ -252,22 +269,44 @@ function initBuilder(chrome) {
 			throw new Error("fragment failed");
 		}
 		const data = await response.json();
-		const wrapper = document.createElement("div");
-		wrapper.innerHTML = data.html;
-		const next = wrapper.firstElementChild;
-		if (!next) {
-			return;
-		}
-		const section = block.closest(".page-component");
-		block.replaceWith(next);
-		if (selected && selected.dataset.componentId === next.dataset.componentId) {
-			selected = next;
-			next.classList.add("is-selected");
-		}
-		bindBlock(next);
+		const next = replaceBlockHtml(block, data.html);
 		initSortables();
 		renderInsertPoints();
 		return next;
+	};
+
+	const findBlockById = (componentId) => {
+		if (!componentId) {
+			return null;
+		}
+		return document.querySelector(`[data-builder-block][data-component-id="${componentId}"]`);
+	};
+
+	const insertCreatedBlock = (html, afterId) => {
+		const wrapper = document.createElement("div");
+		wrapper.innerHTML = html;
+		const block = wrapper.firstElementChild;
+		if (!block) {
+			return null;
+		}
+		const rootList = document.querySelector("[data-builder-root]");
+		rootList?.querySelector("[data-builder-empty]")?.remove();
+		const section = document.createElement("section");
+		section.className = "page-component";
+		section.appendChild(block);
+		if (afterId) {
+			const after = findBlockById(afterId);
+			after?.closest(".page-component")?.after(section);
+		} else {
+			const firstSection = rootList?.querySelector(":scope > .page-component");
+			if (firstSection) {
+				rootList.insertBefore(section, firstSection);
+			} else {
+				rootList?.appendChild(section);
+			}
+		}
+		bindBlock(block);
+		return block;
 	};
 
 	const setUploadProgress = (block, text) => {
@@ -696,20 +735,31 @@ function initBuilder(chrome) {
 
 		const sections = [...rootList.querySelectorAll(":scope > .page-component")];
 		const insertBefore = (afterId) => {
-			const point = document.createElement("button");
-			point.type = "button";
-			point.className = "builder-insert";
-			point.dataset.builderInsert = "";
-			point.dataset.afterId = afterId ? String(afterId) : "";
-			point.textContent = "+ Přidat sem";
-			point.addEventListener("click", (event) => {
+			const wrap = document.createElement("div");
+			wrap.className = "builder-insert";
+			wrap.dataset.builderInsert = "";
+			wrap.dataset.afterId = afterId ? String(afterId) : "";
+
+			const fileList = document.createElement("div");
+			fileList.className = "builder-file-list builder-file-list--insert";
+			fileList.dataset.builderFileList = "";
+			fileList.dataset.createImageAfter = afterId ? String(afterId) : "";
+
+			const button = document.createElement("button");
+			button.type = "button";
+			button.className = "builder-insert__button";
+			button.textContent = "+ Přidat sem";
+			button.addEventListener("click", (event) => {
 				event.preventDefault();
 				event.stopPropagation();
 				closeDrawers();
 				addDrawer.hidden = false;
 				addDrawer.dataset.insertAfterId = afterId ? String(afterId) : "";
 			});
-			return point;
+
+			wrap.appendChild(fileList);
+			wrap.appendChild(button);
+			return wrap;
 		};
 
 		rootList.insertBefore(insertBefore(null), sections[0] || null);
@@ -717,6 +767,111 @@ function initBuilder(chrome) {
 			const block = section.querySelector(":scope > [data-builder-block]");
 			const afterId = block?.dataset.componentId || "";
 			section.after(insertBefore(afterId));
+		});
+	};
+
+	const applyMoveFileResult = (data, sourceBlock) => {
+		const sourceId = String(data.sourcePageComponentId || "");
+		const targetId = String(data.targetPageComponentId || "");
+
+		if (data.created && data.targetHtml) {
+			insertCreatedBlock(data.targetHtml, data.afterId != null ? String(data.afterId) : undefined);
+		} else if (data.targetHtml && targetId) {
+			const targetBlock = findBlockById(targetId);
+			if (targetBlock) {
+				replaceBlockHtml(targetBlock, data.targetHtml);
+			}
+		}
+
+		if (data.sourceHtml && sourceId) {
+			const source = findBlockById(sourceId) || sourceBlock;
+			if (source && sourceId !== targetId) {
+				replaceBlockHtml(source, data.sourceHtml);
+			} else if (source && sourceId === targetId && data.targetHtml) {
+				replaceBlockHtml(source, data.targetHtml);
+			}
+		}
+
+		initSortables();
+		renderInsertPoints();
+	};
+
+	const moveStorageFile = async ({ storageFileId, targetPageComponentId = null, createImage = false, afterId = "", position = 0, sourceBlock = null }) => {
+		if (!moveFileUrlBase || !storageFileId) {
+			return false;
+		}
+		beginSave();
+		try {
+			const formData = new FormData();
+			formData.append("formToken", token);
+			if (createImage) {
+				formData.append("createImage", "1");
+				formData.append("afterId", afterId === null || afterId === undefined ? "" : String(afterId));
+			} else if (targetPageComponentId) {
+				formData.append("targetPageComponentId", String(targetPageComponentId));
+				if (position > 0) {
+					formData.append("position", String(position));
+				}
+			} else {
+				throw new Error("missing target");
+			}
+			const response = await fetch(`${moveFileUrlBase}${storageFileId}/move`, {
+				method: "POST",
+				body: formData,
+				credentials: "same-origin",
+			});
+			if (!response.ok) {
+				throw new Error("move failed");
+			}
+			const data = await response.json();
+			if (createImage) {
+				data.afterId = afterId;
+			}
+			applyMoveFileResult(data, sourceBlock);
+			endSave(true);
+			return true;
+		} catch (error) {
+			endSave(false);
+			if (sourceBlock) {
+				await refreshBlock(sourceBlock).catch(() => null);
+			}
+			return false;
+		}
+	};
+
+	const handleFileListAdd = async (evt) => {
+		const item = evt.item;
+		const storageFileId = item?.dataset?.storageFileId;
+		const toList = evt.to;
+		const fromList = evt.from;
+		const sourceBlock = fromList?.closest?.("[data-builder-block]");
+		if (!storageFileId || !toList) {
+			return;
+		}
+
+		if (Object.prototype.hasOwnProperty.call(toList.dataset, "createImageAfter")) {
+			item.remove();
+			await moveStorageFile({
+				storageFileId,
+				createImage: true,
+				afterId: toList.dataset.createImageAfter || "",
+				sourceBlock,
+			});
+			return;
+		}
+
+		const targetBlock = toList.closest("[data-builder-block]");
+		if (!targetBlock) {
+			return;
+		}
+
+		const position = [...toList.querySelectorAll(".builder-file-item")].indexOf(item) + 1;
+		item.remove();
+		await moveStorageFile({
+			storageFileId,
+			targetPageComponentId: targetBlock.dataset.componentId,
+			position,
+			sourceBlock,
 		});
 	};
 
@@ -768,6 +923,27 @@ function initBuilder(chrome) {
 			});
 		});
 
+		block.querySelectorAll("[data-builder-caption]").forEach((input) => {
+			if (input.dataset.captionBound === "true") {
+				return;
+			}
+			input.dataset.captionBound = "true";
+			let timer = null;
+			const save = () => {
+				clearTimeout(timer);
+				timer = setTimeout(() => persistCaption(input), 500);
+			};
+			input.addEventListener("click", (event) => event.stopPropagation());
+			input.addEventListener("mousedown", (event) => event.stopPropagation());
+			input.addEventListener("pointerdown", (event) => event.stopPropagation());
+			input.addEventListener("keydown", (event) => event.stopPropagation());
+			input.addEventListener("input", save);
+			input.addEventListener("change", () => {
+				clearTimeout(timer);
+				persistCaption(input);
+			});
+		});
+
 		fileInput?.addEventListener("change", () => {
 			const files = [...(fileInput.files || [])];
 			fileInput.value = "";
@@ -794,7 +970,7 @@ function initBuilder(chrome) {
 
 	const persistGalleryOrder = async (block) => {
 		const url = block.dataset.reorderFilesUrl;
-		const gallery = block.querySelector(".builder-image-gallery");
+		const gallery = block.querySelector("[data-builder-file-list]");
 		if (!url || !gallery) {
 			return;
 		}
@@ -807,6 +983,48 @@ function initBuilder(chrome) {
 			const response = await fetch(url, { method: "POST", body: formData, credentials: "same-origin" });
 			if (!response.ok) {
 				throw new Error("reorder files failed");
+			}
+			endSave(true);
+		} catch (error) {
+			endSave(false);
+		}
+	};
+
+	const persistCaption = async (input) => {
+		const url = input.dataset.captionUrl;
+		if (!url) {
+			return;
+		}
+		beginSave();
+		try {
+			const formData = new FormData();
+			formData.append("formToken", token);
+			formData.append("caption", input.value.trim());
+			const response = await fetch(url, { method: "POST", body: formData, credentials: "same-origin" });
+			if (!response.ok) {
+				throw new Error("caption failed");
+			}
+			const figure = input.closest("figure");
+			const image = figure?.querySelector("img");
+			if (image) {
+				image.alt = input.value.trim();
+			}
+			const preview = input.closest("figure")?.querySelector(".builder-caption-preview");
+			const caption = input.value.trim();
+			if (preview) {
+				if (caption) {
+					preview.textContent = caption;
+					preview.hidden = false;
+				} else {
+					preview.remove();
+				}
+			} else if (caption) {
+				const figcaption = document.createElement("figcaption");
+				figcaption.className = input.closest(".builder-image-gallery__item")
+					? "page-gallery__caption builder-caption-preview"
+					: "page-image__caption builder-caption-preview";
+				figcaption.textContent = caption;
+				input.closest(".builder-caption")?.before(figcaption);
 			}
 			endSave(true);
 		} catch (error) {
@@ -827,6 +1045,7 @@ function initBuilder(chrome) {
 				onEnd: () => {
 					persistTree();
 					renderInsertPoints();
+					initSortables();
 				},
 			}));
 		}
@@ -841,12 +1060,27 @@ function initBuilder(chrome) {
 			}));
 		});
 
-		document.querySelectorAll(".builder-image-gallery").forEach((gallery) => {
-			const block = gallery.closest("[data-builder-block]");
-			sortables.push(Sortable.create(gallery, {
+		document.querySelectorAll("[data-builder-file-list]").forEach((list) => {
+			const block = list.closest("[data-builder-block]");
+			sortables.push(Sortable.create(list, {
 				animation: 150,
-				draggable: ".builder-image-gallery__item",
-				onEnd: () => persistGalleryOrder(block),
+				draggable: ".builder-file-item",
+				filter: "input, textarea, button, label, .builder-caption, .builder-insert__button",
+				preventOnFilter: false,
+				group: {
+					name: "builder-files",
+					pull: true,
+					put: true,
+				},
+				emptyInsertThreshold: 24,
+				onAdd: (evt) => {
+					handleFileListAdd(evt);
+				},
+				onUpdate: () => {
+					if (block?.dataset.kind === "IMAGE_GALLERY") {
+						persistGalleryOrder(block);
+					}
+				},
 			}));
 		});
 	};

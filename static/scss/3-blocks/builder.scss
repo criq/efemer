@@ -352,6 +352,82 @@ body.builder.builder--phone .builder-block__content--text {
 	z-index: 1100 !important;
 }
 
+.builder-caption {
+	display: grid;
+	gap: 0.25rem;
+	margin-top: 0.55rem;
+	font-family: Syne, sans-serif;
+}
+
+.builder-caption__label {
+	font-size: 0.7rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: rgba(40, 36, 32, 0.5);
+}
+
+.builder-caption__input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.45rem 0.55rem;
+	border: 1px solid rgba(40, 36, 32, 0.16);
+	border-radius: 0.35rem;
+	background: rgba(255, 255, 255, 0.92);
+	color: inherit;
+	font: inherit;
+	font-size: 0.85rem;
+}
+
+.builder-caption__input:focus {
+	outline: 2px solid rgba(90, 120, 90, 0.45);
+	outline-offset: 1px;
+}
+
+.builder-block:not(.is-selected) .builder-caption {
+	display: none;
+}
+
+.builder-block.is-selected .builder-caption-preview {
+	display: none;
+}
+
+.builder-file-list--insert {
+	min-height: 0;
+	margin-bottom: 0.35rem;
+	border: 1px dashed transparent;
+	border-radius: 0.4rem;
+	transition: border-color 0.15s ease, background 0.15s ease, min-height 0.15s ease;
+}
+
+.builder-file-list--insert.sortable-drag,
+.builder-insert:has(.sortable-ghost) .builder-file-list--insert,
+.builder-file-list--insert.sortable-chosen {
+	min-height: 3rem;
+}
+
+body.builder .builder-file-list--insert:not(:empty),
+.builder-insert.is-file-drop .builder-file-list--insert {
+	min-height: 3rem;
+	border-color: rgba(90, 120, 90, 0.55);
+	background: rgba(90, 120, 90, 0.08);
+}
+
+.builder-file-list--empty {
+	min-height: 4rem;
+}
+
+.builder-file-list__hint {
+	pointer-events: none;
+}
+
+.builder-file-item {
+	cursor: grab;
+}
+
+.builder-file-item:active {
+	cursor: grabbing;
+}
+
 .builder-image-gallery__item {
 	position: relative;
 }
@@ -424,31 +500,36 @@ body.builder.builder--phone .builder-block__content--text {
 }
 
 .builder-insert {
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	display: grid;
+	gap: 0.25rem;
 	width: 100%;
 	margin: 0.35rem 0;
-	padding: 0.35rem;
-	border: 1px dashed transparent;
-	border-radius: 0.4rem;
-	background: transparent;
-	color: rgba(40, 36, 32, 0.35);
-	cursor: pointer;
-	font: inherit;
-	font-size: 0.8rem;
 	opacity: 0;
-	transition: opacity 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+	transition: opacity 0.15s ease;
 }
 
 .builder-blocks:hover .builder-insert,
-.builder-insert:focus-visible {
+.builder-insert:focus-within,
+.builder-insert:has(.sortable-ghost) {
 	opacity: 1;
 }
 
-.builder-insert:hover {
-	border-color: rgba(40, 36, 32, 0.25);
-	color: rgba(40, 36, 32, 0.75);
+.builder-insert__button {
+	appearance: none;
+	width: 100%;
+	padding: 0.35rem 0.5rem;
+	border: 1px dashed rgba(40, 36, 32, 0.2);
+	border-radius: 0.4rem;
+	background: transparent;
+	color: rgba(40, 36, 32, 0.55);
+	cursor: pointer;
+	font: inherit;
+	font-size: 0.8rem;
+}
+
+.builder-insert__button:hover {
+	border-color: rgba(40, 36, 32, 0.35);
+	color: rgba(40, 36, 32, 0.8);
 }
 
 .builder-upload-progress {

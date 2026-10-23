@@ -1,17 +1,30 @@
 {% if pageComponent.getStorageFiles|length > 0 %}
-	<div class="page-gallery page-gallery--natural builder-image-gallery" style="{{ pageComponent.getGalleryStyleAttribute }}">
+	<div class="page-gallery page-gallery--natural builder-image-gallery builder-file-list" style="{{ pageComponent.getGalleryStyleAttribute }}" data-builder-file-list>
 		{% for storageFile in pageComponent.getStorageFiles %}
 			{% if storageFile.getImage %}
-				<figure class="page-gallery__item builder-image-gallery__item" data-storage-file-id="{{ storageFile.getId }}">
+				<figure class="page-gallery__item builder-image-gallery__item builder-file-item" data-storage-file-id="{{ storageFile.getId }}">
 					<img class="page-gallery__image" src="{{ storageFile.getImage.getImageVersion("GALLERY").getURL }}" alt="{{ storageFile.getCaption|default("") }}">
 					{% if storageFile.getCaption %}
-						<figcaption class="page-gallery__caption">{{ storageFile.getCaption }}</figcaption>
+						<figcaption class="page-gallery__caption builder-caption-preview">{{ storageFile.getCaption }}</figcaption>
 					{% endif %}
+					<label class="builder-caption">
+						<span class="builder-caption__label">Popisek</span>
+						<input
+							type="text"
+							class="builder-caption__input"
+							value="{{ storageFile.getCaption|default("") }}"
+							placeholder="Volitelný popisek"
+							data-builder-caption
+							data-caption-url="{{ url("admin.pages.updateStorageFile", { pageId: page.getId, pageComponentId: pageComponent.getId, storageFileId: storageFile.getId }) }}"
+						>
+					</label>
 					<button type="button" class="builder-image-gallery__remove" data-builder-remove-file data-delete-url="{{ url("admin.pages.deleteStorageFile", { pageId: page.getId, pageComponentId: pageComponent.getId, storageFileId: storageFile.getId }) }}" title="Odebrat fotku">{% include "Blocks/adminIcon.twig" with { name: "close", label: "Odebrat fotku" } %}</button>
 				</figure>
 			{% endif %}
 		{% endfor %}
 	</div>
 {% else %}
-	<p class="builder-block__empty">Zatím žádné fotky — přidejte je tlačítkem níže.</p>
+	<div class="builder-file-list builder-file-list--empty" data-builder-file-list>
+		<p class="builder-block__empty builder-file-list__hint">Přetáhněte sem fotky, nebo je přidejte tlačítkem níže.</p>
+	</div>
 {% endif %}

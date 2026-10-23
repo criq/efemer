@@ -19,6 +19,7 @@ class RouterConfig extends \Katu\Config\RouterConfig
 			"admin.pages.reorderStorageFiles" => new Route("/admin/pages/{pageId}/components/{pageComponentId}/storage-files/reorder", [\App\Controllers\Admin\Pages\ReorderStorageFiles::class, "getResponse"]),
 			"admin.pages.updateStorageFile" => new Route("/admin/pages/{pageId}/components/{pageComponentId}/storage-files/{storageFileId}", [\App\Controllers\Admin\Pages\UpdateStorageFile::class, "getResponse"]),
 			"admin.pages.deleteStorageFile" => new Route("/admin/pages/{pageId}/components/{pageComponentId}/storage-files/{storageFileId}/delete", [\App\Controllers\Admin\Pages\DeleteStorageFile::class, "getResponse"]),
+			"admin.pages.moveStorageFile" => new Route("/admin/pages/{pageId}/storage-files/{storageFileId}/move", [\App\Controllers\Admin\Pages\MoveStorageFile::class, "getResponse"]),
 			"admin.pages.viewPageComponent" => new Route("/admin/pages/{pageId}/components/{pageComponentId}", [\App\Controllers\Admin\Pages\ViewPageComponent::class, "getResponse"]),
 			"admin.pages.builder.value" => new Route("/admin/pages/{pageId}/builder/components/{pageComponentId}/value", [\App\Controllers\Admin\Pages\Builder\UpdateValue::class, "getResponse"]),
 			"admin.pages.builder.pageLinks" => new Route("/admin/pages/{pageId}/builder/components/{pageComponentId}/page-links", [\App\Controllers\Admin\Pages\Builder\UpdatePageLinks::class, "getResponse"]),

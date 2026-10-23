@@ -51,6 +51,8 @@
 			</div>
 		{% elseif kindCode == "IMAGE_GALLERY" %}
 			{% include "Admin/Pages/Builder/imageGallery.twig" with { pageComponent: pageComponent, page: page } %}
+		{% elseif kindCode == "IMAGE" %}
+			{% include "Admin/Pages/Builder/image.twig" with { pageComponent: pageComponent, page: page } %}
 		{% else %}
 			{% include "Pages/Components/view.twig" with { pageComponent: pageComponent } %}
 		{% endif %}

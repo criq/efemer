@@ -1,0 +1,25 @@
+{% set storageFile = pageComponent.getStorageFiles.getFirst %}
+
+<div class="builder-file-list" data-builder-file-list>
+	{% if storageFile and storageFile.getImage %}
+		<figure class="page-image builder-image builder-file-item" data-storage-file-id="{{ storageFile.getId }}">
+			<img class="page-image__img" src="{{ storageFile.getImage.getImageVersion("GALLERY").getURL }}" alt="{{ storageFile.getCaption|default("") }}">
+			{% if storageFile.getCaption %}
+				<figcaption class="page-image__caption builder-caption-preview">{{ storageFile.getCaption }}</figcaption>
+			{% endif %}
+			<label class="builder-caption">
+				<span class="builder-caption__label">Popisek</span>
+				<input
+					type="text"
+					class="builder-caption__input"
+					value="{{ storageFile.getCaption|default("") }}"
+					placeholder="Volitelný popisek pod fotkou"
+					data-builder-caption
+					data-caption-url="{{ url("admin.pages.updateStorageFile", { pageId: page.getId, pageComponentId: pageComponent.getId, storageFileId: storageFile.getId }) }}"
+				>
+			</label>
+		</figure>
+	{% else %}
+		<p class="builder-block__empty builder-file-list__hint">Přetáhněte sem fotku z galerie, nebo nahrajte tlačítkem níže.</p>
+	{% endif %}
+</div>
