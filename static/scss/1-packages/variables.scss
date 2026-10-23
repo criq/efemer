@@ -1,8 +1,18 @@
-$line-height: 160%;
+$line-height: 1.65;
 
-$font-serif: "Noticia Text", "Times New Roman", Times, serif;
-$color-text: #000;
-$color-muted: #333;
-$color-bg: #fff;
-$layout-max: 800px;
-$header-offset: 120px;
+$font-display: "Fraunces", "Times New Roman", Times, serif;
+$font-body: "Source Serif 4", "Georgia", serif;
+$font-ui: "Syne", "Helvetica Neue", sans-serif;
+
+// Soft garden mist — cool green-grey paper, not cream/terracotta
+$color-bg: #f2f4f0;
+$color-bg-deep: #e8ebe4;
+$color-ink: #1c211c;
+$color-muted: #5e675c;
+$color-faint: #8b9488;
+$color-line: rgba(28, 33, 28, 0.1);
+$color-accent: #6f7d68;
+
+$layout-max: 42rem;
+$layout-wide: 56rem;
+$header-pad: 1.25rem;

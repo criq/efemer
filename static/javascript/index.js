@@ -44,4 +44,15 @@ const initGallerySlideshows = () => {
 	});
 };
 
-document.addEventListener("DOMContentLoaded", initGallerySlideshows);
+const initReveals = () => {
+	const nodes = [...document.querySelectorAll("[data-reveal]")];
+
+	nodes.forEach((node, index) => {
+		node.style.setProperty("--reveal-delay", `${Math.min(index * 70, 420)}ms`);
+	});
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+	initGallerySlideshows();
+	initReveals();
+});

@@ -1,8 +1,11 @@
 html {
-	font-family: $font-serif;
-	font-size: .9em;
+	background: $color-bg;
+	color: $color-ink;
+	font-family: $font-body;
+	font-optical-sizing: auto;
+	font-size: clamp(16px, 1.05vw + 12px, 18px);
 	font-weight: 400;
 	line-height: $line-height;
-	background: $color-bg;
-	color: $color-text;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
 }

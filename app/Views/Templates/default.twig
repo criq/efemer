@@ -8,7 +8,7 @@
 
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noticia+Text:ital,wght@0,400;0,700;1,400;1,700&display=swap&subset=latin-ext">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,450;0,9..144,600;1,9..144,300;1,9..144,450&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=Syne:wght@400;500&display=swap">
 		<link rel="stylesheet" href="/css/main.css">
 
 	</head>
@@ -17,19 +17,16 @@
 		<div class="site">
 			<header class="site-header">
 				<div class="site-header__inner">
-					<div class="site-brand">
-						<p class="site-brand__logo">
-							<a href="{{ url("homepage.index") }}"><img src="/img/logo.png" alt="Efemér"></a>
-						</p>
-						<p class="site-brand__claim">květiny, vlastní zahrada, ekologické zemědělství, lokální pěstitelé, roční období, rituály a kulturní zvyky, městská divočina, výtvarný objekt, člověk, místo</p>
-					</div>
+					<a class="site-brand" href="{{ url("homepage.index") }}">
+						<img class="site-brand__logo" src="/img/logo.png" alt="Efemér">
+						<span class="site-brand__word">Efemér</span>
+					</a>
 					<nav class="site-nav" aria-label="Hlavní menu">
 						<ul>
 							<li><a href="{{ url("homepage.index") }}#denik">Deník</a></li>
 							<li><a href="{{ url("homepage.index") }}#principy">Principy</a></li>
 							<li><a href="{{ url("homepage.index") }}#o-me">Já</a></li>
 							<li><a href="{{ url("homepage.index") }}#nabizime">Pro vás</a></li>
-							<li><a href="https://www.facebook.com/pages/Ekologické-květinářství-Efemér/192499584220499" target="_blank" rel="noopener noreferrer">Facebook</a></li>
 						</ul>
 					</nav>
 				</div>
@@ -41,6 +38,17 @@
 					{% endblock body %}
 				</div>
 			</main>
+
+			<footer class="site-footer">
+				<p class="site-footer__claim">květiny · vlastní zahrada · roční období · městská divočina · místo</p>
+				<p class="site-footer__contact">
+					<a href="mailto:efemer.info@gmail.com">efemer.info@gmail.com</a>
+					<span aria-hidden="true">·</span>
+					<a href="tel:+420605938524">+420 605 938 524</a>
+					<span aria-hidden="true">·</span>
+					Brno
+				</p>
+			</footer>
 		</div>
 
 		<script src="/javascript/app.js"></script>

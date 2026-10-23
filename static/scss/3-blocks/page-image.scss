@@ -3,20 +3,28 @@
 }
 
 .page-image {
-	margin: 1rem 0;
+	margin: 0 0 1.5rem;
+	overflow: hidden;
 }
 
 .page-image__img {
-	border-radius: .25rem;
 	display: block;
 	height: auto;
 	max-width: 100%;
+	transition: transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
 	width: 100%;
+
+	.page-image:hover & {
+		transform: scale(1.015);
+	}
 }
 
 .page-image__caption {
-	color: #6f6a60;
-	font-size: .875rem;
-	margin-top: .375rem;
+	color: $color-faint;
+	font-family: $font-display;
+	font-size: .85rem;
+	font-style: italic;
+	font-weight: 300;
+	margin-top: .6rem;
 	text-align: center;
 }

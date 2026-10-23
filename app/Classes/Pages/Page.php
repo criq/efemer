@@ -70,9 +70,10 @@ class Page extends \Katu\Models\Model
 			return (string)\Katu\Tools\Routing\URL::getFor("homepage.index");
 		}
 
-		return (string)\Katu\Tools\Routing\URL::getFor("pages.view", [
-			"path" => Slugger::getRoutePath($publicPath),
-		]);
+		// Build path URL without encoding slashes (router {path:.+} expects raw segments).
+		$base = rtrim((string)\Katu\Tools\Routing\URL::getFor("homepage.index"), "/");
+
+		return $base . $publicPath;
 	}
 
 	public static function getHomepage(): ?Page
