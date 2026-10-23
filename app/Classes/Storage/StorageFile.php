@@ -16,7 +16,15 @@ class StorageFile extends \Katu\Models\Model
 
 	public static function createFromUpload(Upload $upload): StorageFile
 	{
-		$time = new Time;
+		return static::createFromContents(
+			$upload->getStream()->getContents(),
+			$upload->getFileName(),
+		);
+	}
+
+	public static function createFromContents(string $contents, string $fileName, ?Time $time = null): StorageFile
+	{
+		$time = $time ?: new Time;
 
 		$path = implode("/", [
 			$time->format("Y"),
@@ -24,15 +32,15 @@ class StorageFile extends \Katu\Models\Model
 			$time->format("d"),
 			\Katu\Tools\Random\Generator::getIdString(2),
 			\Katu\Tools\Random\Generator::getIdString(16),
-			$upload->getFileName(),
+			$fileName,
 		]);
 
-		$storageObject = \App\Classes\ThirdParty\Google\Cloud::getFilesBucket()->upload($upload->getStream()->getContents(), [
+		$storageObject = \App\Classes\ThirdParty\Google\Cloud::getFilesBucket()->upload($contents, [
 			"name" => $path,
 		]);
 
 		$object = new StorageFile;
-		$object->setTimeCreated(new Time);
+		$object->setTimeCreated($time);
 		$object->setURI($storageObject->gcsUri());
 		$object->persist();
 

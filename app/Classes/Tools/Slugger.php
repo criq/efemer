@@ -25,9 +25,21 @@ class Slugger
 			return self::HOMEPAGE_PATH;
 		}
 
-		$slug = \URLify::slug($input, 200, "-", "cs");
+		$segments = [];
 
-		return $slug !== "" ? "/" . $slug : "";
+		foreach (explode("/", $input) as $segment) {
+			$segment = trim($segment);
+			if ($segment === "") {
+				continue;
+			}
+
+			$slug = \URLify::slug($segment, 200, "-", "cs");
+			if ($slug !== "") {
+				$segments[] = $slug;
+			}
+		}
+
+		return count($segments) ? "/" . implode("/", $segments) : "";
 	}
 
 	public static function getRoutePath(?string $path): string

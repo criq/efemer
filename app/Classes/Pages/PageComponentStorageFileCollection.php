@@ -10,8 +10,15 @@ class PageComponentStorageFileCollection extends \ArrayObject
 {
 	public static function createFromUpload(PageComponent $pageComponent, Upload $upload, int $position): PageComponentStorageFile
 	{
-		$storageFile = StorageFile::createFromUpload($upload);
+		return static::createFromStorageFile(
+			$pageComponent,
+			StorageFile::createFromUpload($upload),
+			$position,
+		);
+	}
 
+	public static function createFromStorageFile(PageComponent $pageComponent, StorageFile $storageFile, int $position): PageComponentStorageFile
+	{
 		$link = new PageComponentStorageFile;
 		$link->setPageComponent($pageComponent);
 		$link->setStorageFile($storageFile);

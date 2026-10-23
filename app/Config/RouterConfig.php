@@ -28,7 +28,7 @@ class RouterConfig extends \Katu\Config\RouterConfig
 			"admin.storageFiles.index" => new Route("/admin/storage-files", [\App\Controllers\Admin\StorageFiles\Index::class, "getResponse"]),
 			"homepage.index" => new Route("/", [\App\Controllers\Pages\View::class, "getHomepage"]),
 			"images.getVersion" => new Route("/images/{imagePackage}/{versionCode}.{extension}", [\App\Controllers\Images::class, "getVersion"]),
-			"pages.view" => new Route("/{path}", [\App\Controllers\Pages\View::class, "getByPath"]),
+			"pages.view" => new Route("/{path:.+}", [\App\Controllers\Pages\View::class, "getByPath"]),
 		]);
 	}
 }

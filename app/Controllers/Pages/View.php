@@ -16,6 +16,8 @@ class View extends \Katu\Controllers\Controller
 
 	public function getByPath(ServerRequestInterface $request, ResponseInterface $response, string $path)
 	{
+		$path = preg_replace("/\.html?$/i", "", $path) ?? $path;
+
 		return $this->render($request, $response, Page::getByPath($path));
 	}
 
