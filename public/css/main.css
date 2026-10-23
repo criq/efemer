@@ -9952,7 +9952,8 @@ body.builder.builder--phone .site {
   border-left: 1px solid rgba(40, 36, 32, 0.14);
   border-right: 1px solid rgba(40, 36, 32, 0.14);
   min-height: calc(100vh - 3.5rem);
-  overflow-x: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
   background: #f2f4f0;
   box-shadow: 0 0 0 12px rgba(40, 36, 32, 0.05);
 }
@@ -10188,6 +10189,7 @@ body.builder.builder--phone .builder-block__content--text {
 .builder-block {
   position: relative;
   min-width: 0;
+  overflow: visible;
   outline: 1px solid transparent;
   transition: outline-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -10269,12 +10271,14 @@ body.builder.builder--phone .builder-block__content--text {
 
 .builder-block__toolbar {
   display: none;
+  position: relative;
+  z-index: 20;
   margin: 0 0 0.75rem;
   padding: 0.15rem;
   background: rgba(255, 255, 255, 0.98);
   border: 1px solid rgba(40, 36, 32, 0.12);
   border-radius: 0.4rem;
-  overflow-x: auto;
+  overflow: visible;
 }
 
 .builder-block.is-selected > .builder-block__toolbar:not(:empty) {
@@ -10283,13 +10287,42 @@ body.builder.builder--phone .builder-block__content--text {
 
 .builder-block__toolbar .tox-tinymce-inline {
   position: static !important;
+  overflow: visible !important;
 }
 
-.builder-block__toolbar .tox-editor-header {
+.builder-block__toolbar .tox-editor-header,
+.builder-block__toolbar .tox-toolbar-overlord,
+.builder-block__toolbar .tox-toolbar__primary,
+.builder-block__toolbar .tox-toolbar__overflow {
   position: static !important;
+  overflow: visible !important;
   box-shadow: none !important;
   border: 0 !important;
   background: transparent !important;
+  flex-wrap: wrap !important;
+}
+
+.builder-block__toolbar .tox-menu,
+.builder-block__toolbar .tox-collection,
+.builder-block__toolbar .tox-selected-menu {
+  z-index: 1300 !important;
+}
+
+.tox .tox-collection--list .tox-collection__item {
+  padding: 0.7rem 0.9rem !important;
+  min-height: 2.5rem;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+
+.tox .tox-collection--list .tox-collection__item-label {
+  line-height: 1.4 !important;
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+}
+
+.tox .tox-collection--list .tox-collection__group {
+  padding: 0.35rem 0 !important;
 }
 
 .builder-block__content--text {
@@ -10417,13 +10450,46 @@ body.builder .builder-file-list--insert:not(:empty),
   overflow: auto;
 }
 
+.builder-page-gallery__item {
+  min-width: 0;
+  cursor: grab;
+}
+
+.builder-page-gallery__item:active {
+  cursor: grabbing;
+}
+
+.builder-page-gallery__item .page-page-gallery__item {
+  height: 100%;
+}
+
 .builder-pages-row {
   display: grid;
-  grid-gap: 0.3rem;
-  gap: 0.3rem;
+  grid-template-columns: auto 1fr;
+  grid-gap: 0.3rem 0.55rem;
+  gap: 0.3rem 0.55rem;
   padding: 0.65rem;
   border: 1px solid rgba(40, 36, 32, 0.12);
   border-radius: 0.4rem;
+  align-items: start;
+}
+
+.builder-pages-row__drag {
+  grid-row: 1/span 4;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  border: 0;
+  background: transparent;
+  color: rgba(40, 36, 32, 0.45);
+  cursor: grab;
+  padding: 0.15rem 0.1rem;
+  font: inherit;
+  line-height: 1;
+}
+
+.builder-pages-row__drag:active {
+  cursor: grabbing;
 }
 
 .builder-pages-row__title {

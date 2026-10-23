@@ -1,0 +1,14 @@
+{% if pageComponent.getPageComponentPages|length > 0 %}
+	<div class="page-page-gallery builder-page-gallery" style="{{ pageComponent.getGalleryStyleAttribute }}" data-builder-page-gallery>
+		{% for entry in pageComponent.getPageComponentPages %}
+			<div class="builder-page-gallery__item" data-linked-page-id="{{ entry.getPage.getId }}">
+				{% include entry.getTemplate.getViewPath with {
+					entry: entry,
+					linkedPage: entry.getPage,
+				} %}
+			</div>
+		{% endfor %}
+	</div>
+{% else %}
+	<p class="builder-block__empty">Zatím žádné odkazy — upravte je tlačítkem níže.</p>
+{% endif %}

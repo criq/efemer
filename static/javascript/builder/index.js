@@ -38,6 +38,7 @@ function initBuilder(chrome) {
 	const columnsMaxInput = chrome.querySelector("[data-builder-columns-max]");
 	const candidatePages = JSON.parse(chrome.dataset.candidatePages || "[]");
 	const pageGalleryTemplates = JSON.parse(chrome.dataset.pageGalleryTemplates || "[]");
+	let pagesListSortable = null;
 	let selected = null;
 	let activeEditor = null;
 	let pendingSaves = 0;
@@ -166,6 +167,7 @@ function initBuilder(chrome) {
 			block_formats: "Odstavec=p; Nadpis 1=h1; Nadpis 2=h2; Nadpis 3=h3",
 			fixed_toolbar_container_target: toolbar || undefined,
 			toolbar_persist: true,
+			ui_mode: "split",
 			valid_elements: "p,br,strong/b,em/i,u,s,a[href|title|target|rel],ul,ol,li,h1[id],h2[id],h3[id],h4[id],blockquote,hr",
 			paste_as_text: false,
 			setup: (editor) => {
@@ -552,9 +554,45 @@ function initBuilder(chrome) {
 		}
 	};
 
+	const collectLinkedPagesFromDom = (block) => {
+		const gallery = block.querySelector("[data-builder-page-gallery]");
+		if (!gallery) {
+			return readLinkedPages(block);
+		}
+		const byId = new Map(readLinkedPages(block).map((entry) => [Number(entry.pageId), entry]));
+		return [...gallery.querySelectorAll("[data-linked-page-id]")]
+			.map((node) => byId.get(Number(node.dataset.linkedPageId)))
+			.filter(Boolean);
+	};
+
+	const collectLinkedPagesFromDrawer = () => {
+		if (!pagesList || !pagesEditingBlock) {
+			return [];
+		}
+		const byId = new Map(readLinkedPages(pagesEditingBlock).map((entry) => [Number(entry.pageId), entry]));
+		return [...pagesList.querySelectorAll(".builder-pages-row[data-page-id]")]
+			.map((row) => {
+				const entry = byId.get(Number(row.dataset.pageId));
+				if (!entry) {
+					return null;
+				}
+				const template = row.querySelector(".builder-pages-row__template");
+				if (template) {
+					entry.template = template.value;
+				}
+				return entry;
+			})
+			.filter(Boolean);
+	};
+
 	const renderPagesDrawer = (block) => {
 		if (!pagesDrawer || !pagesList || !pagesAddSelect) {
 			return;
+		}
+
+		if (pagesListSortable) {
+			pagesListSortable.destroy();
+			pagesListSortable = null;
 		}
 
 		const linked = readLinkedPages(block);
@@ -567,9 +605,17 @@ function initBuilder(chrome) {
 			pagesList.appendChild(empty);
 		}
 
-		linked.forEach((entry, index) => {
+		linked.forEach((entry) => {
 			const row = document.createElement("div");
 			row.className = "builder-pages-row";
+			row.dataset.pageId = String(entry.pageId);
+
+			const drag = document.createElement("button");
+			drag.type = "button";
+			drag.className = "builder-pages-row__drag";
+			drag.dataset.builderPagesDrag = "";
+			drag.title = "Přesunout";
+			drag.textContent = "⋮⋮";
 
 			const title = document.createElement("div");
 			title.className = "builder-pages-row__title";
@@ -591,9 +637,9 @@ function initBuilder(chrome) {
 				template.appendChild(opt);
 			});
 			template.addEventListener("change", () => {
-				linked[index].template = template.value;
-				block.dataset.linkedPages = JSON.stringify(linked);
-				persistPageLinks(block, linked);
+				const next = collectLinkedPagesFromDrawer();
+				block.dataset.linkedPages = JSON.stringify(next);
+				persistPageLinks(block, next);
 			});
 
 			const remove = document.createElement("button");
@@ -601,17 +647,31 @@ function initBuilder(chrome) {
 			remove.className = "builder-pages-row__remove";
 			remove.textContent = "Odebrat";
 			remove.addEventListener("click", () => {
-				const next = linked.filter((_, i) => i !== index);
+				const next = collectLinkedPagesFromDrawer().filter((item) => Number(item.pageId) !== Number(entry.pageId));
 				block.dataset.linkedPages = JSON.stringify(next);
 				persistPageLinks(block, next).then(() => renderPagesDrawer(block));
 			});
 
+			row.appendChild(drag);
 			row.appendChild(title);
 			row.appendChild(path);
 			row.appendChild(template);
 			row.appendChild(remove);
 			pagesList.appendChild(row);
 		});
+
+		if (linked.length) {
+			pagesListSortable = Sortable.create(pagesList, {
+				animation: 150,
+				handle: "[data-builder-pages-drag]",
+				draggable: ".builder-pages-row",
+				onEnd: () => {
+					const next = collectLinkedPagesFromDrawer();
+					block.dataset.linkedPages = JSON.stringify(next);
+					persistPageLinks(block, next);
+				},
+			});
+		}
 
 		const linkedIds = new Set(linked.map((entry) => Number(entry.pageId)));
 		pagesAddSelect.innerHTML = '<option value="">— vyberte stránku —</option>';
@@ -1080,6 +1140,19 @@ function initBuilder(chrome) {
 					if (block?.dataset.kind === "IMAGE_GALLERY") {
 						persistGalleryOrder(block);
 					}
+				},
+			}));
+		});
+
+		document.querySelectorAll("[data-builder-page-gallery]").forEach((gallery) => {
+			const block = gallery.closest("[data-builder-block]");
+			sortables.push(Sortable.create(gallery, {
+				animation: 150,
+				draggable: ".builder-page-gallery__item",
+				onEnd: () => {
+					const next = collectLinkedPagesFromDom(block);
+					block.dataset.linkedPages = JSON.stringify(next);
+					persistPageLinks(block, next);
 				},
 			}));
 		});
