@@ -13,7 +13,7 @@ class KindCollection extends \ArrayObject
 			new \App\Classes\Pages\Components\Kinds\ImageKind,
 			new \App\Classes\Pages\Components\Kinds\ImageGalleryKind,
 			new \App\Classes\Pages\Components\Kinds\PageGalleryKind,
-			new \App\Classes\Pages\Components\Kinds\GalleryKind,
+			new \App\Classes\Pages\Components\Kinds\ColumnsKind,
 		]);
 	}
 

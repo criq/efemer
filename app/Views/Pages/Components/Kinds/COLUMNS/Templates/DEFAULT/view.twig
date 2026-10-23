@@ -1,0 +1,11 @@
+{% if pageComponent.getChildComponents|length > 0 %}
+	<div class="page-component-columns" style="{{ pageComponent.getGalleryStyleAttribute }}">
+		{% for child in pageComponent.getChildComponents %}
+			<div class="page-component-columns__item">
+				<div class="page-component">
+					{% include "Pages/Components/view.twig" with { pageComponent: child } %}
+				</div>
+			</div>
+		{% endfor %}
+	</div>
+{% endif %}

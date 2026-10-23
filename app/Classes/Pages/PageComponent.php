@@ -6,7 +6,6 @@ use App\Classes\Pages\Components\Kind;
 use App\Classes\Pages\Components\KindCollection;
 use App\Classes\Pages\Components\Templates\Template;
 use App\Classes\Pages\Components\Templates\TemplateCollection;
-use App\Classes\Pages\PageComponentStorageFile;
 use Katu\Tools\Calendar\Time;
 use Katu\Tools\Strings\Code;
 
@@ -14,12 +13,14 @@ class PageComponent extends \Katu\Models\Model
 {
 	const TABLE = "page_components";
 
-	public const GALLERY_KINDS = ["IMAGE_GALLERY", "PAGE_GALLERY", "GALLERY"];
+	public const LAYOUT_KINDS = ["COLUMNS"];
+	public const GALLERY_PROPERTY_KINDS = ["IMAGE_GALLERY", "PAGE_GALLERY", "COLUMNS"];
 
 	public int|string|null $id = null;
 	public ?string $kind = null;
 	public int $position = 0;
 	public int|string|null $pageId = null;
+	public int|string|null $parentId = null;
 	public Time|string|null $timeCreated = null;
 	public ?string $value = null;
 	public ?string $template = null;
@@ -41,6 +42,32 @@ class PageComponent extends \Katu\Models\Model
 	public function getPage(): Page
 	{
 		return Page::get($this->pageId);
+	}
+
+	public function setParent(?PageComponent $parent): PageComponent
+	{
+		$this->parentId = $parent ? $parent->getId() : null;
+
+		return $this;
+	}
+
+	public function getParentId(): ?int
+	{
+		return $this->parentId !== null ? (int)$this->parentId : null;
+	}
+
+	public function getParent(): ?PageComponent
+	{
+		if ($this->parentId === null) {
+			return null;
+		}
+
+		return static::get($this->parentId);
+	}
+
+	public function isRoot(): bool
+	{
+		return $this->parentId === null;
 	}
 
 	public function setKind(Kind $kind): PageComponent
@@ -137,7 +164,12 @@ class PageComponent extends \Katu\Models\Model
 
 	public function isGallery(): bool
 	{
-		return in_array($this->kind, self::GALLERY_KINDS, true);
+		return in_array($this->kind, self::GALLERY_PROPERTY_KINDS, true);
+	}
+
+	public function isLayout(): bool
+	{
+		return in_array($this->kind, self::LAYOUT_KINDS, true);
 	}
 
 	public function getGalleryProperties(): GalleryProperties
@@ -161,66 +193,41 @@ class PageComponent extends \Katu\Models\Model
 		return $this->getGalleryProperties()->getStyleAttribute();
 	}
 
-	public function isLayoutGallery(): bool
+	public function getChildComponents(): PageComponentCollection
 	{
-		return $this->kind === "GALLERY";
-	}
-
-	public function getGalleryChildItems(): PageComponentGalleryItemCollection
-	{
-		$items = PageComponentGalleryItem::getBy([
-			"galleryPageComponentId" => $this->getId(),
+		$children = static::getBy([
+			"parentId" => $this->getId(),
 		])->getItems();
 
-		usort($items, function (PageComponentGalleryItem $a, PageComponentGalleryItem $b) {
+		usort($children, function (PageComponent $a, PageComponent $b) {
 			return $a->getPosition() <=> $b->getPosition();
 		});
 
-		return new PageComponentGalleryItemCollection($items);
+		return new PageComponentCollection($children);
 	}
 
-	public function getGalleryChildComponents(): PageComponentCollection
+	public function reorderChildComponents(array $orderedIds): void
 	{
-		return $this->getGalleryChildItems()->getPageComponents();
-	}
+		$children = $this->getChildComponents()->getArrayCopy();
+		$childrenById = [];
 
-	public function getAssignableGalleryChildComponents(): PageComponentCollection
-	{
-		$page = $this->getPage();
-		$assignedElsewhere = [];
+		foreach ($children as $child) {
+			$childrenById[(int)$child->getId()] = $child;
+		}
 
-		foreach ($page->getPageComponents() as $pageComponent) {
-			if (!$pageComponent->isLayoutGallery() || (int)$pageComponent->getId() === (int)$this->getId()) {
-				continue;
-			}
+		if (count($orderedIds) !== count($childrenById)) {
+			return;
+		}
 
-			foreach ($pageComponent->getGalleryChildItems() as $item) {
-				$assignedElsewhere[(int)$item->childPageComponentId] = true;
+		foreach ($orderedIds as $id) {
+			if (!isset($childrenById[(int)$id])) {
+				return;
 			}
 		}
 
-		$currentChildIds = [];
-		foreach ($this->getGalleryChildItems() as $item) {
-			$currentChildIds[(int)$item->childPageComponentId] = true;
+		foreach ($orderedIds as $position => $id) {
+			$childrenById[(int)$id]->setPosition($position + 1)->persist();
 		}
-
-		$candidates = [];
-
-		foreach ($page->getPageComponents() as $pageComponent) {
-			$id = (int)$pageComponent->getId();
-
-			if ($id === (int)$this->getId() || $pageComponent->isLayoutGallery()) {
-				continue;
-			}
-
-			if (isset($assignedElsewhere[$id]) && !isset($currentChildIds[$id])) {
-				continue;
-			}
-
-			$candidates[] = $pageComponent;
-		}
-
-		return new PageComponentCollection($candidates);
 	}
 
 	public function getStorageFiles(): PageComponentStorageFileCollection
@@ -276,5 +283,22 @@ class PageComponent extends \Katu\Models\Model
 	public function getLinkedPages(): PageCollection
 	{
 		return $this->getPageComponentPages()->getPages();
+	}
+
+	public function delete(): bool
+	{
+		foreach ($this->getChildComponents() as $child) {
+			$child->delete();
+		}
+
+		foreach ($this->getStorageFiles() as $link) {
+			$link->delete();
+		}
+
+		foreach ($this->getPageComponentPages() as $pageComponentPage) {
+			$pageComponentPage->delete();
+		}
+
+		return parent::delete();
 	}
 }

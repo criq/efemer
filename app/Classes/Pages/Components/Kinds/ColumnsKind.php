@@ -3,25 +3,24 @@
 namespace App\Classes\Pages\Components\Kinds;
 
 use App\Classes\Pages\Components\Kind;
-use App\Classes\Pages\Components\Templates\Gallery\DefaultTemplate;
+use App\Classes\Pages\Components\Templates\Columns\DefaultTemplate;
 use App\Classes\Pages\Components\Templates\TemplateCollection;
 use App\Classes\Pages\GalleryProperties;
 use App\Classes\Pages\PageComponent;
-use App\Classes\Pages\PageComponentGalleryItemCollection;
 use Katu\Tools\Strings\Code;
 use Psr\Http\Message\ServerRequestInterface;
 use Katu\Tools\Validation\Validation;
 
-class GalleryKind extends Kind
+class ColumnsKind extends Kind
 {
 	public static function getCode(): Code
 	{
-		return new Code("GALLERY");
+		return new Code("COLUMNS");
 	}
 
 	public static function getTitle(): string
 	{
-		return "Galerie";
+		return "Sloupce";
 	}
 
 	public static function getTemplates(): TemplateCollection
@@ -50,7 +49,7 @@ class GalleryKind extends Kind
 		$pageComponent->setGalleryProperties($response["gallery"]);
 		static::applyTemplateFromResponse($pageComponent, $response);
 		$pageComponent->persist();
-		PageComponentGalleryItemCollection::syncFromComponentIds($pageComponent, $response["childComponentIds"]);
+		$pageComponent->reorderChildComponents($response["childComponentIds"]);
 
 		return $pageComponent;
 	}

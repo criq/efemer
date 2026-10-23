@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Classes\Pages\Components\Templates\Gallery;
+namespace App\Classes\Pages\Components\Templates\Columns;
 
 use App\Classes\Pages\Components\Templates\Template;
 use Katu\Tools\Strings\Code;
@@ -9,7 +9,7 @@ class DefaultTemplate extends Template
 {
 	public static function getKindCode(): Code
 	{
-		return new Code("GALLERY");
+		return new Code("COLUMNS");
 	}
 
 	public static function getCode(): Code
@@ -19,6 +19,6 @@ class DefaultTemplate extends Template
 
 	public static function getTitle(): string
 	{
-		return "Galerie součástí";
+		return "Sloupce";
 	}
 }

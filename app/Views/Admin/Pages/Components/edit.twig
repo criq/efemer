@@ -12,7 +12,7 @@
 			</div>
 		</div>
 
-		{% if pageComponent.getKind.getCode.getConstantFormat in ["TEXT", "PAGE_GALLERY", "IMAGE_GALLERY", "GALLERY"] %}
+		{% if pageComponent.getKind.getCode.getConstantFormat in ["TEXT", "PAGE_GALLERY", "IMAGE_GALLERY", "COLUMNS"] %}
 			<form class="admin-form" action="" method="POST">
 				{% include "Blocks/formHeader.twig" %}
 

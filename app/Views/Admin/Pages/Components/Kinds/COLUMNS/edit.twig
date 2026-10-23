@@ -1,0 +1,103 @@
+{% include "Blocks/adminGalleryProperties.twig" %}
+
+<input type="hidden" name="values[{{ pageComponent.getId }}][componentOrder]" id="componentOrder" value="{% for child in pageComponent.getChildComponents %}{{ child.getId }}{% if not loop.last %},{% endif %}{% endfor %}">
+
+<div class="admin-field">
+	<span class="admin-field__label">Součásti ve sloupcích</span>
+	{% if pageComponent.getChildComponents|length > 0 %}
+		<table class="admin-table">
+			<thead>
+				<tr>
+					<th class="admin-table__handle" aria-label="Pořadí"></th>
+					<th>Typ</th>
+					<th class="admin-table__actions">Akce</th>
+				</tr>
+			</thead>
+			<tbody class="admin-sortable" data-component-sortable>
+				{% for child in pageComponent.getChildComponents %}
+					<tr data-component-id="{{ child.getId }}">
+						<td class="admin-table__handle" draggable="true">{% include "Blocks/adminIcon.twig" with { name: "drag_indicator", label: "Přesunout" } %}</td>
+						<td>
+							<a href="{{ url("admin.pages.editPageComponent", { pageId: pageComponent.getPage.getId, pageComponentId: child.getId }) }}">{{ child.getKind.getTitle }}</a>
+						</td>
+						<td class="admin-table__actions">
+							<div class="admin-page__actions">
+								<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.editPageComponent", { pageId: pageComponent.getPage.getId, pageComponentId: child.getId }) }}">{% include "Blocks/adminIcon.twig" with { name: "edit" } %} Upravit</a>
+								<a class="admin-button admin-button--danger admin-button--ghost" href="{{ url("admin.pages.deletePageComponent", { pageId: pageComponent.getPage.getId, pageComponentId: child.getId }) }}" data-confirm="Opravdu chcete smazat součást „{{ child.getKind.getTitle }}"?">{% include "Blocks/adminIcon.twig" with { name: "delete" } %} Smazat</a>
+							</div>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<p>Zatím nejsou žádné součásti.</p>
+	{% endif %}
+</div>
+
+<div class="admin-field">
+	<span class="admin-field__label">Přidat součást</span>
+	<ul class="admin-kind-list">
+		{% for kind in childKinds %}
+			<li>
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.createPageComponent", { pageId: pageComponent.getPage.getId, kindCode: kind.getCode }) }}?parentId={{ pageComponent.getId }}">{% include "Blocks/adminIcon.twig" with { name: kind.getCode.getConstantFormat == "TEXT" ? "article" : (kind.getCode.getConstantFormat == "IMAGE_GALLERY" ? "photo_library" : (kind.getCode.getConstantFormat == "PAGE_GALLERY" ? "library_books" : (kind.getCode.getConstantFormat == "COLUMNS" ? "view_column" : "image"))) } %} {{ kind.getTitle }}</a>
+			</li>
+		{% endfor %}
+	</ul>
+</div>
+
+<script>
+	(() => {
+		const orderInput = document.getElementById("componentOrder");
+		const sortableBody = document.querySelector("[data-component-sortable]");
+		let draggedRow = null;
+
+		if (!sortableBody) {
+			return;
+		}
+
+		const updateOrder = () => {
+			const ids = [...sortableBody.querySelectorAll("tr[data-component-id]")].map((row) => row.dataset.componentId);
+			orderInput.value = ids.join(",");
+		};
+
+		sortableBody.querySelectorAll("tr[data-component-id]").forEach((row) => {
+			const handle = row.querySelector(".admin-table__handle");
+
+			handle.addEventListener("dragstart", (event) => {
+				draggedRow = row;
+				row.classList.add("is-dragging");
+				event.dataTransfer.effectAllowed = "move";
+			});
+
+			handle.addEventListener("dragend", () => {
+				row.classList.remove("is-dragging");
+				draggedRow = null;
+				updateOrder();
+			});
+
+			row.addEventListener("dragover", (event) => {
+				event.preventDefault();
+
+				if (!draggedRow || draggedRow === row) {
+					return;
+				}
+
+				const rows = [...sortableBody.querySelectorAll("tr[data-component-id]:not(.is-dragging)")];
+				const nextRow = rows.find((candidate) => {
+					const rect = candidate.getBoundingClientRect();
+
+					return event.clientY <= rect.top + rect.height / 2;
+				});
+
+				if (nextRow) {
+					sortableBody.insertBefore(draggedRow, nextRow);
+				} else {
+					sortableBody.appendChild(draggedRow);
+				}
+			});
+		});
+
+		updateOrder();
+	})();
+</script>

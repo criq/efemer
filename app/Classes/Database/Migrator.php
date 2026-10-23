@@ -6,6 +6,7 @@ use App\Classes\Database\Migrations\AddPageComponentPageTemplate;
 use App\Classes\Database\Migrations\AddPageComponentTemplate;
 use App\Classes\Database\Migrations\AddPagePath;
 use App\Classes\Database\Migrations\AddStorageFileCaption;
+use App\Classes\Database\Migrations\ComponentTreeParentId;
 use App\Classes\Database\Migrations\PageComponentStorageFilesSchema;
 use App\Classes\Database\Migrations\EnsurePagePaths;
 use App\Classes\Database\Migrations\NormalizePagePaths;
@@ -69,6 +70,7 @@ class Migrator
 			new AddPageComponentPageTemplate,
 			new AddPageComponentTemplate,
 			new RenameImageGalleryGridTemplate,
+			new ComponentTreeParentId,
 		];
 	}
 

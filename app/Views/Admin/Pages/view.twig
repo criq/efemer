@@ -47,7 +47,7 @@
 							</tr>
 						</thead>
 						<tbody class="admin-sortable" data-sortable>
-							{% for pageComponent in page.getPageComponents %}
+							{% for pageComponent in page.getRootPageComponents %}
 								<tr data-component-id="{{ pageComponent.getId }}">
 									<td class="admin-table__handle" draggable="true">{% include "Blocks/adminIcon.twig" with { name: "drag_indicator", label: "Přesunout" } %}</td>
 									<td class="admin-table__id">
@@ -75,7 +75,7 @@
 						</tbody>
 					</table>
 				</div>
-				<input type="hidden" name="componentOrder" id="componentOrder" value="{% for pageComponent in page.getPageComponents %}{{ pageComponent.getId }}{% if not loop.last %},{% endif %}{% endfor %}">
+				<input type="hidden" name="componentOrder" id="componentOrder" value="{% for pageComponent in page.getRootPageComponents %}{{ pageComponent.getId }}{% if not loop.last %},{% endif %}{% endfor %}">
 			</section>
 
 			<section class="admin-section">
@@ -83,7 +83,7 @@
 				<ul class="admin-kind-list">
 					{% for kind in kinds %}
 						<li>
-							<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.createPageComponent", { pageId: page.getId, kindCode: kind.getCode }) }}">{% include "Blocks/adminIcon.twig" with { name: kind.getCode == "TEXT" ? "article" : (kind.getCode == "IMAGE_GALLERY" ? "photo_library" : (kind.getCode == "PAGE_GALLERY" ? "library_books" : (kind.getCode == "GALLERY" ? "dashboard" : "image"))) } %} {{ kind.getTitle }}</a>
+							<a class="admin-button admin-button--ghost" href="{{ url("admin.pages.createPageComponent", { pageId: page.getId, kindCode: kind.getCode }) }}">{% include "Blocks/adminIcon.twig" with { name: kind.getCode.getConstantFormat == "TEXT" ? "article" : (kind.getCode.getConstantFormat == "IMAGE_GALLERY" ? "photo_library" : (kind.getCode.getConstantFormat == "PAGE_GALLERY" ? "library_books" : (kind.getCode.getConstantFormat == "COLUMNS" ? "view_column" : "image"))) } %} {{ kind.getTitle }}</a>
 						</li>
 					{% endfor %}
 				</ul>

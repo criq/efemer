@@ -105,23 +105,24 @@ class Page extends \Katu\Models\Model
 
 	public function getRootPageComponents(): PageComponentCollection
 	{
-		$assignedChildIds = array_flip(PageComponentGalleryItemCollection::getAssignedChildIdsForPage($this));
 		$rootComponents = [];
 
 		foreach ($this->getPageComponents() as $pageComponent) {
-			if (isset($assignedChildIds[(int)$pageComponent->getId()])) {
-				continue;
+			if ($pageComponent->isRoot()) {
+				$rootComponents[] = $pageComponent;
 			}
-
-			$rootComponents[] = $pageComponent;
 		}
+
+		usort($rootComponents, function (PageComponent $a, PageComponent $b) {
+			return $a->getPosition() <=> $b->getPosition();
+		});
 
 		return new PageComponentCollection($rootComponents);
 	}
 
 	public function reorderPageComponents(array $orderedIds): void
 	{
-		$components = $this->getPageComponents()->getArrayCopy();
+		$components = $this->getRootPageComponents()->getArrayCopy();
 		$componentsById = [];
 
 		foreach ($components as $component) {
