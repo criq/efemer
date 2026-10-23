@@ -6,6 +6,13 @@ class Sanitizer
 {
 	private const ALLOWED_TAGS = "<p><br><strong><b><em><i><u><s><a><ul><ol><li><h1><h2><h3><h4><blockquote><hr>";
 
+	private const ALLOWED_CLASSES = [
+		"text-eyebrow",
+		"text-lead",
+		"text-prose",
+		"text-statement",
+	];
+
 	public static function clean(?string $html): string
 	{
 		$html = trim((string)$html);
@@ -51,7 +58,8 @@ class Sanitizer
 			$tag = strtolower($node->tagName);
 			$allowed = match ($tag) {
 				"a" => ["href", "title", "target", "rel"],
-				"h1", "h2", "h3", "h4" => ["id"],
+				"h1", "h2", "h3", "h4" => ["id", "class"],
+				"p" => ["class"],
 				default => [],
 			};
 
@@ -65,6 +73,18 @@ class Sanitizer
 
 				if ($name === "href" && preg_match("/^\s*javascript:/i", $attribute->value)) {
 					$remove[] = $attribute->name;
+				}
+
+				if ($name === "class") {
+					$kept = array_values(array_filter(
+						preg_split("/\s+/", trim($attribute->value)) ?: [],
+						fn (string $class): bool => in_array($class, self::ALLOWED_CLASSES, true),
+					));
+					if ($kept) {
+						$node->setAttribute("class", implode(" ", $kept));
+					} else {
+						$remove[] = $attribute->name;
+					}
 				}
 			}
 

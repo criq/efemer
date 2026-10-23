@@ -183,9 +183,9 @@ class EfemerCzImporter
 
 		$hero = $this->createComponent($page, new TextKind, $position++, null);
 		$hero->setValue(
-			"<p>ekologické květinářství</p>\n"
+			"<p class=\"text-eyebrow\">ekologické květinářství</p>\n"
 			. "<h1>Efemér</h1>\n"
-			. "<p>Lokální, přirozený a ohleduplný přístup ke kytici — podle místa, člověka a ročního období.</p>",
+			. "<p class=\"text-lead\">Lokální, přirozený a ohleduplný přístup ke kytici — podle místa, člověka a ročního období.</p>",
 		)->persist();
 
 		$sections = [

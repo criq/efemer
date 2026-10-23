@@ -27,7 +27,7 @@ Primary edit surface: `/admin/pages/{id}/builder` (Czech florist UI). Classic ta
 
 - Canvas reuses public Twig + `builder` chrome (`Admin/Pages/Builder/block.twig`)
 - Mutations via JSON under `admin.pages.builder.*` (value, tree, create, delete, fragment)
-- TEXT HTML is sanitized server-side (`App\Classes\Html\Sanitizer`)
+- TEXT HTML is sanitized server-side (`App\Classes\Html\Sanitizer`); TinyMCE **Styly**: Štítek / Titul / Perex / Nadpis / Odstavec / Odstavec kurzívou / Důrazný odstavec (`text-eyebrow`, `text-lead`, `text-prose`, `text-statement`)
 - New diary posts: **Nový příspěvek** → `PostScaffolder` (dated path, title `TEXT` + IMAGE + TEXT + IMAGE_GALLERY, prepend homepage diary `PAGE_GALLERY`)
 - Non-homepage first root block gets `page-header` styling; homepage first root gets `site-hero`
 - Builder UI copy is Czech only (Fotka, Galerie fotek, …) — never show kind codes in chrome

@@ -105,20 +105,69 @@
 	padding: 0 clamp(1rem, 3cqw, 1.5rem);
 }
 
+@mixin text-eyebrow {
+	color: $color-faint;
+	font-family: $font-ui;
+	font-size: .72rem;
+	font-weight: 500;
+	letter-spacing: 0.14em;
+	margin: 0 0 1rem;
+	text-transform: uppercase;
+}
+
+@mixin text-lead {
+	color: $color-muted;
+	font-size: 1.05rem;
+	font-weight: 300;
+	line-height: 1.55;
+	margin: 0 0 .9em;
+	max-width: 22rem;
+}
+
+@mixin text-prose {
+	color: $color-muted;
+	font-size: .98rem;
+	font-style: italic;
+	font-weight: 300;
+	margin: 0 0 1.75rem;
+	max-width: 34rem;
+}
+
+@mixin text-statement {
+	font-family: $font-display;
+	font-size: 1.15rem;
+	font-weight: 450;
+	line-height: 1.4;
+	margin: 0 0 1.25rem;
+	max-width: 32rem;
+}
+
+// Named text styles (TinyMCE “Styly”) — work in any TEXT block.
+.text-eyebrow {
+	@include text-eyebrow;
+}
+
+.text-lead {
+	@include text-lead;
+}
+
+.text-prose {
+	@include text-prose;
+}
+
+.text-statement {
+	@include text-statement;
+}
+
 .site-hero {
 	margin: 0 0 clamp(2.5rem, 7cqw, 4.5rem);
 	max-width: 28rem;
 	padding-top: .5rem;
 
-	> p:first-child,
-	.builder-block__content--text > p:first-child {
-		color: $color-faint;
-		font-family: $font-ui;
-		font-size: .72rem;
-		font-weight: 500;
-		letter-spacing: 0.14em;
-		margin: 0 0 1rem;
-		text-transform: uppercase;
+	// Legacy unmarked hero markup (before text-* classes).
+	> p:first-child:not([class]),
+	.builder-block__content--text > p:first-child:not([class]) {
+		@include text-eyebrow;
 	}
 
 	> h1,
@@ -131,14 +180,10 @@
 		margin: 0 0 1.25rem;
 	}
 
-	> h1 + p,
-	.builder-block__content--text > h1 + p {
-		color: $color-muted;
-		font-size: 1.05rem;
-		font-weight: 300;
-		line-height: 1.55;
+	> h1 + p:not([class]),
+	.builder-block__content--text > h1 + p:not([class]) {
+		@include text-lead;
 		margin: 0;
-		max-width: 22rem;
 	}
 }
 
@@ -260,22 +305,12 @@
 
 .site--index {
 	.principles-1 {
-		color: $color-muted;
-		font-size: .98rem;
-		font-style: italic;
-		font-weight: 300;
-		margin: 0 0 1.75rem;
-		max-width: 34rem;
+		@include text-prose;
 	}
 
 	.principles-2 {
 		> p {
-			font-family: $font-display;
-			font-size: 1.15rem;
-			font-weight: 450;
-			line-height: 1.4;
-			margin-bottom: 1.25rem;
-			max-width: 32rem;
+			@include text-statement;
 		}
 	}
 

@@ -7,9 +7,9 @@ use Katu\PDO\Connection;
 
 class HomepageHeroTextComponent implements MigrationInterface
 {
-	private const HERO_HTML = "<p>ekologické květinářství</p>\n"
+	private const HERO_HTML = "<p class=\"text-eyebrow\">ekologické květinářství</p>\n"
 		. "<h1>Efemér</h1>\n"
-		. "<p>Lokální, přirozený a ohleduplný přístup ke kytici — podle místa, člověka a ročního období.</p>";
+		. "<p class=\"text-lead\">Lokální, přirozený a ohleduplný přístup ke kytici — podle místa, člověka a ročního období.</p>";
 
 	private const HERO_MARKER = "Lokální, přirozený a ohleduplný přístup ke kytici";
 
