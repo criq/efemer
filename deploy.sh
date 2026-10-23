@@ -39,9 +39,7 @@ rsync -avz \
 	.secret/ "jan@${VM_IP}:${REMOTE_DIR}/.secret/"
 
 echo "Remote setup..."
-gcloud compute ssh "${VM_NAME}" \
-	--zone="${GCP_ZONE}" \
-	--project="${GCP_PROJECT}" \
-	--command="bash ${REMOTE_DIR}/deploy/remote-setup.sh"
+ssh -i "${SSH_KEY_FILE}" -o StrictHostKeyChecking=no "jan@${VM_IP}" \
+	"bash ${REMOTE_DIR}/deploy/remote-setup.sh"
 
 echo "Deployment complete."
