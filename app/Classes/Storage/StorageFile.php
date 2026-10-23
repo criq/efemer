@@ -90,11 +90,12 @@ class StorageFile extends \Katu\Models\Model
 
 	public function getImage(): ?\Katu\Tools\Images\Image
 	{
-		$file = $this->getFile();
-		if (!$file) {
+		if (!$this->getURI()) {
 			return null;
 		}
 
-		return new \Katu\Tools\Images\Image($file);
+		// Package by storage file id / gs URI so listing pages can build image
+		// URLs without downloading every object from GCS first.
+		return new \Katu\Tools\Images\Image(new StorageFileImageSource($this));
 	}
 }
