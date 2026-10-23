@@ -6,14 +6,8 @@
 
 {% block body %}
 
-	{% if page.getPath != "/" and page.getTitle %}
-		<header class="page-header" data-reveal>
-			<h1 class="page-header__title">{{ page.getTitle }}</h1>
-		</header>
-	{% endif %}
-
 	{% for pageComponent in page.getRootPageComponents %}
-		<section class="page-component{% if page.getPath == "/" and loop.first %} site-hero{% endif %}" data-reveal>
+		<section class="page-component{% if page.getPath == "/" and loop.first %} site-hero{% elseif page.getPath != "/" and loop.first %} page-header{% endif %}" data-reveal>
 			{% include "Pages/Components/view.twig" with { pageComponent: pageComponent } %}
 		</section>
 	{% endfor %}

@@ -17,6 +17,7 @@
 		data-token="{{ getCsrfToken() }}"
 		data-create-url="{{ url("admin.pages.builder.create", { pageId: page.getId }) }}"
 		data-tree-url="{{ url("admin.pages.builder.tree", { pageId: page.getId }) }}"
+		data-move-file-url-base="/admin/pages/{{ page.getId }}/storage-files/"
 		data-candidate-pages="{{ candidatePages|json_encode|e("html_attr") }}"
 		data-page-gallery-templates="{{ pageGalleryTemplates|json_encode|e("html_attr") }}"
 	>
@@ -95,15 +96,9 @@
 	</div>
 
 	<div class="builder-canvas" data-builder-canvas>
-		{% if page.getPath != "/" and page.getTitle %}
-			<header class="page-header" data-reveal>
-				<h1 class="page-header__title">{{ page.getTitle }}</h1>
-			</header>
-		{% endif %}
-
 		<div class="builder-blocks" data-builder-root>
 			{% for pageComponent in page.getRootPageComponents %}
-				<section class="page-component{% if page.getPath == "/" and loop.first %} site-hero{% endif %}" data-reveal>
+				<section class="page-component{% if page.getPath == "/" and loop.first %} site-hero{% elseif page.getPath != "/" and loop.first %} page-header{% endif %}" data-reveal>
 					{% include "Admin/Pages/Builder/block.twig" with { pageComponent: pageComponent, page: page } %}
 				</section>
 			{% else %}

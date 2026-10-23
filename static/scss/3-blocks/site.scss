@@ -144,15 +144,17 @@
 
 .page-header {
 	margin: 0 0 clamp(2rem, 5cqw, 3rem);
-}
 
-.page-header__title {
-	font-family: $font-display;
-	font-size: clamp(1.85rem, 4cqw, 2.75rem);
-	font-weight: 300;
-	letter-spacing: -0.02em;
-	line-height: 1.15;
-	margin: 0;
+	> h1,
+	.page-header__title,
+	.builder-block__content--text > h1 {
+		font-family: $font-display;
+		font-size: clamp(1.85rem, 4cqw, 2.75rem);
+		font-weight: 300;
+		letter-spacing: -0.02em;
+		line-height: 1.15;
+		margin: 0;
+	}
 }
 
 .page-component {
@@ -160,6 +162,10 @@
 
 	&.site-hero {
 		margin: 0 0 clamp(2.5rem, 7cqw, 4.5rem);
+	}
+
+	&.page-header {
+		margin: 0 0 clamp(2rem, 5cqw, 3rem);
 	}
 
 	h2 {

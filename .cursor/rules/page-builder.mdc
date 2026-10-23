@@ -28,10 +28,11 @@ Primary edit surface: `/admin/pages/{id}/builder` (Czech florist UI). Classic ta
 - Canvas reuses public Twig + `builder` chrome (`Admin/Pages/Builder/block.twig`)
 - Mutations via JSON under `admin.pages.builder.*` (value, tree, create, delete, fragment)
 - TEXT HTML is sanitized server-side (`App\Classes\Html\Sanitizer`)
-- New diary posts: **Nový příspěvek** → `PostScaffolder` (dated path, IMAGE+TEXT+IMAGE_GALLERY, prepend homepage diary `PAGE_GALLERY`)
+- New diary posts: **Nový příspěvek** → `PostScaffolder` (dated path, title `TEXT` + IMAGE + TEXT + IMAGE_GALLERY, prepend homepage diary `PAGE_GALLERY`)
+- Non-homepage first root block gets `page-header` styling; homepage first root gets `site-hero`
 - Builder UI copy is Czech only (Fotka, Galerie fotek, …) — never show kind codes in chrome
 - Frontend: `static/javascript/builder/` → `public/javascript/builder.js` (bundles SortableJS + self-hosted TinyMCE); styles in `static/scss/3-blocks/builder.scss`
-- Gallery photos: drag reorder + per-photo delete; between-block “+ Přidat sem”; layout drawer for column min/max on Sloupce / galleries
+- Gallery photos: drag reorder + move between galleries / onto Fotka / onto “+ Přidat sem” (new Fotka); per-photo delete + captions; between-block “+ Přidat sem”; layout drawer for column min/max on Sloupce / galleries
 
 ## Import from efemer.cz
 
@@ -39,4 +40,4 @@ Primary edit surface: `/admin/pages/{id}/builder` (Czech florist UI). Classic ta
 docker compose exec -T php php bin/import-efemer-cz.php
 ```
 
-Wipes existing pages, recreates homepage (intro `TEXT` + Principy / Já / Pro vás + diary `PAGE_GALLERY`) and all diary posts (hero `IMAGE` + optional `TEXT` + `IMAGE_GALLERY`). Images go to GCS bucket `efemer-files`. Homepage first root block gets `site-hero` styling (eyebrow / title / lede).
+Wipes existing pages, recreates homepage (intro `TEXT` + Principy / Já / Pro vás + diary `PAGE_GALLERY`) and all diary posts (title `TEXT` + hero `IMAGE` + optional body `TEXT` + `IMAGE_GALLERY`). Images go to GCS bucket `efemer-files`.

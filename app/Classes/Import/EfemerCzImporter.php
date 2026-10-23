@@ -134,6 +134,11 @@ class EfemerCzImporter
 		$textHtml = $this->extractCopyHtml($xpath);
 		$perexHtml = $this->extractPerexHtml($xpath);
 
+		$titleText = $this->createComponent($page, new TextKind, $position++, null);
+		$titleText->setValue(
+			"<h1>" . htmlspecialchars((string)$post["title"], ENT_QUOTES | ENT_HTML5, "UTF-8") . "</h1>",
+		)->persist();
+
 		if (count($images) > 0) {
 			$hero = array_shift($images);
 			$heroComponent = $this->createComponent($page, new ImageKind, $position++, null);

@@ -11,6 +11,7 @@ use App\Classes\Database\Migrations\PageComponentStorageFilesSchema;
 use App\Classes\Database\Migrations\EnsurePagePaths;
 use App\Classes\Database\Migrations\HomepageHeroTextComponent;
 use App\Classes\Database\Migrations\NormalizePagePaths;
+use App\Classes\Database\Migrations\PageTitleTextComponent;
 use App\Classes\Database\Migrations\RequireUniquePagePath;
 use App\Classes\Database\Migrations\PageComponentGalleryItemsSchema;
 use App\Classes\Database\Migrations\PageComponentPagesSchema;
@@ -73,6 +74,7 @@ class Migrator
 			new RenameImageGalleryGridTemplate,
 			new ComponentTreeParentId,
 			new HomepageHeroTextComponent,
+			new PageTitleTextComponent,
 		];
 	}
 

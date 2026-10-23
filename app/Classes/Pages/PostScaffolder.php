@@ -29,6 +29,9 @@ class PostScaffolder
 
 		$position = 1;
 
+		$titleText = $this->createComponent($page, new TextKind, $position++);
+		$titleText->setValue("<h1>" . htmlspecialchars($title, ENT_QUOTES | ENT_HTML5, "UTF-8") . "</h1>")->persist();
+
 		$hero = $this->createComponent($page, new ImageKind, $position++);
 		if ($heroUpload) {
 			PageComponentStorageFileCollection::replaceWithUpload($hero, $heroUpload);
