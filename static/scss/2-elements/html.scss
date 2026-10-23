@@ -1,6 +1,8 @@
 html {
-	font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-	font-size: clamp(10pt, 1vw, 14pt);
+	font-family: $font-serif;
+	font-size: .9em;
 	font-weight: 400;
 	line-height: $line-height;
+	background: $color-bg;
+	color: $color-text;
 }

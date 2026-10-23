@@ -4,15 +4,44 @@
 
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Efemer</title>
+		<title>{% block title %}Efemér{% endblock %}</title>
 
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noticia+Text:ital,wght@0,400;0,700;1,400;1,700&display=swap&subset=latin-ext">
 		<link rel="stylesheet" href="/css/main.css">
 
 	</head>
-	<body>
+	<body class="{% block bodyClass %}{% endblock %}">
 
-		{% block body %}
-		{% endblock body %}
+		<div class="site">
+			<header class="site-header">
+				<div class="site-header__inner">
+					<div class="site-brand">
+						<p class="site-brand__logo">
+							<a href="{{ url("homepage.index") }}"><img src="/img/logo.png" alt="Efemér"></a>
+						</p>
+						<p class="site-brand__claim">květiny, vlastní zahrada, ekologické zemědělství, lokální pěstitelé, roční období, rituály a kulturní zvyky, městská divočina, výtvarný objekt, člověk, místo</p>
+					</div>
+					<nav class="site-nav" aria-label="Hlavní menu">
+						<ul>
+							<li><a href="{{ url("homepage.index") }}#denik">Deník</a></li>
+							<li><a href="{{ url("homepage.index") }}#principy">Principy</a></li>
+							<li><a href="{{ url("homepage.index") }}#o-me">Já</a></li>
+							<li><a href="{{ url("homepage.index") }}#nabizime">Pro vás</a></li>
+							<li><a href="https://www.facebook.com/pages/Ekologické-květinářství-Efemér/192499584220499" target="_blank" rel="noopener noreferrer">Facebook</a></li>
+						</ul>
+					</nav>
+				</div>
+			</header>
+
+			<main class="site-main">
+				<div class="site-main__inner">
+					{% block body %}
+					{% endblock body %}
+				</div>
+			</main>
+		</div>
 
 		<script src="/javascript/app.js"></script>
 

@@ -1,17 +1,21 @@
 {% extends "Templates/default.twig" %}
 
-{% block title %}{{ page.getTitle|default("Efemer") }}{% endblock %}
+{% block title %}{{ page.getTitle|default("Efemér") }}{% endblock %}
+
+{% block bodyClass %}{% if page.getPath == "/" %}site--index{% else %}site--page{% endif %}{% endblock %}
 
 {% block body %}
 
-	{% if page.getTitle %}
-		<h1 class="a-title">{{ page.getTitle }}</h1>
+	{% if page.getPath != "/" and page.getTitle %}
+		<header class="page-header">
+			<h1 class="page-header__title">{{ page.getTitle }}</h1>
+		</header>
 	{% endif %}
 
 	{% for pageComponent in page.getRootPageComponents %}
-		<div class="page-component">
+		<section class="page-component">
 			{% include "Pages/Components/view.twig" with { pageComponent: pageComponent } %}
-		</div>
+		</section>
 	{% endfor %}
 
 {% endblock body %}

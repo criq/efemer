@@ -1,10 +1,9 @@
 a {
-	color: blue;
+	color: $color-muted;
 	text-decoration: none;
 
 	&:hover {
-		color: darken(blue, 10%);
-		text-decoration: underline;
+		color: $color-text;
+		border-bottom: 1px solid $color-text;
 	}
-
 }

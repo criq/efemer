@@ -6,13 +6,14 @@
 }
 
 .page-page-gallery__item {
-	border-radius: .25rem;
 	color: inherit;
 	display: block;
 	overflow: hidden;
 	text-decoration: none;
 
 	&:hover {
+		border: 0;
+		color: inherit;
 		text-decoration: none;
 	}
 }
@@ -36,6 +37,33 @@
 
 .page-page-gallery__title {
 	display: block;
-	font-weight: 600;
-	padding: .5rem 0 0;
+	font-size: 1.25em;
+	font-style: italic;
+	font-weight: 700;
+	line-height: 150%;
+	margin: 0 0 1em;
+	text-align: right;
+	text-transform: lowercase;
+
+	@media screen and (max-width: 640px) {
+		text-align: center;
+	}
+}
+
+.page-page-gallery__item--image-and-text {
+	margin: 2em 0;
+
+	.page-page-gallery__image {
+		margin-top: 0;
+	}
+}
+
+// Homepage diary: single-column list like the original posts-index
+.site--index .page-page-gallery {
+	display: block;
+	gap: 0;
+}
+
+.site--index .page-page-gallery__item--image-and-text {
+	display: block;
 }
