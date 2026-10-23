@@ -175,6 +175,14 @@ class EfemerCzImporter
 		$page->persist();
 
 		$position = 1;
+
+		$hero = $this->createComponent($page, new TextKind, $position++, null);
+		$hero->setValue(
+			"<p>ekologické květinářství</p>\n"
+			. "<h1>Efemér</h1>\n"
+			. "<p>Lokální, přirozený a ohleduplný přístup ke kytici — podle místa, člověka a ročního období.</p>",
+		)->persist();
+
 		$sections = [
 			["fragment-principy", "principy", "Principy"],
 			["fragment-o-me", "o-me", "Já"],

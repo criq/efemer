@@ -9,6 +9,7 @@ use App\Classes\Database\Migrations\AddStorageFileCaption;
 use App\Classes\Database\Migrations\ComponentTreeParentId;
 use App\Classes\Database\Migrations\PageComponentStorageFilesSchema;
 use App\Classes\Database\Migrations\EnsurePagePaths;
+use App\Classes\Database\Migrations\HomepageHeroTextComponent;
 use App\Classes\Database\Migrations\NormalizePagePaths;
 use App\Classes\Database\Migrations\RequireUniquePagePath;
 use App\Classes\Database\Migrations\PageComponentGalleryItemsSchema;
@@ -71,6 +72,7 @@ class Migrator
 			new AddPageComponentTemplate,
 			new RenameImageGalleryGridTemplate,
 			new ComponentTreeParentId,
+			new HomepageHeroTextComponent,
 		];
 	}
 

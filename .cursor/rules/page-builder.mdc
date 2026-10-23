@@ -39,4 +39,4 @@ Primary edit surface: `/admin/pages/{id}/builder` (Czech florist UI). Classic ta
 docker compose exec -T php php bin/import-efemer-cz.php
 ```
 
-Wipes existing pages, recreates homepage (Principy / Já / Pro vás + diary `PAGE_GALLERY`) and all diary posts (hero `IMAGE` + optional `TEXT` + `IMAGE_GALLERY`). Images go to GCS bucket `efemer-files`.
+Wipes existing pages, recreates homepage (intro `TEXT` + Principy / Já / Pro vás + diary `PAGE_GALLERY`) and all diary posts (hero `IMAGE` + optional `TEXT` + `IMAGE_GALLERY`). Images go to GCS bucket `efemer-files`. Homepage first root block gets `site-hero` styling (eyebrow / title / lede).

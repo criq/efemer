@@ -6,20 +6,14 @@
 
 {% block body %}
 
-	{% if page.getPath == "/" %}
-		<section class="site-hero" data-reveal>
-			<p class="site-hero__eyebrow">ekologické květinářství</p>
-			<h1 class="site-hero__title">Efemér</h1>
-			<p class="site-hero__lede">Lokální, přirozený a ohleduplný přístup ke kytici — podle místa, člověka a ročního období.</p>
-		</section>
-	{% elseif page.getTitle %}
+	{% if page.getPath != "/" and page.getTitle %}
 		<header class="page-header" data-reveal>
 			<h1 class="page-header__title">{{ page.getTitle }}</h1>
 		</header>
 	{% endif %}
 
 	{% for pageComponent in page.getRootPageComponents %}
-		<section class="page-component" data-reveal>
+		<section class="page-component{% if page.getPath == "/" and loop.first %} site-hero{% endif %}" data-reveal>
 			{% include "Pages/Components/view.twig" with { pageComponent: pageComponent } %}
 		</section>
 	{% endfor %}
