@@ -49,7 +49,9 @@ Reload after changes: `sudo caddy validate --config /etc/caddy/Caddyfile && sudo
 ./deploy.sh
 ```
 
-`deploy.sh` builds webpack assets, rsyncs the app (excluding `.env`, `vendor`, `data/mysql`), syncs `.secret/`, then runs `deploy/remote-setup.sh` on the server.
+`deploy.sh` builds webpack assets, rsyncs the app (excluding `.env`, `vendor`, `data/mysql`, `data/instagram`), syncs `.secret/`, then runs `deploy/remote-setup.sh` on the server.
+
+Production also runs `instagram-archive` (PHP CLI loop every 6 hours). `remote-setup.sh` starts it **after** `composer install` so `vendor/` exists. Session lives in Secret Manager (`instagram-session-id` in `efemer-456414`), not in git.
 
 ## Server `.env`
 

@@ -5,6 +5,8 @@ alwaysApply: true
 
 # Page builder
 
+The public site is now the three-section content model (see `content-model.mdc`). The visual page builder remains for leftover `pages` in admin, not for the homepage.
+
 Pages are built from a **tree** of components (`page_components.parentId` + `position`).
 
 ## Kinds

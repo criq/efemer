@@ -1,0 +1,45 @@
+---
+description: Public content model — four sections, events, Instagram import
+alwaysApply: true
+---
+
+# Content model
+
+Public site is **not** assembled from the page-component tree. Typed entities:
+
+| Entity | Role |
+|---|---|
+| `posts` | Work shown in three practice sections |
+| `events` | Happenings; fourth public section + homepage banner |
+| `appearances` | Press / v tisku |
+
+## Sections (never show codes in chrome)
+
+| Code | Czech | Path | Entity |
+|---|---|---|---|
+| `ritualy` | Svatební rituály | `/svatebni-ritualy` | posts |
+| `himmelhaus` | Himmelhaus | `/himmelhaus` | posts |
+| `umeni` | Umění | `/umeni` | posts |
+| `udalosti` | Události | `/udalosti` | events |
+
+Himmelhaus is the house; Instagram handle is `@himmlhaus`.
+
+`Section::work()` is the three post sections. `Section::all()` includes Události. Posts and event “Souvisí se” never use `udalosti`.
+
+## Homepage
+
+Visual layout is in `homepage.mdc`. Text is the next published current or upcoming event, else the latest post. The five hero photos are a mock for now. Then three work-section plots (not Události), one photo above the text in each.
+
+## Events
+
+Public listing at `/udalosti` (nadcházející / proběhlé). Detail at `/udalosti/{slug}`. Optional related work section + Instagram `url`. Admin **Události**: create/edit with optional Instagram URL (“Načíst z Instagramu”).
+
+## Instagram
+
+Continuous archive (Secret Manager session `instagram-session-id`, see `instagram.mdc`):
+
+```bash
+docker compose exec -T php php bin/archive-instagram.php
+```
+
+`@himmlhaus` → Himmelhaus. `@efemer_flowers` classified by caption (rituály / umění). Confidence below 0.75 → status `review`.

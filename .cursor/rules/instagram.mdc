@@ -1,0 +1,38 @@
+---
+description: Continuous Instagram archive of @efemer_flowers and @himmlhaus
+alwaysApply: true
+---
+
+# Instagram archive
+
+Continuously dump `@efemer_flowers` and `@himmlhaus` into `posts` (idempotent on `instagramAccount` + `instagramShortcode`).
+
+## Session
+
+Store Jan’s Instagram `sessionid` in Secret Manager (never commit it):
+
+| Item | Value |
+|---|---|
+| Project | `efemer-456414` |
+| Secret | `instagram-session-id` |
+| Accessor | `efemer-storage@efemer-456414.iam.gserviceaccount.com` |
+
+Runtime reads GSM first, then `.secret/instagram.session`. Local file is seeded into GSM when GSM is empty.
+
+Refresh the secret when Instagram checkpoints the session:
+
+```bash
+printf '%s' "$SESSIONID" | gcloud secrets versions add instagram-session-id \
+  --project=efemer-456414 --account=jablunka@gmail.com --data-file=-
+```
+
+## Run
+
+```bash
+docker compose exec -T php php bin/archive-instagram.php
+docker compose exec -T php php bin/archive-instagram.php --full
+```
+
+Production `instagram-archive` service loops every 6 hours. Each run imports up to 20 new posts per account, skips shortcodes already in the database, then walks older posts until the profile is backfilled.
+
+`@himmlhaus` → Himmelhaus. `@efemer_flowers` classified by caption. Confidence below 0.75 → status `review`.

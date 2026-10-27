@@ -1,0 +1,36 @@
+---
+description: Public homepage visual — greige sections, five-photo hero
+globs: app/Views/Homepage/**,static/scss/3-blocks/home.scss,app/Controllers/Homepage/**
+alwaysApply: false
+---
+
+# Homepage visual
+
+## Hero photos
+
+Two on the left, three on the right. Text sits in the wide center column.
+
+- **Main photo** on each side: vertically centered, the large one, overflowing past the outer edge of the frame. Top and bottom stay in frame.
+- **Secondary photos**: smaller, toward the text, off that vertical center. Not lined up with the main photo.
+- The five photos are a mock for now (Wanderlust, Čajový dýchánek, Zahrádkářská kolonie, Advent a Vánoce, Svatba Mlhových).
+
+## Every homepage photo
+
+- Keep the file’s aspect ratio. Never stretch, squash, or crop to a new ratio (`height: auto`, no fixed height, no `object-fit: cover`). Overflow past the side is position only.
+- Hero prints and section photos have a drop shadow from above: pronounced, with a wide spread, so it reads on the greige.
+- Tilt at most **0.5deg**. Neighbors lean opposite ways.
+- A **1px** corner radius. No border, no white mat, no entrance or hover animation.
+
+## Ground
+
+- Header and footer stay **white**. Hero and the three section plots are `$color-greige` (pale, low saturation).
+- Separate those blocks, including the three columns, with **.75rem** of the white page. No hairlines.
+- The hero is only as tall as its photos, with clear top and bottom padding. The poster on the left sets that height.
+
+## Hero text
+
+Featured item is the next published current or upcoming event, else the latest post. Centered: kicker, title, place and date, a short summary (opening of the body, about 220 characters), and a **Připoj se** button. Title is upright Fraunces, larger than the body, not huge.
+
+## Section plots
+
+The three work sections only (not Události). One photo and centered text. Section titles start with a capital letter (Svatební rituály, Himmelhaus, Umění). Rituály and Umění put the photo on top; Himmelhaus puts it on the bottom. The photo runs past that outer edge, far enough that its tilt does not open a gap, and the block clips the picture and its shadow. On large screens, three columns with the same .75rem white gap. Stacked on smaller screens.
