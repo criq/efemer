@@ -9,6 +9,7 @@
 	{% set showHero = true %}
 	{% set leftLead = heroImages[0]|default(null) %}
 	{% set leftAside = heroImages[1]|default(null) %}
+	{% set mobileAside = heroImages[2]|default(null) %}
 	{% set rightAsides = heroImages|slice(2, 2) %}
 	{% set rightLead = heroImages[4]|default(null) %}
 
@@ -26,6 +27,13 @@
 				<a class="home-print home-print--aside home-print--aside-1" href="{{ leftAside.url }}">
 					<span class="home-print__photo">
 						<img src="{{ leftAside.image.getImageVersion("GALLERY").getURL }}" alt="">
+					</span>
+				</a>
+			{% endif %}
+			{% if mobileAside %}
+				<a class="home-print home-print--aside home-print--aside-2 home-print--mobile-only" href="{{ mobileAside.url }}">
+					<span class="home-print__photo">
+						<img src="{{ mobileAside.image.getImageVersion("GALLERY").getURL }}" alt="">
 					</span>
 				</a>
 			{% endif %}

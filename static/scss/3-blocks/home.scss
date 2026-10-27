@@ -9,7 +9,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: .75rem;
-		margin-top: .75rem;
+		margin-top: 0;
 		padding: 0;
 	}
 
@@ -22,9 +22,9 @@
 .home-print {
 	border-radius: 1px;
 	box-shadow:
-		0 2px 8px rgba(48, 40, 32, 0.18),
-		0 22px 50px rgba(48, 40, 32, 0.22),
-		0 40px 80px rgba(48, 40, 32, 0.14);
+		0 2px 8px rgba(48, 40, 32, 0.16),
+		0 16px 36px rgba(48, 40, 32, 0.18),
+		0 28px 56px rgba(48, 40, 32, 0.1);
 	display: block;
 	line-height: 0;
 }
@@ -136,18 +136,20 @@
 		}
 	}
 
+	// Anchor to the left of this column (toward the text), not the lead on the right,
+	// so they do not slide right as the column shrinks.
 	.home-print--aside-1 {
-		left: 8%;
+		left: 0;
 		top: 11%;
-		transform: rotate(-0.5deg);
+		transform: translateX(-18%) rotate(-0.5deg);
 		width: 30%;
 		z-index: 2;
 	}
 
 	.home-print--aside-2 {
-		left: 4%;
+		left: 0;
 		top: 46%;
-		transform: rotate(0.45deg);
+		transform: translateX(-22%) rotate(0.45deg);
 		width: 40%;
 		z-index: 3;
 	}
@@ -280,20 +282,33 @@
 	}
 }
 
-.home-plot--himmelhaus {
+@media screen and (max-width: 800px) {
 	.home-plot__photo {
-		margin-bottom: calc((var(--plot-pad-bottom) + var(--plot-edge)) * -1);
-		margin-top: auto;
-		order: 2;
+		align-self: center;
+		width: min(88%, 22rem);
 
 		img {
-			margin-bottom: calc(var(--plot-photo-over) * -1);
-			margin-top: 0;
+			margin-top: calc(var(--plot-photo-over) * -0.65);
 		}
 	}
+}
 
-	.home-plot__copy {
-		padding: 0 0 1.5rem;
+@media screen and (min-width: 801px) {
+	.home-plot--himmelhaus {
+		.home-plot__photo {
+			margin-bottom: calc((var(--plot-pad-bottom) + var(--plot-edge)) * -1);
+			margin-top: auto;
+			order: 2;
+
+			img {
+				margin-bottom: calc(var(--plot-photo-over) * -1);
+				margin-top: 0;
+			}
+		}
+
+		.home-plot__copy {
+			padding: 0 0 1.5rem;
+		}
 	}
 }
 
@@ -494,12 +509,13 @@
 	}
 }
 
-@media screen and (min-width: 1200px) {
+// Tablet: two plots per row. Three columns wait for the wider frame.
+@media screen and (min-width: 801px) {
 	.home-plots {
 		align-items: stretch;
 		display: grid;
 		gap: .75rem;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
 	.home-plot {
@@ -519,7 +535,13 @@
 	}
 
 	.home-plot__title {
-		font-size: clamp(1.6rem, 2vw, 2.35rem);
+		font-size: clamp(1.6rem, 2.4vw, 2.35rem);
+	}
+}
+
+@media screen and (min-width: 1200px) {
+	.home-plots {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 }
 
@@ -529,11 +551,24 @@
 	}
 }
 
-@media screen and (max-width: 1360px) and (min-width: 1200px) {
+// The five-photo collage needs a wide frame. Narrower than that, drop the
+// small prints first so the two main photos and the text keep their space.
+@media screen and (max-width: 1500px) and (min-width: 1200px) {
+	.home-hero .home-print--aside {
+		display: none;
+	}
+
+	.home-hero__side--left .home-print--lead {
+		.home-print__photo,
+		img {
+			max-width: min(24rem, 30vw);
+		}
+	}
+
 	.home-hero__side--right .home-print--lead {
 		.home-print__photo,
 		img {
-			max-width: 36vw;
+			max-width: min(26rem, 32vw);
 		}
 	}
 }
@@ -566,30 +601,6 @@
 		}
 	}
 
-	.home-hero__side--left .home-print--lead {
-		margin-left: -16vw;
-		transform: rotate(-0.4deg);
-		width: 92vw;
-
-		.home-print__photo {
-			width: 100%;
-		}
-	}
-
-	.home-hero__side--right .home-print--lead {
-		margin-left: auto;
-		margin-right: -16vw;
-		transform: rotate(0.35deg);
-		width: 92vw;
-
-		.home-print__photo,
-		img {
-			max-height: none;
-			max-width: none;
-			width: 100%;
-		}
-	}
-
 	.home-hero__text,
 	.home-hero__copy {
 		align-items: center;
@@ -606,21 +617,110 @@
 	}
 }
 
-// Between a phone and the side-by-side collage, keep each cluster on its photo
-// and stop the poster from growing past about one screen.
-@media screen and (max-width: 1199px) and (min-width: 801px) {
-	.home-hero__side--left,
-	.home-hero__side--right {
-		justify-self: center;
-		margin-left: 0;
-		margin-right: 0;
-		width: min(84vw, 40rem);
+.home-print--mobile-only {
+	display: none;
+}
+
+// Phone: top collage of three prints, capped at 40vh, sticking past the top.
+@media screen and (max-width: 800px) {
+	.home-hero {
+		padding: 0 1.25rem 2.25rem;
 	}
 
-	.home-hero__side--left .home-print--lead,
-	.home-hero__side--right .home-print--lead {
+	.home-hero__side--left {
+		height: 40vh;
+		justify-self: center;
+		max-width: min(82vw, 22rem);
+		position: relative;
+		width: max-content;
+	}
+
+	.home-hero__side--left .home-print--lead {
+		margin: -1.75rem 0 0;
+		transform: rotate(-0.4deg);
+		width: auto;
+
+		.home-print__photo {
+			width: fit-content;
+		}
+
+		.home-print__photo,
+		img {
+			height: auto;
+			max-height: calc(40vh + 1.75rem);
+			max-width: min(72vw, 18rem);
+			width: auto;
+		}
+	}
+
+	.home-hero__side--left .home-print--aside-1 {
+		left: auto;
+		right: -14%;
+		top: 6%;
+		width: 42%;
+	}
+
+	.home-print--mobile-only {
+		display: block;
+	}
+
+	.home-hero__side--left .home-print--aside-2 {
+		bottom: 4%;
+		left: -12%;
+		right: auto;
+		top: auto;
+		transform: rotate(0.45deg);
+		width: 36%;
+		z-index: 3;
+	}
+
+	.home-hero__side--right {
+		display: none;
+	}
+
+	.home-hero__text {
+		padding: 1.5rem .5rem 1.75rem;
+	}
+}
+
+// Tablet: poster and its small print on the left, text on the right.
+// The right-hand photos wait until the collage has room again.
+@media screen and (max-width: 1199px) and (min-width: 801px) {
+	.home-hero {
+		align-items: center;
+		gap: clamp(1.75rem, 4vw, 3rem);
+		grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+		padding: 4rem clamp(1.25rem, 3vw, 2.5rem) 4rem 0;
+	}
+
+	.home-hero__side--left {
+		justify-self: start;
+		margin-left: -3.5rem;
+		width: min(22rem, 48vw);
+	}
+
+	.home-hero__side--left .home-print--lead {
 		margin-left: 0;
-		margin-right: 0;
+		transform: rotate(-0.4deg);
 		width: 100%;
+
+		.home-print__photo {
+			width: 100%;
+		}
+	}
+
+	.home-hero__side--left .home-print--aside-1 {
+		left: 68%;
+		right: auto;
+		top: 8%;
+		width: 58%;
+	}
+
+	.home-hero__side--right {
+		display: none;
+	}
+
+	.home-hero__text {
+		padding: .5rem 0 .5rem .25rem;
 	}
 }
