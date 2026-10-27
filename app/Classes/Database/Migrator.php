@@ -7,6 +7,7 @@ use App\Classes\Database\Migrations\AddPageComponentTemplate;
 use App\Classes\Database\Migrations\AddPagePath;
 use App\Classes\Database\Migrations\AddStorageFileCaption;
 use App\Classes\Database\Migrations\ComponentTreeParentId;
+use App\Classes\Database\Migrations\ContentSchema;
 use App\Classes\Database\Migrations\PageComponentStorageFilesSchema;
 use App\Classes\Database\Migrations\EnsurePagePaths;
 use App\Classes\Database\Migrations\HomepageHeroTextComponent;
@@ -19,6 +20,9 @@ use App\Classes\Database\Migrations\PagesSchema;
 use App\Classes\Database\Migrations\RenameFilesKindToGallery;
 use App\Classes\Database\Migrations\RenameGalleryKindToImageGallery;
 use App\Classes\Database\Migrations\RenameImageGalleryGridTemplate;
+use App\Classes\Database\Migrations\AddEventPath;
+use App\Classes\Database\Migrations\AddEventUrl;
+use App\Classes\Database\Migrations\SeedEventsAppearances;
 use App\Classes\Database\Migrations\StorageFilesSchema;
 use Katu\PDO\Connection;
 use Katu\Tools\Calendar\Time;
@@ -75,6 +79,10 @@ class Migrator
 			new ComponentTreeParentId,
 			new HomepageHeroTextComponent,
 			new PageTitleTextComponent,
+			new ContentSchema,
+			new SeedEventsAppearances,
+			new AddEventUrl,
+			new AddEventPath,
 		];
 	}
 
