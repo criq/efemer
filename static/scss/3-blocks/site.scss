@@ -27,7 +27,6 @@
 .site-brand {
 	align-items: center;
 	display: inline-flex;
-	gap: .85rem;
 	text-decoration: none;
 
 	&:hover {
@@ -38,15 +37,71 @@
 .site-brand__logo {
 	display: block;
 	height: auto;
-	width: 2.75rem;
+	width: 4rem;
 }
 
-.site-brand__word {
-	font-family: $font-display;
-	font-size: 1.15rem;
-	font-weight: 450;
-	letter-spacing: 0.02em;
-	line-height: 1;
+.site-nav-toggle {
+	align-items: center;
+	background: transparent;
+	border: 0;
+	color: $color-ink;
+	cursor: pointer;
+	display: none;
+	flex-shrink: 0;
+	height: 2.75rem;
+	justify-content: center;
+	margin: -.4rem -.4rem -.4rem 0;
+	padding: .4rem;
+	width: 2.75rem;
+
+	&:hover {
+		color: $color-ink;
+	}
+}
+
+.site-nav-toggle__bars {
+	display: block;
+	height: 1.5px;
+	position: relative;
+	width: 1.2rem;
+
+	&::before,
+	&::after {
+		background: currentColor;
+		border-radius: 1px;
+		content: "";
+		height: 1.5px;
+		left: 0;
+		position: absolute;
+		transition: transform .2s ease, top .2s ease;
+		width: 100%;
+	}
+
+	background: currentColor;
+	border-radius: 1px;
+	transition: background .2s ease;
+
+	&::before {
+		top: -.4rem;
+	}
+
+	&::after {
+		top: .4rem;
+	}
+}
+
+.site-header.is-nav-open .site-nav-toggle__bars {
+	background: transparent;
+
+	&::before {
+		top: 0;
+		transform: rotate(45deg);
+	}
+
+	&::after {
+		top: 0;
+		transform: rotate(-45deg);
+	}
 }
 
 .site-nav {
@@ -75,30 +130,46 @@
 			text-decoration: none;
 		}
 	}
-
-	@media screen and (max-width: 640px) {
-		font-size: .72rem;
-		letter-spacing: 0.04em;
-
-		ul {
-			gap: .1rem .65rem;
-		}
-	}
-
-	@media screen and (max-width: 420px) {
-		flex: 1 0 100%;
-
-		ul {
-			justify-content: flex-start;
-		}
-	}
 }
 
-@media screen and (max-width: 420px) {
+@media screen and (max-width: 800px) {
 	.site-header__inner {
-		align-items: flex-start;
 		flex-wrap: wrap;
-		row-gap: .85rem;
+		row-gap: 0;
+	}
+
+	.site-nav-toggle {
+		display: inline-flex;
+		margin-left: auto;
+	}
+
+	.site-nav {
+		flex: 1 0 100%;
+		font-size: .92rem;
+		letter-spacing: 0.06em;
+		max-height: 0;
+		opacity: 0;
+		overflow: hidden;
+		pointer-events: none;
+		transition: max-height .25s ease, opacity .2s ease;
+	}
+
+	.site-nav ul {
+		flex-direction: column;
+		gap: 0;
+		justify-content: flex-start;
+		padding: .35rem 0 .85rem;
+	}
+
+	.site-nav a {
+		display: block;
+		padding: .7rem 0;
+	}
+
+	.site-header.is-nav-open .site-nav {
+		max-height: 20rem;
+		opacity: 1;
+		pointer-events: auto;
 	}
 }
 

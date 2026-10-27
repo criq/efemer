@@ -18,11 +18,13 @@
 		<div class="site">
 			<header class="site-header">
 				<div class="site-header__inner">
-					<a class="site-brand" href="{{ url("homepage.index") }}">
-						<img class="site-brand__logo" src="/img/logo.png" alt="">
-						<span class="site-brand__word">Efemér</span>
+					<a class="site-brand" href="{{ url("homepage.index") }}" aria-label="Efemér">
+						<img class="site-brand__logo" src="/img/logo.png" alt="Efemér">
 					</a>
-					<nav class="site-nav" aria-label="Hlavní menu">
+					<button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Otevřít menu">
+						<span class="site-nav-toggle__bars" aria-hidden="true"></span>
+					</button>
+					<nav class="site-nav" id="site-nav" aria-label="Hlavní menu">
 						<ul>
 							<li><a href="{{ url("sections.ritualy") }}">rituály</a></li>
 							<li><a href="{{ url("sections.himmelhaus") }}">himmelhaus</a></li>

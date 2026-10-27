@@ -44,6 +44,43 @@ const initGallerySlideshows = () => {
 	});
 };
 
+const initSiteNav = () => {
+	const header = document.querySelector(".site-header");
+	const toggle = document.querySelector(".site-nav-toggle");
+	const nav = document.querySelector("#site-nav");
+
+	if (!header || !toggle || !nav) {
+		return;
+	}
+
+	const setOpen = (open) => {
+		header.classList.toggle("is-nav-open", open);
+		toggle.setAttribute("aria-expanded", open ? "true" : "false");
+		toggle.setAttribute("aria-label", open ? "Zavřít menu" : "Otevřít menu");
+	};
+
+	toggle.addEventListener("click", () => {
+		setOpen(!header.classList.contains("is-nav-open"));
+	});
+
+	nav.querySelectorAll("a").forEach((link) => {
+		link.addEventListener("click", () => setOpen(false));
+	});
+
+	document.addEventListener("keydown", (event) => {
+		if (event.key === "Escape") {
+			setOpen(false);
+		}
+	});
+
+	document.addEventListener("click", (event) => {
+		if (!header.contains(event.target)) {
+			setOpen(false);
+		}
+	});
+};
+
 document.addEventListener("DOMContentLoaded", () => {
 	initGallerySlideshows();
+	initSiteNav();
 });
