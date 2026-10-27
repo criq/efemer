@@ -494,7 +494,7 @@
 	}
 }
 
-@media screen and (min-width: $screen-lg) {
+@media screen and (min-width: 1200px) {
 	.home-plots {
 		align-items: stretch;
 		display: grid;
@@ -505,7 +505,7 @@
 	.home-plot {
 		--plot-pad-top: 2rem;
 		--plot-pad-bottom: 2.25rem;
-		--plot-photo-over: 4.25rem;
+		--plot-photo-over: 2.25rem;
 		padding: var(--plot-pad-top) 1.75rem var(--plot-pad-bottom);
 	}
 
@@ -523,7 +523,22 @@
 	}
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (min-width: 1280px) {
+	.home-plot {
+		--plot-photo-over: 4.25rem;
+	}
+}
+
+@media screen and (max-width: 1360px) and (min-width: 1200px) {
+	.home-hero__side--right .home-print--lead {
+		.home-print__photo,
+		img {
+			max-width: 36vw;
+		}
+	}
+}
+
+@media screen and (max-width: 1199px) {
 	.home-hero {
 		grid-template-columns: minmax(0, 1fr);
 		height: auto;
@@ -566,6 +581,13 @@
 		margin-right: -16vw;
 		transform: rotate(0.35deg);
 		width: 92vw;
+
+		.home-print__photo,
+		img {
+			max-height: none;
+			max-width: none;
+			width: 100%;
+		}
 	}
 
 	.home-hero__text,
@@ -581,5 +603,24 @@
 	.post-page__frame {
 		grid-column: span 12 !important;
 		transform: none;
+	}
+}
+
+// Between a phone and the side-by-side collage, keep each cluster on its photo
+// and stop the poster from growing past about one screen.
+@media screen and (max-width: 1199px) and (min-width: 801px) {
+	.home-hero__side--left,
+	.home-hero__side--right {
+		justify-self: center;
+		margin-left: 0;
+		margin-right: 0;
+		width: min(84vw, 40rem);
+	}
+
+	.home-hero__side--left .home-print--lead,
+	.home-hero__side--right .home-print--lead {
+		margin-left: 0;
+		margin-right: 0;
+		width: 100%;
 	}
 }

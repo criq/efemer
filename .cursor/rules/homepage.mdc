@@ -13,6 +13,7 @@ Two on the left, three on the right. Text sits in the wide center column.
 - **Main photo** on each side: vertically centered, the large one, overflowing past the outer edge of the frame. Top and bottom stay in frame.
 - **Secondary photos**: smaller, toward the text, off that vertical center. Not lined up with the main photo.
 - The five photos are a mock for now (Wanderlust, Čajový dýchánek, Zahrádkářská kolonie, Advent a Vánoce, Svatba Mlhových).
+- The side-by-side collage is for screens 1200px and wider. Below that the hero stacks: left photos, text, right photos. Phones keep the full-bleed prints. From 801px to 1199px each cluster is centered and capped (`40rem`) so the poster stays about one screen tall, and the smaller prints stay on that photo.
 
 ## Every homepage photo
 
@@ -33,4 +34,4 @@ Featured item is the next published current or upcoming event, else the latest p
 
 ## Section plots
 
-The three work sections only (not Události). One photo and centered text. Section titles start with a capital letter (Svatební rituály, Himmelhaus, Umění). Rituály and Umění put the photo on top; Himmelhaus puts it on the bottom. The photo runs past that outer edge, far enough that its tilt does not open a gap, and the block clips the picture and its shadow. On large screens, three columns with the same .75rem white gap. Stacked on smaller screens.
+The three work sections only (not Události). One photo and centered text. Section titles start with a capital letter (Svatební rituály, Himmelhaus, Umění). Rituály and Umění put the photo on top; Himmelhaus puts it on the bottom. The photo runs past that outer edge, far enough that its tilt does not open a gap, and the block clips the picture and its shadow. Three columns from 1200px, with the same .75rem white gap. Stacked below that. The outer-edge crop is `2.25rem` until 1280px, then `4.25rem`.

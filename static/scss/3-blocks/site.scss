@@ -84,6 +84,22 @@
 			gap: .1rem .65rem;
 		}
 	}
+
+	@media screen and (max-width: 420px) {
+		flex: 1 0 100%;
+
+		ul {
+			justify-content: flex-start;
+		}
+	}
+}
+
+@media screen and (max-width: 420px) {
+	.site-header__inner {
+		align-items: flex-start;
+		flex-wrap: wrap;
+		row-gap: .85rem;
+	}
 }
 
 .site-main {
