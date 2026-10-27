@@ -35,8 +35,9 @@ echo "Installing Composer dependencies..."
 "${COMPOSE[@]}" exec -T -e COMPOSER_HOME="${ROOT}/tmp/composer" -u "$(id -u):$(id -g)" php composer install --no-dev --optimize-autoloader --no-interaction
 "${COMPOSE[@]}" exec -T php php bin/migrate.php
 # PHP-FPM runs as www-data; image versions and GCS downloads need writable tmp dirs.
+# The storage key is rsynced as mode 600. www-data (gid 82) still has to read it.
 echo "Ensuring www-data can write image/tmp caches..."
-"${COMPOSE[@]}" exec -T php sh -c "mkdir -p /var/www/public/tmp /var/www/tmp && chown -R www-data:www-data /var/www/public/tmp /var/www/tmp && chmod -R ug+rwX /var/www/public/tmp /var/www/tmp"
+"${COMPOSE[@]}" exec -T php sh -c "mkdir -p /var/www/public/tmp /var/www/tmp && chown -R www-data:www-data /var/www/public/tmp /var/www/tmp && chmod -R ug+rwX /var/www/public/tmp /var/www/tmp && if [ -f /var/www/.secret/efemer-storage@efemer-456414.iam.gserviceaccount.com.json ]; then chgrp www-data /var/www/.secret/efemer-storage@efemer-456414.iam.gserviceaccount.com.json && chmod 640 /var/www/.secret/efemer-storage@efemer-456414.iam.gserviceaccount.com.json; fi"
 echo "Restarting PHP to refresh cached table schemas..."
 "${COMPOSE[@]}" restart php
 echo "Starting Instagram archive loop..."

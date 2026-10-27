@@ -99,6 +99,7 @@ docker compose -f docker-compose.production.yml exec -T php php bin/migrate.php
 ## Gotchas
 
 - If `~/efemer2/vendor` is owned by root (from an old `docker compose run`), fix before rsync: `sudo rm -rf vendor && mkdir vendor && chown jan:jan vendor`
+- Homepage photos 500 when PHP cannot read `.secret/efemer-storage@….json` (rsync leaves it mode 600). `remote-setup.sh` chmods it `640` and group `www-data`. Image versions also need `/var/www/tmp` and `/var/www/public/tmp` writable by `www-data`.
 - `aukce` uses port `54184`, `movies` uses `50184` — efemer uses `52184`
 - Run migrations locally after schema changes (see `migrations.mdc`), then deploy
 
