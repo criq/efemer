@@ -1,0 +1,55 @@
+{% extends "Templates/admin.twig" %}
+
+{% block title %}Události{% endblock %}
+
+{% block body %}
+
+	<div class="admin-page">
+		<div class="admin-page__header">
+			<h1 class="admin-page__title">Události</h1>
+			<div class="admin-page__actions">
+				<a class="admin-button" href="{{ url("admin.events.create") }}">{% include "Blocks/adminIcon.twig" with { name: "add" } %} Nová událost</a>
+			</div>
+		</div>
+		<div class="admin-panel">
+			<table class="admin-table">
+				<thead>
+					<tr>
+						<th>Název</th>
+						<th>Kdy</th>
+						<th>Kde</th>
+						<th>Na webu</th>
+						<th>Náhled</th>
+						<th class="admin-table__actions">Akce</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for event in events %}
+						<tr>
+							<td><a href="{{ url("admin.events.edit", { eventId: event.getId }) }}">{{ event.getTitle }}</a></td>
+							<td>{{ event.getDateLabel }}</td>
+							<td>{{ event.getPlace }}</td>
+							<td>{{ event.isPublished ? "ano" : "ne" }}</td>
+							<td>
+								{% if event.getHeroImage %}
+									<img class="admin-thumbnail" src="{{ event.getHeroImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+								{% endif %}
+							</td>
+							<td class="admin-table__actions">
+								{% if event.getPublicPath %}
+									<a class="admin-button admin-button--ghost" href="{{ event.getPublicUrl }}" target="_blank" rel="noopener noreferrer">Na webu</a>
+								{% endif %}
+								<a class="admin-button admin-button--ghost" href="{{ url("admin.events.edit", { eventId: event.getId }) }}">Upravit</a>
+							</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="6">Zatím žádné události.</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+{% endblock body %}

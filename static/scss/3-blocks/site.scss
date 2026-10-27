@@ -7,8 +7,7 @@
 }
 
 .site-header {
-	backdrop-filter: blur(10px);
-	background: rgba(242, 244, 240, 0.78);
+	background: $color-bg;
 	border-bottom: 1px solid $color-line;
 	position: sticky;
 	top: 0;
@@ -21,8 +20,8 @@
 	gap: 1.5rem;
 	justify-content: space-between;
 	margin: 0 auto;
-	max-width: $layout-wide;
-	padding: $header-pad clamp(1rem, 3cqw, 2rem);
+	max-width: none;
+	padding: $header-pad clamp(1rem, 4vw, 3rem);
 }
 
 .site-brand {
@@ -39,14 +38,7 @@
 .site-brand__logo {
 	display: block;
 	height: auto;
-	opacity: .92;
-	transition: opacity 200ms ease, transform 400ms ease;
 	width: 2.75rem;
-
-	.site-brand:hover & {
-		opacity: 1;
-		transform: scale(1.03);
-	}
 }
 
 .site-brand__word {
@@ -96,13 +88,8 @@
 
 .site-main {
 	flex: 1 0 auto;
-	padding: clamp(2rem, 5cqw, 4rem) 0 clamp(3rem, 8cqw, 6rem);
-}
-
-.site-main__inner {
-	margin: 0 auto;
-	max-width: $layout-max;
-	padding: 0 clamp(1rem, 3cqw, 1.5rem);
+	max-width: 100%;
+	min-width: 0;
 }
 
 @mixin text-eyebrow {
@@ -216,7 +203,6 @@
 	h2 {
 		font-family: $font-display;
 		font-size: clamp(1.65rem, 3.5cqw, 2.15rem);
-		font-style: italic;
 		font-weight: 300;
 		letter-spacing: -0.01em;
 		line-height: 1.2;
@@ -321,45 +307,7 @@
 		img {
 			border-radius: 0;
 			display: block;
-			filter: saturate(0.92) contrast(0.98);
-			opacity: .95;
-			transition: opacity 300ms ease, filter 300ms ease;
 			width: 100%;
-
-			&:hover {
-				filter: none;
-				opacity: 1;
-			}
 		}
-	}
-}
-
-[data-reveal] {
-	animation: site-reveal 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
-	animation-delay: var(--reveal-delay, 0ms);
-}
-
-@keyframes site-reveal {
-	from {
-		opacity: 0;
-		transform: translateY(0.85rem);
-	}
-
-	to {
-		opacity: 1;
-		transform: none;
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	[data-reveal] {
-		animation: none;
-	}
-
-	.site-brand__logo,
-	.page-page-gallery__image,
-	.page-image__img,
-	.kosilky img {
-		transition: none;
 	}
 }

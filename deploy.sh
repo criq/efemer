@@ -26,6 +26,7 @@ rsync -avz \
 	--exclude="node_modules" \
 	--exclude="vendor" \
 	--exclude="data/mysql" \
+	--exclude="data/instagram" \
 	--exclude=".git" \
 	--exclude="logs" \
 	--exclude="tmp" \

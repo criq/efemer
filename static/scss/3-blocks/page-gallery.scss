@@ -17,12 +17,7 @@
 .page-gallery__image {
 	display: block;
 	height: auto;
-	transition: transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
 	width: 100%;
-
-	.page-gallery__item:hover & {
-		transform: scale(1.02);
-	}
 }
 
 .page-gallery--square .page-gallery__image {

@@ -1,0 +1,55 @@
+{% extends "Templates/admin.twig" %}
+
+{% block title %}Příspěvky{% endblock %}
+
+{% block body %}
+
+	<div class="admin-page">
+		<div class="admin-page__header">
+			<h1 class="admin-page__title">Příspěvky</h1>
+			<div class="admin-page__actions">
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.posts.index") }}">Vše</a>
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.posts.index") }}?status=review">Ke kontrole</a>
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.posts.index") }}?status=published">Veřejné</a>
+			</div>
+		</div>
+
+		<div class="admin-panel">
+			<table class="admin-table">
+				<thead>
+					<tr>
+						<th class="admin-table__id">ID</th>
+						<th>Název</th>
+						<th>Sekce</th>
+						<th>Stav</th>
+						<th>Náhled</th>
+						<th class="admin-table__actions">Akce</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for post in posts %}
+						<tr>
+							<td class="admin-table__id">{{ post.getId }}</td>
+							<td><a href="{{ url("admin.posts.edit", { postId: post.getId }) }}">{{ post.getTitle|default("—") }}</a></td>
+							<td>{{ post.getSectionTitle }}</td>
+							<td>{{ post.getStatus }}</td>
+							<td>
+								{% if post.getHeroImage %}
+									<img class="admin-thumbnail" src="{{ post.getHeroImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+								{% endif %}
+							</td>
+							<td class="admin-table__actions">
+								<a class="admin-button admin-button--ghost" href="{{ url("admin.posts.edit", { postId: post.getId }) }}">Upravit</a>
+							</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="6">Zatím žádné příspěvky.</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+{% endblock body %}

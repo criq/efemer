@@ -32,11 +32,43 @@ services:
       - ./logs:/var/logs
       - ./logs:/var/www/logs
       - ./public:/var/www/public
+      - ./data/instagram:/var/www/data/instagram
       - ./tmp:/var/www/tmp
       - ./vendor:/var/www/vendor
     working_dir: /var/www
     env_file:
       - .env
+    depends_on:
+      mysql:
+        condition: service_started
+      redis:
+        condition: service_started
+    networks:
+      - efemer-network
+
+  instagram-archive:
+    image: efemer
+    container_name: efemer_instagram_archive
+    command: ["php", "bin/archive-instagram.php", "--loop", "--interval=21600"]
+    volumes:
+      - ./.env:/var/www/.env
+      - ./.platform:/var/www/.platform
+      - ./.secret:/var/www/.secret
+      - ./app:/var/www/app
+      - ./bin:/var/www/bin
+      - ./composer.json:/var/www/composer.json
+      - ./composer.lock:/var/www/composer.lock
+      - ./data/instagram:/var/www/data/instagram
+      - ./logs:/var/logs
+      - ./logs:/var/www/logs
+      - ./tmp:/var/www/tmp
+      - ./vendor:/var/www/vendor
+    working_dir: /var/www
+    environment:
+      XDEBUG_MODE: "off"
+    env_file:
+      - .env
+    restart: unless-stopped
     depends_on:
       mysql:
         condition: service_started

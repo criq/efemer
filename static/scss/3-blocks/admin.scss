@@ -302,7 +302,11 @@
 }
 
 .admin-field textarea,
-.admin-field input[type="text"] {
+.admin-field input[type="text"],
+.admin-field input[type="url"],
+.admin-field input[type="date"],
+.admin-field input[type="datetime-local"],
+.admin-field select {
 	background: var(--admin-surface);
 	border: 1px solid var(--admin-border);
 	border-radius: var(--admin-radius);
@@ -388,6 +392,42 @@
 
 	p:last-child {
 		margin-bottom: 0;
+	}
+}
+
+.admin-fields-row {
+	display: grid;
+	gap: .75rem;
+
+	@media (min-width: 40rem) {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+.admin-ig {
+	align-items: end;
+	display: grid;
+	gap: .5rem;
+
+	@media (min-width: 40rem) {
+		grid-template-columns: 1fr auto;
+	}
+}
+
+.admin-check {
+	align-items: center;
+	display: flex;
+	gap: .5rem;
+	font-size: .875rem;
+}
+
+.admin-event-hero {
+	max-width: 12rem;
+
+	img {
+		border-radius: var(--admin-radius);
+		display: block;
+		width: 100%;
 	}
 }
 

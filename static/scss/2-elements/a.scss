@@ -3,7 +3,6 @@ a {
 	text-decoration-color: rgba(28, 33, 28, 0.25);
 	text-decoration-thickness: 1px;
 	text-underline-offset: 0.22em;
-	transition: color 180ms ease, text-decoration-color 180ms ease;
 
 	&:hover {
 		color: $color-accent;

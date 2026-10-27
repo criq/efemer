@@ -11,7 +11,7 @@ class Index extends \Katu\Controllers\Controller
 	{
 		return $response
 			->withStatus(302)
-			->withHeader("Location", (string)\Katu\Tools\Routing\URL::getFor("admin.pages.index"))
+			->withHeader("Location", (string)\Katu\Tools\Routing\URL::getFor("admin.posts.index"))
 			;
 	}
 }

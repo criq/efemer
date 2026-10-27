@@ -1,0 +1,102 @@
+{% extends "Templates/admin.twig" %}
+
+{% block title %}{{ event ? "Upravit událost" : "Nová událost" }}{% endblock %}
+
+{% block body %}
+
+	<div class="admin-page">
+		<div class="admin-page__header">
+			<h1 class="admin-page__title">{{ event ? "Upravit událost" : "Nová událost" }}</h1>
+			<div class="admin-page__actions">
+				{% if event and event.getPublicPath %}
+					<a class="admin-button admin-button--ghost" href="{{ event.getPublicUrl }}" target="_blank" rel="noopener noreferrer">Veřejná stránka</a>
+				{% endif %}
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.events.index") }}">{% include "Blocks/adminIcon.twig" with { name: "arrow_back" } %} Zpět</a>
+			</div>
+		</div>
+
+		<form class="admin-form" action="" method="POST" enctype="multipart/form-data">
+			{% include "Blocks/formHeader.twig" %}
+			{% include "Blocks/formErrors.twig" %}
+
+			<section class="admin-section">
+				<div class="admin-panel admin-field">
+					<div class="admin-ig">
+						<label class="admin-field">
+							<span class="admin-field__label">Instagram</span>
+							<input type="url" name="url" value="{{ form.url }}" placeholder="https://www.instagram.com/p/…">
+						</label>
+						<button class="admin-button admin-button--ghost" type="submit" name="action" value="fetch">Načíst z Instagramu</button>
+					</div>
+
+					<label class="admin-field">
+						<span class="admin-field__label">Název</span>
+						<input type="text" name="title" value="{{ form.title }}" autofocus>
+					</label>
+
+					<div class="admin-fields-row">
+						<label class="admin-field">
+							<span class="admin-field__label">Začátek</span>
+							<input type="datetime-local" name="startsAt" value="{{ form.startsAt }}">
+						</label>
+						<label class="admin-field">
+							<span class="admin-field__label">Konec</span>
+							<input type="datetime-local" name="endsAt" value="{{ form.endsAt }}">
+						</label>
+					</div>
+
+					<div class="admin-fields-row">
+						<label class="admin-field">
+							<span class="admin-field__label">Místo</span>
+							<input type="text" name="place" value="{{ form.place }}" placeholder="Himmelhaus">
+						</label>
+						<label class="admin-field">
+							<span class="admin-field__label">Souvisí se</span>
+							<select class="admin-select" name="section">
+								<option value="">—</option>
+								{% for code in sections %}
+									<option value="{{ code }}" {% if form.section == code %}selected{% endif %}>
+										{% if code == "ritualy" %}Svatební rituály{% elseif code == "himmelhaus" %}Himmelhaus{% else %}Umění{% endif %}
+									</option>
+								{% endfor %}
+							</select>
+						</label>
+					</div>
+
+					<label class="admin-check">
+						<input type="checkbox" name="published" value="1" {% if form.published %}checked{% endif %}>
+						<span>Zobrazit na webu</span>
+					</label>
+
+					<label class="admin-field">
+						<span class="admin-field__label">Text</span>
+						<textarea name="bodyHtml" rows="10">{{ form.bodyHtml }}</textarea>
+					</label>
+
+					{% if form.heroFileId %}
+						<input type="hidden" name="heroFileId" value="{{ form.heroFileId }}">
+					{% endif %}
+
+					{% if form.heroImage %}
+						<div class="admin-event-hero">
+							<img src="{{ form.heroImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+						</div>
+					{% endif %}
+
+					<label class="admin-field">
+						<span class="admin-field__label">Fotka</span>
+						<input type="file" name="hero" accept="image/*">
+					</label>
+				</div>
+			</section>
+
+			<div class="admin-form__footer">
+				<button class="admin-button" type="submit" name="action" value="save">Uložit</button>
+				{% if event %}
+					<a class="admin-button admin-button--ghost admin-button--danger" href="{{ url("admin.events.delete", { eventId: event.getId }) }}" data-confirm="Opravdu smazat tuhle událost?">Smazat</a>
+				{% endif %}
+			</div>
+		</form>
+	</div>
+
+{% endblock body %}

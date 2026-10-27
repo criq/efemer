@@ -1,0 +1,100 @@
+{% extends "Templates/default.twig" %}
+
+{% block title %}Efemér{% endblock %}
+
+{% block bodyClass %}site--home{% endblock %}
+
+{% block body %}
+
+	{% set showHero = true %}
+	{% set leftLead = heroImages[0]|default(null) %}
+	{% set leftAside = heroImages[1]|default(null) %}
+	{% set rightAsides = heroImages|slice(2, 2) %}
+	{% set rightLead = heroImages[4]|default(null) %}
+
+	{% if showHero %}
+	<section class="home-hero {% if leftLead or rightLead %}home-hero--collage{% else %}home-hero--text{% endif %}" data-reveal>
+		<div class="home-hero__side home-hero__side--left">
+			{% if leftLead %}
+				<a class="home-print home-print--lead" href="{{ leftLead.url }}">
+					<span class="home-print__photo">
+						<img src="{{ leftLead.image.getImageVersion("GALLERY").getURL }}" alt="">
+					</span>
+				</a>
+			{% endif %}
+			{% if leftAside %}
+				<a class="home-print home-print--aside home-print--aside-1" href="{{ leftAside.url }}">
+					<span class="home-print__photo">
+						<img src="{{ leftAside.image.getImageVersion("GALLERY").getURL }}" alt="">
+					</span>
+				</a>
+			{% endif %}
+		</div>
+
+		<div class="home-hero__text">
+			{% if event %}
+				<div class="home-hero__copy">
+					<span class="home-hero__kicker">{{ event.isHappening ? "právě probíhá" : "nadcházející" }}</span>
+					<a class="home-hero__title" href="{{ event.getPublicUrl }}">{{ event.getTitle }}</a>
+					{% if event.getPlace or event.getDateLabel %}
+						<span class="home-hero__meta">
+							{{ event.getPlace }}{% if event.getPlace and event.getDateLabel %} · {% endif %}{{ event.getDateLabel }}
+						</span>
+					{% endif %}
+					{% if event.getSummary %}
+						<p class="home-hero__summary">{{ event.getSummary }}</p>
+					{% endif %}
+					<a class="home-hero__cta" href="{{ event.getPublicUrl }}">Připoj se</a>
+				</div>
+			{% elseif latestPost %}
+				<div class="home-hero__copy">
+					<span class="home-hero__kicker">{{ latestPost.getSectionTitle|lower }}</span>
+					<a class="home-hero__title" href="{{ latestPost.getPublicUrl }}">{{ latestPost.getTitle }}</a>
+					{% if latestPost.getSummary %}
+						<p class="home-hero__summary">{{ latestPost.getSummary }}</p>
+					{% endif %}
+					<a class="home-hero__cta" href="{{ latestPost.getPublicUrl }}">Připoj se</a>
+				</div>
+			{% endif %}
+		</div>
+
+		<div class="home-hero__side home-hero__side--right">
+			{% if rightLead %}
+				<a class="home-print home-print--lead" href="{{ rightLead.url }}">
+					<span class="home-print__photo">
+						<img src="{{ rightLead.image.getImageVersion("GALLERY").getURL }}" alt="">
+					</span>
+				</a>
+			{% endif %}
+			{% for item in rightAsides %}
+				<a class="home-print home-print--aside home-print--aside-{{ loop.index }}" href="{{ item.url }}">
+					<span class="home-print__photo">
+						<img src="{{ item.image.getImageVersion("GALLERY").getURL }}" alt="">
+					</span>
+				</a>
+			{% endfor %}
+		</div>
+	</section>
+	{% endif %}
+
+	<div class="home-plots">
+		{% for section in sections %}
+			<section class="home-plot home-plot--{{ section.code }} home-plot--{{ loop.index }}" data-reveal>
+				{% set photo = section.images|first %}
+				{% if photo %}
+					<a class="home-print home-plot__photo" href="{{ photo.url }}">
+						<span class="home-print__photo">
+							<img src="{{ photo.image.getImageVersion("GALLERY").getURL }}" alt="">
+						</span>
+					</a>
+				{% endif %}
+				<div class="home-plot__copy">
+					<p class="home-plot__kicker">{{ section.navLabel }}</p>
+					<h2 class="home-plot__title"><a href="{{ section.url }}">{{ section.title }}</a></h2>
+					<p class="home-plot__lead">{{ section.lead }}</p>
+				</div>
+			</section>
+		{% endfor %}
+	</div>
+
+{% endblock body %}

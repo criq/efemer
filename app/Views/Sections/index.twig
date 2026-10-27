@@ -1,0 +1,39 @@
+{% extends "Templates/default.twig" %}
+
+{% block title %}{{ title }} · Efemér{% endblock %}
+
+{% block bodyClass %}site--section{% endblock %}
+
+{% block body %}
+
+	<div class="section-page">
+		<header class="section-page__header" data-reveal>
+			<p class="text-eyebrow">{{ title|lower }}</p>
+			<h1>{{ title }}</h1>
+			<p class="section-page__lead">{{ lead }}</p>
+		</header>
+
+		<ul class="section-index">
+			{% for post in posts %}
+				<li class="section-index__item" data-reveal>
+					<a class="section-index__link" href="{{ post.getPublicUrl }}">
+						{% if post.getHeroImage %}
+							<span class="section-index__photo">
+								<img src="{{ post.getHeroImage.getImageVersion("GALLERY").getURL }}" alt="">
+							</span>
+						{% endif %}
+						<span class="section-index__copy">
+							<span class="section-index__title">{{ post.getTitle }}</span>
+							{% if post.getPublishedAt %}
+								<span class="section-index__date">{{ post.getPublishedAt|date("j. n. Y") }}</span>
+							{% endif %}
+						</span>
+					</a>
+				</li>
+			{% else %}
+				<li class="section-index__empty">Zatím tu nic není.</li>
+			{% endfor %}
+		</ul>
+	</div>
+
+{% endblock body %}

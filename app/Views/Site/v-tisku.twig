@@ -1,0 +1,20 @@
+{% extends "Templates/default.twig" %}
+
+{% block title %}V tisku · Efemér{% endblock %}
+
+{% block body %}
+
+	<div class="plain-page" data-reveal>
+		<p class="text-eyebrow">v tisku</p>
+		<h1>Media</h1>
+		<ul class="appearances">
+			{% for appearance in appearances %}
+				<li>
+					<a href="{{ appearance.getUrl }}" target="_blank" rel="noopener noreferrer">{{ appearance.getTitle }}</a>
+					<span>{{ appearance.getOutlet }}{% if appearance.getDateLabel %} · {{ appearance.getDateLabel }}{% endif %}</span>
+				</li>
+			{% endfor %}
+		</ul>
+	</div>
+
+{% endblock body %}

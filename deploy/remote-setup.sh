@@ -29,8 +29,8 @@ else
 	echo "PHP image build context unchanged — skipping build."
 fi
 
-"${COMPOSE[@]}" up -d --no-build
-mkdir -p tmp/composer public/tmp tmp
+mkdir -p tmp/composer public/tmp tmp data/instagram
+"${COMPOSE[@]}" up -d --no-build nginx php mysql redis
 echo "Installing Composer dependencies..."
 "${COMPOSE[@]}" exec -T -e COMPOSER_HOME="${ROOT}/tmp/composer" -u "$(id -u):$(id -g)" php composer install --no-dev --optimize-autoloader --no-interaction
 "${COMPOSE[@]}" exec -T php php bin/migrate.php
@@ -39,5 +39,7 @@ echo "Ensuring www-data can write image/tmp caches..."
 "${COMPOSE[@]}" exec -T php sh -c "mkdir -p /var/www/public/tmp /var/www/tmp && chown -R www-data:www-data /var/www/public/tmp /var/www/tmp && chmod -R ug+rwX /var/www/public/tmp /var/www/tmp"
 echo "Restarting PHP to refresh cached table schemas..."
 "${COMPOSE[@]}" restart php
+echo "Starting Instagram archive loop..."
+"${COMPOSE[@]}" up -d --no-build instagram-archive
 
 echo "Efemer containers are up."

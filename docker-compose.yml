@@ -35,6 +35,7 @@ services:
       - ./logs:/var/logs
       - ./logs:/var/www/logs
       - ./public:/var/www/public
+      - ./data/instagram:/var/www/data/instagram
       - ./tmp:/var/www/tmp
       - ./vendor:/var/www/vendor
     working_dir: /var/www

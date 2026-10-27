@@ -1,0 +1,60 @@
+{% extends "Templates/admin.twig" %}
+
+{% block title %}{{ post.getTitle|default("Příspěvek") }}{% endblock %}
+
+{% block body %}
+
+	<div class="admin-page">
+		<div class="admin-page__header">
+			<h1 class="admin-page__title">{{ post.getTitle|default("Příspěvek") }}</h1>
+			{% if post.getPublicPath %}
+				<a class="admin-button admin-button--ghost" href="{{ post.getPublicUrl }}" target="_blank" rel="noopener noreferrer">Veřejná stránka</a>
+			{% endif %}
+		</div>
+
+		<form class="admin-form" action="" method="POST">
+			{% include "Blocks/formHeader.twig" %}
+			{% include "Blocks/formErrors.twig" %}
+
+			<section class="admin-section">
+				<div class="admin-panel admin-field">
+					<label class="admin-field">
+						<span class="admin-field__label">Název</span>
+						<input type="text" name="title" value="{{ post.getTitle }}" autofocus>
+					</label>
+					<label class="admin-field">
+						<span class="admin-field__label">Sekce</span>
+						<select name="section">
+							{% for code in sections %}
+								<option value="{{ code }}" {% if post.getSection == code %}selected{% endif %}>
+									{% if code == "ritualy" %}Svatební rituály{% elseif code == "himmelhaus" %}Himmelhaus{% else %}Umění{% endif %}
+								</option>
+							{% endfor %}
+						</select>
+					</label>
+					<label class="admin-field">
+						<span class="admin-field__label">Stav</span>
+						<select name="status">
+							<option value="review" {% if post.getStatus == "review" %}selected{% endif %}>Ke kontrole</option>
+							<option value="published" {% if post.getStatus == "published" %}selected{% endif %}>Veřejný</option>
+							<option value="hidden" {% if post.getStatus == "hidden" %}selected{% endif %}>Skrytý</option>
+						</select>
+					</label>
+					<label class="admin-field">
+						<span class="admin-field__label">Perex</span>
+						<textarea name="excerpt" rows="3">{{ post.getExcerpt }}</textarea>
+					</label>
+					<label class="admin-field">
+						<span class="admin-field__label">Text</span>
+						<textarea name="bodyHtml" rows="12">{{ post.getBodyHtml }}</textarea>
+					</label>
+				</div>
+			</section>
+
+			<p class="admin-form__submit">
+				<button class="admin-button" type="submit">Uložit</button>
+			</p>
+		</form>
+	</div>
+
+{% endblock body %}

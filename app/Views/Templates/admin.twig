@@ -16,9 +16,11 @@
 
 		<header class="admin-header">
 			<div class="admin-header__inner">
-				<a class="admin-header__brand" href="{{ url("admin.pages.index") }}">Efemer</a>
+				<a class="admin-header__brand" href="{{ url("admin.posts.index") }}">Efemer</a>
 				<nav class="admin-header__nav">
-					<a class="admin-header__link" href="{{ url("admin.pages.index") }}">{% include "Blocks/adminIcon.twig" with { name: "description" } %} Stránky</a>
+					<a class="admin-header__link" href="{{ url("admin.posts.index") }}">{% include "Blocks/adminIcon.twig" with { name: "description" } %} Příspěvky</a>
+					<a class="admin-header__link" href="{{ url("admin.events.index") }}">{% include "Blocks/adminIcon.twig" with { name: "event" } %} Události</a>
+					<a class="admin-header__link" href="{{ url("admin.pages.index") }}">{% include "Blocks/adminIcon.twig" with { name: "note" } %} Stránky</a>
 					<a class="admin-header__link" href="{{ url("admin.storageFiles.index") }}">{% include "Blocks/adminIcon.twig" with { name: "perm_media" } %} Soubory</a>
 					<a class="admin-header__link admin-header__link--muted" href="{{ url("homepage.index") }}">{% include "Blocks/adminIcon.twig" with { name: "public" } %} Web</a>
 				</nav>

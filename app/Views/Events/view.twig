@@ -1,0 +1,40 @@
+{% extends "Templates/default.twig" %}
+
+{% block title %}{{ event.getTitle }} · Efemér{% endblock %}
+
+{% block bodyClass %}site--post{% endblock %}
+
+{% block body %}
+
+	<article class="post-page">
+		<header class="post-page__header" data-reveal>
+			<p class="text-eyebrow"><a href="{{ sectionPath }}">{{ sectionTitle|lower }}</a></p>
+			<h1>{{ event.getTitle }}</h1>
+			<p class="post-page__date">
+				{{ event.getDateLabel }}{% if event.getPlace %} · {{ event.getPlace }}{% endif %}
+			</p>
+			{% if relatedTitle %}
+				<p class="post-page__related">souvisí se: <a href="{{ relatedPath }}">{{ relatedTitle|lower }}</a></p>
+			{% endif %}
+		</header>
+
+		{% if event.getHeroImage %}
+			<figure class="post-page__hero" data-reveal>
+				<img src="{{ event.getHeroImage.getImageVersion("GALLERY").getURL }}" alt="">
+			</figure>
+		{% endif %}
+
+		{% if event.getBodyHtml %}
+			<div class="post-page__body" data-reveal>
+				{{ event.getBodyHtml|raw }}
+			</div>
+		{% endif %}
+
+		{% if event.isExternal %}
+			<p class="post-page__out" data-reveal>
+				<a href="{{ event.getUrl }}" target="_blank" rel="noopener noreferrer">na Instagramu</a>
+			</p>
+		{% endif %}
+	</article>
+
+{% endblock body %}
