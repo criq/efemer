@@ -190,8 +190,8 @@
 	text-decoration: none;
 
 	&:hover {
-		color: $color-accent;
-		text-decoration: none;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
 	}
 }
 
@@ -228,7 +228,8 @@
 	&:hover {
 		background: $color-ink;
 		color: $color-bg;
-		text-decoration: none;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
 	}
 }
 

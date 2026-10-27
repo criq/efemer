@@ -11151,9 +11151,9 @@ body.builder .builder-file-list--insert:not(:empty),
   text-decoration: none;
 }
 .home-hero__title:hover {
-  color: #6f7d68;
-  -webkit-text-decoration: none;
-  text-decoration: none;
+  -webkit-text-decoration: underline;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
 }
 
 .home-hero__meta {
@@ -11190,8 +11190,9 @@ body.builder .builder-file-list--insert:not(:empty),
 .home-hero__cta:hover {
   background: #1c211c;
   color: #fff;
-  -webkit-text-decoration: none;
-  text-decoration: none;
+  -webkit-text-decoration: underline;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
 }
 
 .home-plot {
