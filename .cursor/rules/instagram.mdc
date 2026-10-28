@@ -28,15 +28,19 @@ printf '%s' "$SESSIONID" | gcloud secrets versions add instagram-session-id \
 
 ## Run (ingest jobs)
 
+Prefer `./bin/job` (TTY) so Ctrl+C kills the job:
+
 ```bash
-docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"efemer_flowers","full":true}' -f
-docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"himmlhaus","full":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"efemer_flowers","full":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"himmlhaus","full":true}' -f
 
 # both accounts
-docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f
 
 # offline dump under data/instagram
-docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
 ```
+
+On HTTP 429 the client waits (60s → … capped at 15m, up to 8 attempts, honors `Retry-After`) then retries; Ctrl+C still interrupts waits. Browser OK ≠ archive API unthrottled.
 
 Production `instagram-archive` loops `jobs:loop …RefreshInstagramAccounts` every 6 hours.

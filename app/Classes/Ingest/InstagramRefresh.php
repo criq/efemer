@@ -18,6 +18,7 @@ class InstagramRefresh
 	public const DEFAULT_MAX_NEW = 20;
 	public const INCREMENTAL_MAX_SCAN = 36;
 	public const BACKFILL_MAX_SCAN = 1000;
+	private const POST_DELAY_MICROSECONDS = 2_000_000;
 
 	/** @var list<callable(string): void> */
 	private array $loggers = [];
@@ -36,7 +37,7 @@ class InstagramRefresh
 		}
 
 		$sessionid = Session::load();
-		$client = new Client($sessionid);
+		$client = (new Client($sessionid))->onLog(fn (string $message) => $this->log(ConsoleStyle::muted($message)));
 		$loader = (new Loader)->onLog(fn (string $message) => $this->log($message));
 		$state = new ArchiveState;
 
@@ -94,7 +95,7 @@ class InstagramRefresh
 					break;
 				}
 
-				usleep(1_200_000);
+				usleep(self::POST_DELAY_MICROSECONDS);
 			}
 		} catch (RateLimitedException $exception) {
 			$reachedEnd = false;

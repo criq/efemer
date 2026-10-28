@@ -2,6 +2,7 @@
 
 namespace App\Classes\Instagram;
 
+use App\Classes\Jobs\Signals;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
@@ -10,9 +11,16 @@ class Client
 {
 	private const APP_ID = "936619743392459";
 	private const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+	private const RATE_LIMIT_ATTEMPTS = 8;
+	private const RATE_LIMIT_BASE_SECONDS = 60;
+	private const RATE_LIMIT_MAX_SECONDS = 900;
+	private const PAGE_DELAY_MICROSECONDS = 3_000_000;
 
 	private HttpClient $http;
 	private HttpClient $downloadHttp;
+
+	/** @var list<callable(string): void> */
+	private array $loggers = [];
 
 	public function __construct(string $sessionid)
 	{
@@ -45,6 +53,13 @@ class Client
 				"Referer" => "https://www.instagram.com/",
 			],
 		]);
+	}
+
+	public function onLog(callable $logger): self
+	{
+		$this->loggers[] = $logger;
+
+		return $this;
 	}
 
 	/**
@@ -93,7 +108,7 @@ class Client
 			}
 
 			$maxId = (string)$page["next_max_id"];
-			usleep(2_000_000);
+			usleep(self::PAGE_DELAY_MICROSECONDS);
 		}
 	}
 
@@ -378,29 +393,76 @@ class Client
 	 */
 	private function getJson(string $url): array
 	{
-		try {
-			$response = $this->http->request("GET", $url);
-		} catch (GuzzleException $exception) {
-			throw new \RuntimeException("Instagram request failed: " . $exception->getMessage(), 0, $exception);
+		$attempt = 0;
+		while (true) {
+			$attempt++;
+			Signals::throwIfStopped();
+
+			try {
+				$response = $this->http->request("GET", $url);
+			} catch (GuzzleException $exception) {
+				throw new \RuntimeException("Instagram request failed: " . $exception->getMessage(), 0, $exception);
+			}
+
+			$body = (string)$response->getBody();
+			$status = $response->getStatusCode();
+
+			if ($status === 429) {
+				if ($attempt >= self::RATE_LIMIT_ATTEMPTS) {
+					throw new RateLimitedException(
+						"Instagram rate-limited the archive request after {$attempt} attempts.",
+					);
+				}
+
+				$delay = $this->rateLimitDelaySeconds($attempt, $response);
+				$this->log(sprintf(
+					"Instagram HTTP 429 — waiting %ss before retry %s/%s.",
+					$delay,
+					$attempt + 1,
+					self::RATE_LIMIT_ATTEMPTS,
+				));
+				$this->sleepInterruptible($delay);
+				continue;
+			}
+
+			$this->assertSession($response, $body);
+			$json = json_decode($body, true);
+			if (!is_array($json)) {
+				throw new \RuntimeException("Instagram returned non-JSON from {$url}.");
+			}
+
+			return $json;
+		}
+	}
+
+	private function rateLimitDelaySeconds(int $attempt, ResponseInterface $response): int
+	{
+		$retryAfter = trim($response->getHeaderLine("Retry-After"));
+		if ($retryAfter !== "" && ctype_digit($retryAfter)) {
+			return min(self::RATE_LIMIT_MAX_SECONDS, max(30, (int)$retryAfter));
 		}
 
-		$body = (string)$response->getBody();
-		$this->assertSession($response, $body);
-		$json = json_decode($body, true);
-		if (!is_array($json)) {
-			throw new \RuntimeException("Instagram returned non-JSON from {$url}.");
-		}
+		$delay = self::RATE_LIMIT_BASE_SECONDS * (2 ** max(0, $attempt - 1));
 
-		return $json;
+		return (int)min(self::RATE_LIMIT_MAX_SECONDS, $delay);
+	}
+
+	private function sleepInterruptible(int $seconds): void
+	{
+		$deadline = time() + max(0, $seconds);
+		while (true) {
+			Signals::throwIfStopped();
+			$remaining = $deadline - time();
+			if ($remaining <= 0) {
+				return;
+			}
+			sleep(min(5, $remaining));
+		}
 	}
 
 	private function assertSession(ResponseInterface $response, string $body = ""): void
 	{
 		$status = $response->getStatusCode();
-		if ($status === 429) {
-			throw new RateLimitedException("Instagram rate-limited the archive request.");
-		}
-
 		$location = $response->getHeaderLine("Location");
 		if (in_array($status, [301, 302, 303, 307, 308], true) && str_contains($location, "login")) {
 			throw new SessionExpiredException("Instagram sessionid was rejected (redirected to login).");
@@ -416,6 +478,13 @@ class Client
 
 		if (str_contains($body, "checkpoint_required") || str_contains($body, "\"challenge_required\"")) {
 			throw new SessionExpiredException("Instagram session needs a checkpoint. Refresh sessionid in Secret Manager.");
+		}
+	}
+
+	private function log(string $message): void
+	{
+		foreach ($this->loggers as $logger) {
+			$logger($message);
 		}
 	}
 }
