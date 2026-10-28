@@ -41,19 +41,37 @@ class KeywordAnalyzer
 
 		$files = array_values($item->getFiles()->getArrayCopy());
 		$prepared = $this->prepareImages($files, $maxImages);
-		$parts = [];
-		$parts[] = ["text" => $this->buildUserPrompt($item, $files, $prepared)];
-		foreach ($prepared["images"] as $image) {
-			$parts[] = [
-				"inline_data" => [
-					"mime_type" => "image/jpeg",
-					"data" => $image["base64"],
-				],
+		/** @var list<int> $blockedPositions */
+		$blockedPositions = [];
+
+		try {
+			$result = $this->callGemini($item, $files, $prepared);
+		} catch (\Throwable $exception) {
+			if (!$this->isPromptBlocked($exception) || $prepared["images"] === []) {
+				throw $exception;
+			}
+
+			$reason = $this->blockReason($exception);
+			$this->log(ConsoleStyle::warn(
+				"Gemini blocked multimodal prompt ({$reason}) — isolating safe photos.",
+			));
+
+			$allowed = $this->selectAllowedImages($prepared["images"]);
+			$blockedPositions = $this->positionsNotIn($prepared["images"], $allowed);
+			foreach ($blockedPositions as $position) {
+				$this->log(ConsoleStyle::warn("Skipping blocked photo position={$position}."));
+			}
+
+			$prepared = [
+				"images" => $allowed,
+				"missing" => $prepared["missing"],
+				"skippedVideo" => $prepared["skippedVideo"],
+				"imagesOmitted" => $allowed === [],
+				"blockedPositions" => $blockedPositions,
 			];
-			$parts[] = ["text" => "[photo position={$image["position"]} fileIndex={$image["index"]}]"];
+			$result = $this->callGemini($item, $files, $prepared);
 		}
 
-		$result = $this->gemini->generateContent($parts, $this->systemInstruction());
 		$usage = $result["usage"];
 		$this->log(sprintf(
 			"Tokens prompt=%s candidates=%s total=%s",
@@ -69,9 +87,193 @@ class KeywordAnalyzer
 			return ["item" => $item, "dryRunPayload" => $payload];
 		}
 
+		if ($blockedPositions !== []) {
+			$flags = $item->getQualityFlags();
+			if (!in_array("llm_images_blocked", $flags, true)) {
+				$flags[] = "llm_images_blocked";
+				$item->setQualityFlags($flags);
+			}
+		}
+
 		$this->apply($item, $files, $payload, $result["text"]);
+		if ($blockedPositions !== []) {
+			$this->markBlockedFiles($files, $blockedPositions, $item);
+		}
 
 		return ["item" => $item];
+	}
+
+	/**
+	 * @param list<IngestItemFile> $files
+	 * @param array{images: list<array{index: int, position: int, base64: string}>, missing: list<int>, skippedVideo: list<int>, imagesOmitted?: bool, blockedPositions?: list<int>} $prepared
+	 * @return array{text: string, usage: array<string, mixed>, raw: array<string, mixed>}
+	 */
+	private function callGemini(IngestItem $item, array $files, array $prepared): array
+	{
+		$parts = [];
+		$parts[] = ["text" => $this->buildUserPrompt($item, $files, $prepared)];
+		foreach ($prepared["images"] as $image) {
+			$parts[] = [
+				"inline_data" => [
+					"mime_type" => "image/jpeg",
+					"data" => $image["base64"],
+				],
+			];
+			$parts[] = ["text" => "[photo position={$image["position"]} fileIndex={$image["index"]}]"];
+		}
+
+		return $this->gemini->generateContent($parts, $this->systemInstruction());
+	}
+
+	/**
+	 * Binary-partition probe: keep photos that pass the safety filter alone or in a safe group.
+	 *
+	 * @param list<array{index: int, position: int, base64: string}> $images
+	 * @return list<array{index: int, position: int, base64: string}>
+	 */
+	private function selectAllowedImages(array $images): array
+	{
+		if ($images === []) {
+			return [];
+		}
+
+		Signals::throwIfStopped();
+
+		if ($this->probeImagesAllowed($images)) {
+			return $images;
+		}
+
+		if (count($images) === 1) {
+			return [];
+		}
+
+		$mid = intdiv(count($images), 2);
+
+		return array_values(array_merge(
+			$this->selectAllowedImages(array_slice($images, 0, $mid)),
+			$this->selectAllowedImages(array_slice($images, $mid)),
+		));
+	}
+
+	/**
+	 * Cheap multimodal ping — only checks whether the image set is accepted.
+	 *
+	 * @param list<array{index: int, position: int, base64: string}> $images
+	 */
+	private function probeImagesAllowed(array $images): bool
+	{
+		$parts = [
+			["text" => "Safety probe only. Respond with JSON {\"ok\":true}."],
+		];
+		foreach ($images as $image) {
+			$parts[] = [
+				"inline_data" => [
+					"mime_type" => "image/jpeg",
+					"data" => $image["base64"],
+				],
+			];
+		}
+
+		try {
+			$this->gemini->generateContent($parts, null);
+
+			return true;
+		} catch (\Throwable $exception) {
+			if ($this->isPromptBlocked($exception)) {
+				return false;
+			}
+
+			throw $exception;
+		}
+	}
+
+	/**
+	 * @param list<array{index: int, position: int, base64: string}> $all
+	 * @param list<array{index: int, position: int, base64: string}> $allowed
+	 * @return list<int>
+	 */
+	private function positionsNotIn(array $all, array $allowed): array
+	{
+		$allowedPositions = [];
+		foreach ($allowed as $image) {
+			$allowedPositions[(int)$image["position"]] = true;
+		}
+
+		$blocked = [];
+		foreach ($all as $image) {
+			$position = (int)$image["position"];
+			if (!isset($allowedPositions[$position])) {
+				$blocked[] = $position;
+			}
+		}
+
+		return $blocked;
+	}
+
+	/**
+	 * @param list<IngestItemFile> $files
+	 * @param list<int> $blockedPositions
+	 */
+	private function markBlockedFiles(array $files, array $blockedPositions, IngestItem $item): void
+	{
+		$blockedSet = array_fill_keys($blockedPositions, true);
+		$coverWasBlocked = false;
+
+		foreach ($files as $index => $file) {
+			$position = (int)($file->getPosition() ?? ($index + 1));
+			if (!isset($blockedSet[$position])) {
+				continue;
+			}
+
+			$file->setDemote(true);
+			if (!$file->isRoleLocked()) {
+				$file->setRole(IngestItemFile::ROLE_SKIP);
+				$file->setRoleRationale("Vyřazeno: Gemini safety filter");
+			}
+			if ($file->isCover()) {
+				$file->setIsCover(false);
+				$coverWasBlocked = true;
+			}
+			$file->persist();
+		}
+
+		if (!$coverWasBlocked || $item->isCoverLocked()) {
+			return;
+		}
+
+		$cover = $this->resolveCover($files, null);
+		foreach ($files as $file) {
+			$isCover = $cover && (int)$file->getId() === (int)$cover->getId();
+			$file->setIsCover($isCover);
+			$file->persist();
+		}
+		$item->setCoverFileId($cover ? (int)$cover->getId() : null);
+		$rationale = trim((string)$item->getCoverRationale());
+		$suffix = "(cover přepočten po safety filtru)";
+		if (!str_contains($rationale, $suffix)) {
+			$item->setCoverRationale(trim(($rationale !== "" ? $rationale . " " : "") . $suffix));
+		}
+		$item->persist();
+	}
+
+	private function isPromptBlocked(\Throwable $exception): bool
+	{
+		$message = $exception->getMessage();
+
+		return str_contains($message, "blocked: PROHIBITED_CONTENT")
+			|| str_contains($message, "blocked: SAFETY")
+			|| str_contains($message, "blocked: BLOCKLIST")
+			|| str_contains($message, "blocked: OTHER")
+			|| str_contains($message, "blocked: IMAGE_SAFETY");
+	}
+
+	private function blockReason(\Throwable $exception): string
+	{
+		if (preg_match("/blocked:\s*(\w+)/", $exception->getMessage(), $match)) {
+			return $match[1];
+		}
+
+		return "unknown";
 	}
 
 	/**
@@ -192,7 +394,7 @@ class KeywordAnalyzer
 
 	/**
 	 * @param list<IngestItemFile> $files
-	 * @param array{images: list<array{index: int, position: int, base64: string}>, missing: list<int>, skippedVideo: list<int>} $prepared
+	 * @param array{images: list<array{index: int, position: int, base64: string}>, missing: list<int>, skippedVideo: list<int>, imagesOmitted?: bool, blockedPositions?: list<int>} $prepared
 	 */
 	private function buildUserPrompt(IngestItem $item, array $files, array $prepared): string
 	{
@@ -218,7 +420,7 @@ class KeywordAnalyzer
 			$prepared["images"],
 		);
 
-		return implode("\n", [
+		$lines = [
 			"Analyze this florist / floral-art ingest item.",
 			"Source: " . $item->getSourceLabel(),
 			"Title: " . ($item->getTitle() ?: "(none)"),
@@ -232,11 +434,28 @@ class KeywordAnalyzer
 			"Attached images (in order after this text): " . ($attached ? implode("; ", $attached) : "(none)"),
 			"Missing downloads: " . ($prepared["missing"] ? implode(", ", $prepared["missing"]) : "(none)"),
 			"Skipped videos: " . ($prepared["skippedVideo"] ? implode(", ", $prepared["skippedVideo"]) : "(none)"),
-			"",
-			"Return JSON only matching the schema in the system instruction.",
-			"coverFileId must be an ingest_item_files id from the list above (or null).",
-			"layoutHints.blocks[].fileIds must use those same file ids.",
-		]);
+		];
+
+		$blockedPositions = isset($prepared["blockedPositions"]) && is_array($prepared["blockedPositions"])
+			? $prepared["blockedPositions"]
+			: [];
+		if ($blockedPositions !== [] || !empty($prepared["imagesOmitted"])) {
+			$lines[] = "";
+			if (!empty($prepared["imagesOmitted"])) {
+				$lines[] = "NOTE: All photos were omitted — multimodal request blocked by the model safety filter (often baptism / infant / child portraits). Infer keywords/themes/kind from the title and file list only. Prefer coverFileId = first non-blocked pre_copy file id. For files[], use conservative roles; do not invent people details.";
+			} else {
+				$lines[] = "NOTE: Some photos were omitted after the safety filter blocked them (positions: "
+					. implode(", ", $blockedPositions)
+					. "). Analyze only the attached images. Mark omitted file ids as demote=true, role=skip. Prefer coverFileId among attached/safe files (still prefer pre_copy when attached).";
+			}
+		}
+
+		$lines[] = "";
+		$lines[] = "Return JSON only matching the schema in the system instruction.";
+		$lines[] = "coverFileId must be an ingest_item_files id from the list above (or null).";
+		$lines[] = "layoutHints.blocks[].fileIds must use those same file ids.";
+
+		return implode("\n", $lines);
 	}
 
 	private function systemInstruction(): string
