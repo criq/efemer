@@ -246,6 +246,38 @@ class IngestItem extends \Katu\Models\Model
 		return is_array($decoded) ? array_values(array_filter($decoded, "is_string")) : [];
 	}
 
+	public function hasQualityFlag(string $flag): bool
+	{
+		return in_array($flag, $this->getQualityFlags(), true);
+	}
+
+	public function addQualityFlag(string $flag): IngestItem
+	{
+		$flag = trim($flag);
+		if ($flag === "") {
+			return $this;
+		}
+
+		$flags = $this->getQualityFlags();
+		if (!in_array($flag, $flags, true)) {
+			$flags[] = $flag;
+			$this->setQualityFlags($flags);
+		}
+
+		return $this;
+	}
+
+	public function removeQualityFlag(string $flag): IngestItem
+	{
+		$flags = array_values(array_filter(
+			$this->getQualityFlags(),
+			fn (string $existing) => $existing !== $flag,
+		));
+		$this->setQualityFlags($flags);
+
+		return $this;
+	}
+
 	public function clearEnrichment(): IngestItem
 	{
 		$this->kind = null;

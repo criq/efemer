@@ -496,7 +496,7 @@ Respond with a single JSON object (no markdown) using this shape:
 }
 
 Rules:
-- Item keywords/themes/entities and per-file keywords, altText, rationales in correct Czech (spell-check; no typos like florisitika).
+- Item keywords/themes/entities and per-file keywords, altText, rationales in correct Czech (Latin script only — never Cyrillic). Spell-check; write floristika correctly (not florika, florisitika, or garbled stems).
 - Keywords: lowercase except proper names / place names. Avoid duplicate casing variants.
 - Each file needs 3–8 specific keywords (plants, objects, people, mood, place) — not only copies of item keywords.
 - kind:
@@ -554,9 +554,9 @@ PROMPT;
 			$byId[(int)$file->getId()] = $file;
 		}
 
-		$item->setKeywordsList($this->normalizeKeywordList($payload["keywords"] ?? null));
-		$item->setThemesList($this->normalizeKeywordList($payload["themes"] ?? null));
-		$item->setEntitiesList($this->normalizeKeywordList($payload["entities"] ?? null, preserveCase: true));
+		$item->setKeywordsList(KeywordNormalizer::normalizeList($payload["keywords"] ?? null));
+		$item->setThemesList(KeywordNormalizer::normalizeList($payload["themes"] ?? null));
+		$item->setEntitiesList(KeywordNormalizer::normalizeList($payload["entities"] ?? null, preserveCase: true));
 		$item->setKind($this->normalizeKind($payload["kind"] ?? null));
 		$item->setPalette($this->stringList($payload["palette"] ?? null));
 		$seriesKey = isset($payload["seriesKey"]) && is_string($payload["seriesKey"]) ? trim($payload["seriesKey"]) : null;
@@ -585,7 +585,7 @@ PROMPT;
 
 			$demote = !empty($row["demote"]);
 			$file->setDemote($demote);
-			$file->setKeywords($this->normalizeKeywordList($row["keywords"] ?? null) ?: null);
+			$file->setKeywords(KeywordNormalizer::normalizeList($row["keywords"] ?? null) ?: null);
 			$file->setRating($this->clampRating($row["rating"] ?? null));
 			$file->setAltText($this->nullableString($row["altText"] ?? null));
 			$file->setOrientation($this->nullableString($row["orientation"] ?? null));
@@ -823,53 +823,6 @@ PROMPT;
 		}
 
 		return array_values(array_unique($out));
-	}
-
-	/**
-	 * Lowercase Czech keywords (unless preserveCase for entities), collapse dupes, fix known typos.
-	 *
-	 * @return list<string>
-	 */
-	private function normalizeKeywordList(mixed $value, bool $preserveCase = false): array
-	{
-		$out = [];
-		$seen = [];
-		foreach ($this->stringList($value) as $raw) {
-			$keyword = $this->fixKnownTypos($raw);
-			if (!$preserveCase) {
-				$keyword = $this->lowercaseKeyword($keyword);
-			}
-			$key = mb_strtolower($keyword);
-			if (isset($seen[$key])) {
-				continue;
-			}
-			$seen[$key] = true;
-			$out[] = $keyword;
-		}
-
-		return $out;
-	}
-
-	private function lowercaseKeyword(string $keyword): string
-	{
-		// Keep short ALLCAPS tokens (LP, PF) and mixed proper-looking tokens with capitals after space handled simply:
-		if (preg_match('/^[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]{2,5}$/u', $keyword)) {
-			return $keyword;
-		}
-
-		return mb_strtolower($keyword);
-	}
-
-	private function fixKnownTypos(string $keyword): string
-	{
-		$map = [
-			"florisitika" => "floristika",
-			"přírodní florisitika" => "přírodní floristika",
-			"autorská florisitika" => "autorská floristika",
-		];
-		$lower = mb_strtolower(trim($keyword));
-
-		return $map[$lower] ?? trim($keyword);
 	}
 
 	private function nullableString(mixed $value): ?string
