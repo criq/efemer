@@ -39,7 +39,7 @@ Primary edit surface: `/admin/pages/{id}/builder` (Czech florist UI). Classic ta
 ## Import from efemer.cz
 
 ```bash
-docker compose exec -T php php bin/import-efemer-cz.php
+docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Pages.ImportEfemerCz -f
 ```
 
-Wipes existing pages, recreates homepage (intro `TEXT` + Principy / Já / Pro vás + diary `PAGE_GALLERY`) and all diary posts (title `TEXT` + hero `IMAGE` + optional body `TEXT` + `IMAGE_GALLERY`). Images go to GCS bucket `efemer-files`.
+Wipes existing pages, recreates homepage (intro `TEXT` + Principy / Já / Pro vás + diary `PAGE_GALLERY`) and all diary posts (title `TEXT` + hero `IMAGE` + optional body `TEXT` + `IMAGE_GALLERY`). Images go to GCS bucket `efemer`. For the content-model ingest pipeline use `App.Classes.Jobs.Ingest.RefreshEfemerCz` instead.

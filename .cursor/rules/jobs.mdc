@@ -1,0 +1,19 @@
+---
+description: Run operational tasks as Katu jobs via bin/cli.php
+alwaysApply: true
+---
+
+# Katu jobs
+
+Use `bin/cli.php` from the project directory (`~/Sites/efemer`):
+
+```bash
+docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.… -f
+docker compose exec -T php php bin/cli.php jobs:loop App.Classes.Jobs.… --interval=21600 -f
+```
+
+Portable class names use dots instead of backslashes. Pass JSON with `--args='{"key":"value"}'`.
+
+Do not add new `bin/*.php` one-off scripts for ops — add a job under `app/Classes/Jobs/` instead. Legacy `bin/*` stubs only print the job command.
+
+Color all job / ingest / import logs via `App\Classes\Jobs\ConsoleStyle` (never raw `<fg=…>` or `<error>` tags). Palette: cyan steps/progress, green success, yellow skip/warn, red errors, magenta paths, white bold titles/counts, gray secondary.

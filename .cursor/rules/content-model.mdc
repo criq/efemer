@@ -1,5 +1,5 @@
 ---
-description: Public content model — four sections, events, Instagram import
+description: Public content model — four sections, events, ingest pipeline
 alwaysApply: true
 ---
 
@@ -9,11 +9,12 @@ Public site is **not** assembled from the page-component tree. Typed entities:
 
 | Entity | Role |
 |---|---|
-| `posts` | Work shown in three practice sections |
+| `ingest_items` | Raw imported sources (stage 1+); not public |
+| `posts` | Work shown in practice sections (after materialize) |
 | `events` | Happenings; fourth public section + homepage banner |
 | `appearances` | Press / v tisku |
 
-## Sections (never show codes in chrome)
+## Sections (provisional — taxonomy may change after keyword corpus)
 
 | Code | Czech | Path | Entity |
 |---|---|---|---|
@@ -34,12 +35,6 @@ Visual layout is in `homepage.mdc`. Text is the next published current or upcomi
 
 Public listing at `/udalosti` (nadcházející / proběhlé). Detail at `/udalosti/{slug}`. Optional related work section + Instagram `url`. Admin **Události**: create/edit with optional Instagram URL (“Načíst z Instagramu”).
 
-## Instagram
+## Import
 
-Continuous archive (Secret Manager session `instagram-session-id`, see `instagram.mdc`):
-
-```bash
-docker compose exec -T php php bin/archive-instagram.php
-```
-
-`@himmlhaus` → Himmelhaus. `@efemer_flowers` classified by caption (rituály / umění). Confidence below 0.75 → status `review`.
+Load into ingest via Katu jobs first (see `ingest.mdc`). Do not write public `posts` from refresh jobs.

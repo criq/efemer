@@ -40,7 +40,7 @@ Deploy progress:
 Required when schema changed. Skip if no migration files in the change set.
 
 ```bash
-docker compose exec -T php php bin/migrate.php
+docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Database.Migrate -f
 ```
 
 Success: output ends with `Migrations complete.`
@@ -81,7 +81,7 @@ This script:
 docker compose -f docker-compose.production.yml build php   # skipped when context unchanged
 docker compose -f docker-compose.production.yml up -d --no-build
 docker compose -f docker-compose.production.yml exec -T php composer install --no-dev --optimize-autoloader --no-interaction
-docker compose -f docker-compose.production.yml exec -T php php bin/migrate.php
+docker compose -f docker-compose.production.yml exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Database.Migrate -f
 ```
 
 ### Deploy failures

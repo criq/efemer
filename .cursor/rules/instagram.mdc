@@ -1,11 +1,11 @@
 ---
-description: Continuous Instagram archive of @efemer_flowers and @himmlhaus
+description: Instagram session and stage-1 ingest refresh for @efemer_flowers and @himmlhaus
 alwaysApply: true
 ---
 
-# Instagram archive
+# Instagram
 
-Continuously dump `@efemer_flowers` and `@himmlhaus` into `posts` (idempotent on `instagramAccount` + `instagramShortcode`).
+Stage 1 loads `@efemer_flowers` and `@himmlhaus` into **`ingest_items`** (idempotent on `account:shortcode`). Categorization and public posts come later.
 
 ## Session
 
@@ -26,13 +26,17 @@ printf '%s' "$SESSIONID" | gcloud secrets versions add instagram-session-id \
   --project=efemer-456414 --account=jablunka@gmail.com --data-file=-
 ```
 
-## Run
+## Run (ingest jobs)
 
 ```bash
-docker compose exec -T php php bin/archive-instagram.php
-docker compose exec -T php php bin/archive-instagram.php --full
+docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"efemer_flowers","full":true}' -f
+docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"himmlhaus","full":true}' -f
+
+# both accounts
+docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f
+
+# offline dump under data/instagram
+docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
 ```
 
-Production `instagram-archive` service loops every 6 hours. Each run imports up to 20 new posts per account, skips shortcodes already in the database, then walks older posts until the profile is backfilled.
-
-`@himmlhaus` → Himmelhaus. `@efemer_flowers` classified by caption. Confidence below 0.75 → status `review`.
+Production `instagram-archive` loops `jobs:loop …RefreshInstagramAccounts` every 6 hours.

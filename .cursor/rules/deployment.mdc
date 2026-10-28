@@ -40,7 +40,7 @@ Reload after changes: `sudo caddy validate --config /etc/caddy/Caddyfile && sudo
 ## GCS (files)
 
 - GCP project: `efemer-456414` (see `gcloud-project.mdc`)
-- Bucket: `efemer-files`
+- Bucket: `efemer`
 - Credentials: `.secret/` (gitignored, rsynced on deploy)
 
 ## Deploy
@@ -51,7 +51,7 @@ Reload after changes: `sudo caddy validate --config /etc/caddy/Caddyfile && sudo
 
 `deploy.sh` builds webpack assets, rsyncs the app (excluding `.env`, `vendor`, `data/mysql`, `data/instagram`), syncs `.secret/`, then runs `deploy/remote-setup.sh` on the server.
 
-Production also runs `instagram-archive` (PHP CLI loop every 6 hours). `remote-setup.sh` starts it **after** `composer install` so `vendor/` exists. Session lives in Secret Manager (`instagram-session-id` in `efemer-456414`), not in git.
+Production also runs `instagram-archive` (`jobs:loop` RefreshInstagramAccounts every 6 hours into ingest). `remote-setup.sh` starts it **after** `composer install` so `vendor/` exists. Session lives in Secret Manager (`instagram-session-id` in `efemer-456414`), not in git.
 
 ## Server `.env`
 
@@ -71,7 +71,7 @@ Set `APP_HOST=efemer.jabli.cz`, `APP_ENV=PRODUCTION`, `APP_SCHEMA=https`, `MYSQL
 docker compose -f docker-compose.production.yml build php   # conditional
 docker compose -f docker-compose.production.yml up -d --no-build
 docker compose -f docker-compose.production.yml exec -T php composer install --no-dev --optimize-autoloader --no-interaction
-docker compose -f docker-compose.production.yml exec -T php php bin/migrate.php
+docker compose -f docker-compose.production.yml exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Database.Migrate -f
 ```
 
 `vendor/` is installed in the PHP container on the server — the image includes Composer.
@@ -93,7 +93,7 @@ Production deploy runs `composer install --no-dev` via `remote-setup.sh` after c
 After deploy, migrations run automatically via `remote-setup.sh`. To run manually:
 
 ```bash
-docker compose -f docker-compose.production.yml exec -T php php bin/migrate.php
+docker compose -f docker-compose.production.yml exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Database.Migrate -f
 ```
 
 ## Gotchas
