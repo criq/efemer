@@ -24,6 +24,8 @@ class Post extends \Katu\Models\Model
 	public ?string $instagramAccount = null;
 	public ?string $instagramShortcode = null;
 	public ?string $classificationConfidence = null;
+	public int|string|null $ingestItemId = null;
+	public ?string $layoutJson = null;
 
 	public const STATUS_REVIEW = "review";
 	public const STATUS_PUBLISHED = "published";
