@@ -3,8 +3,10 @@
 namespace App\Classes\Ingest;
 
 use App\Classes\Jobs\ConsoleStyle;
+use App\Classes\Jobs\Signals;
 use DOMDocument;
 use DOMElement;
+use DOMNode;
 use DOMXPath;
 use Katu\Tools\Calendar\Time;
 
@@ -30,7 +32,9 @@ class EfemerCzRefresh
 		$this->log(ConsoleStyle::step("Found " . count($posts) . " diary posts on efemer.cz."));
 
 		$loaded = 0;
+		$failed = 0;
 		foreach ($posts as $index => $post) {
+			Signals::throwIfStopped();
 			$title = $post["title"] !== "" ? $post["title"] : ("Záznam " . ($index + 1));
 			$this->log(ConsoleStyle::item($index + 1, count($posts), $title));
 			try {
@@ -38,11 +42,17 @@ class EfemerCzRefresh
 					$loaded++;
 				}
 			} catch (\Throwable $exception) {
-				$this->log(ConsoleStyle::warn($exception->getMessage()));
+				if ($exception->getMessage() === "Interrupted.") {
+					throw $exception;
+				}
+				$failed++;
+				$this->log(ConsoleStyle::failure($exception));
 			}
 		}
 
-		$this->log(ConsoleStyle::done("Efemer.cz refresh", $loaded));
+		$this->log(ConsoleStyle::done("Efemer.cz refresh", $loaded) . (
+			$failed > 0 ? " " . ConsoleStyle::error("{$failed} failed") : ""
+		));
 	}
 
 	/**
@@ -51,25 +61,28 @@ class EfemerCzRefresh
 	private function loadPost(Loader $loader, array $post, string $title): bool
 	{
 		$url = $this->absoluteUrl($post["href"]);
-		$sourceKey = parse_url($url, PHP_URL_PATH) ?: $post["href"];
-		$sourceKey = "/" . ltrim((string)$sourceKey, "/");
+		$sourceKey = ltrim((string)(parse_url($url, PHP_URL_PATH) ?: $post["href"]), "/");
 
 		$flags = [];
 		try {
 			$html = $this->fetch($url);
 		} catch (\Throwable $exception) {
-			$loader->upsert(
-				IngestItem::SOURCE_EFEMER_CZ,
-				$sourceKey,
-				$url,
-				$title,
-				BodyDates::parseIndexDate($post["date"]),
-				null,
-				[],
-				null,
-				null,
-				["fetch_failed"],
-			);
+			try {
+				$loader->upsert(
+					IngestItem::SOURCE_EFEMER_CZ,
+					$sourceKey,
+					$url,
+					$title,
+					BodyDates::parseIndexDate($post["date"]),
+					null,
+					[],
+					null,
+					null,
+					["fetch_failed"],
+				);
+			} catch (\Throwable) {
+				// Keep the original fetch error as the one we surface.
+			}
 
 			throw $exception;
 		}
@@ -88,13 +101,13 @@ class EfemerCzRefresh
 		}
 
 		$files = [];
-		foreach ($this->extractOrderedImages($xpath) as $imageUrl) {
-			$contents = $this->fetchBinary($imageUrl);
+		foreach ($this->extractSlottedImages($xpath) as $image) {
+			$contents = $this->fetchBinary($image["url"]);
 			if ($contents === null || $contents === "") {
 				continue;
 			}
 
-			$fileName = basename(parse_url($imageUrl, PHP_URL_PATH) ?: "image.jpg");
+			$fileName = basename(parse_url($image["url"], PHP_URL_PATH) ?: "image.jpg");
 			if ($fileName === "" || $fileName === "/") {
 				$fileName = "image.jpg";
 			}
@@ -102,6 +115,8 @@ class EfemerCzRefresh
 			$files[] = [
 				"contents" => $contents,
 				"fileName" => $fileName,
+				"sourceSlot" => $image["sourceSlot"],
+				"galleryIndex" => $image["galleryIndex"],
 			];
 		}
 
@@ -162,23 +177,63 @@ class EfemerCzRefresh
 	}
 
 	/**
-	 * @return list<string>
+	 * Images from each `ul.images` in document order, tagged relative to `section.copy`.
+	 *
+	 * @return list<array{url: string, sourceSlot: string, galleryIndex: int}>
 	 */
-	private function extractOrderedImages(DOMXPath $xpath): array
+	private function extractSlottedImages(DOMXPath $xpath): array
 	{
-		$urls = [];
-		foreach ($xpath->query("//div[@id=\"layout\"]//ul[contains(@class,\"images\")]//img") as $img) {
-			if (!$img instanceof DOMElement) {
+		$copy = $xpath->query("//div[@id=\"layout\"]//section[contains(@class,\"copy\")]")->item(0);
+		$out = [];
+		$seen = [];
+		$galleryIndex = 0;
+
+		foreach ($xpath->query("//div[@id=\"layout\"]//ul[contains(@class,\"images\")]") as $gallery) {
+			if (!$gallery instanceof DOMElement) {
 				continue;
 			}
 
-			$src = trim($img->getAttribute("src"));
-			if ($src !== "") {
-				$urls[] = $this->absoluteUrl($src);
+			$slot = IngestItemFile::SLOT_UNKNOWN;
+			if ($copy instanceof DOMElement) {
+				$position = $gallery->compareDocumentPosition($copy);
+				if ($position & DOMNode::DOCUMENT_POSITION_FOLLOWING) {
+					$slot = IngestItemFile::SLOT_PRE_COPY;
+				} elseif ($position & DOMNode::DOCUMENT_POSITION_PRECEDING) {
+					$slot = IngestItemFile::SLOT_POST_COPY;
+				}
+			} else {
+				$slot = $galleryIndex === 0
+					? IngestItemFile::SLOT_PRE_COPY
+					: IngestItemFile::SLOT_POST_COPY;
 			}
+
+			foreach ($xpath->query(".//img", $gallery) as $img) {
+				if (!$img instanceof DOMElement) {
+					continue;
+				}
+
+				$src = trim($img->getAttribute("src"));
+				if ($src === "") {
+					continue;
+				}
+
+				$url = $this->absoluteUrl($src);
+				if (isset($seen[$url])) {
+					continue;
+				}
+				$seen[$url] = true;
+
+				$out[] = [
+					"url" => $url,
+					"sourceSlot" => $slot,
+					"galleryIndex" => $galleryIndex,
+				];
+			}
+
+			$galleryIndex++;
 		}
 
-		return array_values(array_unique($urls));
+		return $out;
 	}
 
 	private function extractCopyHtml(DOMXPath $xpath): string

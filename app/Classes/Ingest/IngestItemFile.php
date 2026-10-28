@@ -9,6 +9,10 @@ class IngestItemFile extends \Katu\Models\Model
 {
 	const TABLE = "ingest_item_files";
 
+	public const SLOT_PRE_COPY = "pre_copy";
+	public const SLOT_POST_COPY = "post_copy";
+	public const SLOT_UNKNOWN = "unknown";
+
 	public int|string|null $id = null;
 	public Time|string|null $timeCreated = null;
 	public int|string|null $ingestItemId = null;
@@ -17,6 +21,8 @@ class IngestItemFile extends \Katu\Models\Model
 	public ?string $caption = null;
 	public ?string $keywords = null;
 	public ?string $contentHash = null;
+	public ?string $sourceSlot = null;
+	public int|string|null $galleryIndex = null;
 
 	public function setIngestItem(IngestItem $item): IngestItemFile
 	{
@@ -94,5 +100,39 @@ class IngestItemFile extends \Katu\Models\Model
 		$decoded = json_decode($this->keywords, true);
 
 		return is_array($decoded) ? array_values(array_filter($decoded, "is_string")) : [];
+	}
+
+	public function setSourceSlot(?string $sourceSlot): IngestItemFile
+	{
+		$this->sourceSlot = $sourceSlot;
+
+		return $this;
+	}
+
+	public function getSourceSlot(): ?string
+	{
+		return $this->sourceSlot;
+	}
+
+	public function getSourceSlotLabel(): string
+	{
+		return match ($this->getSourceSlot()) {
+			self::SLOT_PRE_COPY => "před textem",
+			self::SLOT_POST_COPY => "za textem",
+			self::SLOT_UNKNOWN => "neznámé",
+			default => $this->getSourceSlot() ?: "—",
+		};
+	}
+
+	public function setGalleryIndex(?int $galleryIndex): IngestItemFile
+	{
+		$this->galleryIndex = $galleryIndex;
+
+		return $this;
+	}
+
+	public function getGalleryIndex(): ?int
+	{
+		return $this->galleryIndex === null ? null : (int)$this->galleryIndex;
 	}
 }

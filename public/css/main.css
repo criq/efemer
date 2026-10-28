@@ -9452,6 +9452,11 @@ html {
   padding: 0.75rem;
   text-align: center;
 }
+.admin-ingest-gallery__meta {
+  color: inherit;
+  color: var(--admin-text, inherit);
+  font-weight: 600;
+}
 .admin-ingest-gallery__keywords {
   margin-top: 0 !important;
 }

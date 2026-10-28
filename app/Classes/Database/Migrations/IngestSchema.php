@@ -63,9 +63,12 @@ class IngestSchema implements MigrationInterface
 					caption varchar(500) COLLATE utf8mb4_czech_ci DEFAULT NULL,
 					keywords mediumtext COLLATE utf8mb4_czech_ci,
 					contentHash char(64) COLLATE utf8mb4_czech_ci DEFAULT NULL,
+					sourceSlot varchar(32) COLLATE utf8mb4_czech_ci DEFAULT NULL,
+					galleryIndex smallint unsigned DEFAULT NULL,
 					PRIMARY KEY (id),
 					KEY ingest_item_files_item (ingestItemId),
 					KEY ingest_item_files_storage (storageFileId),
+					KEY ingest_item_files_sourceSlot (sourceSlot),
 					CONSTRAINT ingest_item_files_fk_item FOREIGN KEY (ingestItemId) REFERENCES ingest_items (id) ON DELETE CASCADE ON UPDATE CASCADE,
 					CONSTRAINT ingest_item_files_fk_storage FOREIGN KEY (storageFileId) REFERENCES storage_files (id) ON DELETE CASCADE ON UPDATE CASCADE
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci

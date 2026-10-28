@@ -58,6 +58,13 @@
 							{% else %}
 								<span class="admin-ingest-gallery__missing">{{ file.fileName }}</span>
 							{% endif %}
+							<p class="admin-ingest-gallery__meta">
+								#{{ file.position }}
+								{% if file.sourceSlot %}
+									· {{ file.sourceSlotLabel }}
+									{% if file.galleryIndex is not null %}(galerie {{ file.galleryIndex }}){% endif %}
+								{% endif %}
+							</p>
 							{% if file.caption %}
 								<p>{{ file.caption }}</p>
 							{% endif %}

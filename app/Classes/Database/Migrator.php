@@ -22,6 +22,7 @@ use App\Classes\Database\Migrations\RenameGalleryKindToImageGallery;
 use App\Classes\Database\Migrations\RenameImageGalleryGridTemplate;
 use App\Classes\Database\Migrations\AddEventPath;
 use App\Classes\Database\Migrations\AddEventUrl;
+use App\Classes\Database\Migrations\IngestItemFileSlots;
 use App\Classes\Database\Migrations\IngestSchema;
 use App\Classes\Database\Migrations\SeedEventsAppearances;
 use App\Classes\Database\Migrations\StorageFilesSchema;
@@ -85,6 +86,7 @@ class Migrator
 			new AddEventUrl,
 			new AddEventPath,
 			new IngestSchema,
+			new IngestItemFileSlots,
 		];
 	}
 

@@ -44,11 +44,29 @@ class IngestItem extends \Katu\Models\Model
 	public const STATUS_MATERIALIZED = "materialized";
 	public const STATUS_SKIPPED = "skipped";
 
+	/**
+	 * Canonical source key: no leading slash (paths like 2017/08/08/post.html).
+	 */
+	public static function normalizeSourceKey(string $sourceKey): string
+	{
+		return ltrim($sourceKey, "/");
+	}
+
 	public static function getBySourceKey(string $source, string $sourceKey): ?IngestItem
 	{
+		$normalized = static::normalizeSourceKey($sourceKey);
+		$item = static::getOneBy([
+			"source" => $source,
+			"sourceKey" => $normalized,
+		]);
+		if ($item) {
+			return $item;
+		}
+
+		// Legacy rows stored with a leading slash before key normalization.
 		return static::getOneBy([
 			"source" => $source,
-			"sourceKey" => $sourceKey,
+			"sourceKey" => "/" . $normalized,
 		]);
 	}
 
@@ -258,8 +276,14 @@ class IngestItem extends \Katu\Models\Model
 		}
 	}
 
-	public function attachStorageFile(StorageFile $storageFile, int $position, ?string $caption = null, ?string $contentHash = null): IngestItemFile
-	{
+	public function attachStorageFile(
+		StorageFile $storageFile,
+		int $position,
+		?string $caption = null,
+		?string $contentHash = null,
+		?string $sourceSlot = null,
+		?int $galleryIndex = null,
+	): IngestItemFile {
 		$link = new IngestItemFile;
 		$link->timeCreated = new Time;
 		$link->setIngestItem($this);
@@ -267,6 +291,8 @@ class IngestItem extends \Katu\Models\Model
 		$link->setPosition($position);
 		$link->setCaption($caption);
 		$link->setContentHash($contentHash ?: $storageFile->getContentHash());
+		$link->setSourceSlot($sourceSlot);
+		$link->setGalleryIndex($galleryIndex);
 		$link->persist();
 
 		return $link;

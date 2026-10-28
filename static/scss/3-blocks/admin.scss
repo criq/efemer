@@ -194,6 +194,11 @@
 		text-align: center;
 	}
 
+	&__meta {
+		color: var(--admin-text, inherit);
+		font-weight: 600;
+	}
+
 	&__keywords {
 		margin-top: 0 !important;
 	}

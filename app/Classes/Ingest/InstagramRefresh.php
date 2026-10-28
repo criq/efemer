@@ -8,6 +8,7 @@ use App\Classes\Instagram\PostUrl;
 use App\Classes\Instagram\RateLimitedException;
 use App\Classes\Instagram\Session;
 use App\Classes\Jobs\ConsoleStyle;
+use App\Classes\Jobs\Signals;
 use Katu\Files\File;
 use Katu\Tools\Calendar\Time;
 
@@ -62,6 +63,7 @@ class InstagramRefresh
 
 		try {
 			foreach ($client->iteratePosts($account) as $post) {
+				Signals::throwIfStopped();
 				$scanned++;
 				$shortcode = (string)$post["shortcode"];
 				if (isset($known[$shortcode])) {
@@ -79,9 +81,12 @@ class InstagramRefresh
 						$known[$shortcode] = true;
 					}
 				} catch (\Throwable $exception) {
-					$this->log(ConsoleStyle::warn(
-						"@" . $account . "/" . $shortcode . " failed: " . $exception->getMessage(),
-					));
+					if ($exception->getMessage() === "Interrupted.") {
+						throw $exception;
+					}
+					$this->log(
+						ConsoleStyle::path("@" . $account . "/" . $shortcode) . " " . ConsoleStyle::failure($exception),
+					);
 				}
 
 				if ($imported >= $maxNew || $scanned >= $maxScan) {
@@ -160,6 +165,8 @@ class InstagramRefresh
 			$files[] = [
 				"contents" => $contents,
 				"fileName" => basename($path),
+				"sourceSlot" => IngestItemFile::SLOT_UNKNOWN,
+				"galleryIndex" => 0,
 			];
 		}
 
