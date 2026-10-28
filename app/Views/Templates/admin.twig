@@ -19,6 +19,7 @@
 				<a class="admin-header__brand" href="{{ url("admin.posts.index") }}">Efemer</a>
 				<nav class="admin-header__nav">
 					<a class="admin-header__link" href="{{ url("admin.posts.index") }}">{% include "Blocks/adminIcon.twig" with { name: "description" } %} Příspěvky</a>
+					<a class="admin-header__link" href="{{ url("admin.ingest.index") }}">{% include "Blocks/adminIcon.twig" with { name: "download" } %} Import</a>
 					<a class="admin-header__link" href="{{ url("admin.events.index") }}">{% include "Blocks/adminIcon.twig" with { name: "event" } %} Události</a>
 					<a class="admin-header__link" href="{{ url("admin.pages.index") }}">{% include "Blocks/adminIcon.twig" with { name: "note" } %} Stránky</a>
 					<a class="admin-header__link" href="{{ url("admin.storageFiles.index") }}">{% include "Blocks/adminIcon.twig" with { name: "perm_media" } %} Soubory</a>

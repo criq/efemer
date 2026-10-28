@@ -1,0 +1,64 @@
+{% extends "Templates/admin.twig" %}
+
+{% block title %}Import{% endblock %}
+
+{% block body %}
+
+	<div class="admin-page">
+		<div class="admin-page__header">
+			<h1 class="admin-page__title">Import</h1>
+			<div class="admin-page__actions">
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}">Vše</a>
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?source=efemer_cz">efemer.cz</a>
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?account=efemer_flowers">@efemer_flowers</a>
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?account=himmlhaus">@himmlhaus</a>
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?status=loaded">Načteno</a>
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?status=keyworded">Klíčová slova</a>
+			</div>
+		</div>
+
+		<p class="admin-page__lede">Načtené zdroje před kategorizací a vytvořením veřejných příspěvků. Celkem {{ items|length }}.</p>
+
+		<div class="admin-panel">
+			<table class="admin-table">
+				<thead>
+					<tr>
+						<th class="admin-table__id">ID</th>
+						<th>Náhled</th>
+						<th>Název</th>
+						<th>Zdroj</th>
+						<th>Datum</th>
+						<th>Stav</th>
+						<th>Fotky</th>
+						<th class="admin-table__actions">Akce</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for item in items %}
+						<tr>
+							<td class="admin-table__id">{{ item.getId }}</td>
+							<td>
+								{% if item.getHeroImage %}
+									<img class="admin-thumbnail" src="{{ item.getHeroImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+								{% endif %}
+							</td>
+							<td><a href="{{ url("admin.ingest.view", { ingestItemId: item.getId }) }}">{{ item.getTitle|default("—") }}</a></td>
+							<td>{{ item.getSourceLabel }}</td>
+							<td>{% if item.getPostedAt %}{{ item.getPostedAt|date("j. n. Y") }}{% else %}—{% endif %}</td>
+							<td>{{ item.getStatusLabel }}</td>
+							<td>{{ item.getFileCount }}</td>
+							<td class="admin-table__actions">
+								<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.view", { ingestItemId: item.getId }) }}">Otevřít</a>
+							</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="8">Zatím žádné načtené položky. Spusťte refresh CLIs.</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+{% endblock body %}

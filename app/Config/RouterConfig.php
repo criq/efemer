@@ -37,7 +37,10 @@ class RouterConfig extends \Katu\Config\RouterConfig
 			"admin.storageFiles.index" => new Route("/admin/storage-files", [\App\Controllers\Admin\StorageFiles\Index::class, "getResponse"]),
 			"admin.posts.edit" => new Route("/admin/posts/{postId}", [\App\Controllers\Admin\Posts\Edit::class, "getResponse"]),
 			"admin.posts.index" => new Route("/admin/posts", [\App\Controllers\Admin\Posts\Index::class, "getResponse"]),
+			"admin.ingest.view" => new Route("/admin/ingest/{ingestItemId}", [\App\Controllers\Admin\Ingest\View::class, "getResponse"]),
+			"admin.ingest.index" => new Route("/admin/ingest", [\App\Controllers\Admin\Ingest\Index::class, "getResponse"]),
 			"admin.events.create" => new Route("/admin/events/create", [\App\Controllers\Admin\Events\Edit::class, "getResponse"]),
+
 			"admin.events.delete" => new Route("/admin/events/{eventId}/delete", [\App\Controllers\Admin\Events\Delete::class, "getResponse"]),
 			"admin.events.edit" => new Route("/admin/events/{eventId}", [\App\Controllers\Admin\Events\Edit::class, "getResponse"]),
 			"admin.events.index" => new Route("/admin/events", [\App\Controllers\Admin\Events\Index::class, "getResponse"]),

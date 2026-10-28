@@ -1,0 +1,74 @@
+{% extends "Templates/admin.twig" %}
+
+{% block title %}{{ item.getTitle|default("Import") }}{% endblock %}
+
+{% block body %}
+
+	<div class="admin-page">
+		<div class="admin-page__header">
+			<h1 class="admin-page__title">{{ item.getTitle|default("Bez názvu") }}</h1>
+			<div class="admin-page__actions">
+				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}">{% include "Blocks/adminIcon.twig" with { name: "arrow_back" } %} Zpět</a>
+				{% if item.getSourceUrl %}
+					<a class="admin-button admin-button--ghost" href="{{ item.getSourceUrl }}" target="_blank" rel="noopener noreferrer">{% include "Blocks/adminIcon.twig" with { name: "open_in_new" } %} Zdroj</a>
+				{% endif %}
+			</div>
+		</div>
+
+		<section class="admin-section">
+			<div class="admin-panel">
+				<dl class="admin-meta">
+					<div><dt>Zdroj</dt><dd>{{ item.getSourceLabel }}</dd></div>
+					<div><dt>Klíč</dt><dd><code>{{ item.getSourceKey }}</code></dd></div>
+					<div><dt>Datum</dt><dd>{% if item.getPostedAt %}{{ item.getPostedAt|date("j. n. Y H:i") }}{% else %}—{% endif %}</dd></div>
+					<div><dt>Stav</dt><dd>{{ item.getStatusLabel }}</dd></div>
+					<div><dt>Fotky</dt><dd>{{ files|length }}</dd></div>
+					{% if item.getQualityFlags %}
+						<div><dt>Příznaky</dt><dd>{{ item.getQualityFlags|join(", ") }}</dd></div>
+					{% endif %}
+					{% if item.getKeywordsList %}
+						<div><dt>Klíčová slova</dt><dd>{{ item.getKeywordsList|join(", ") }}</dd></div>
+					{% endif %}
+					{% if item.getThemesList %}
+						<div><dt>Témata</dt><dd>{{ item.getThemesList|join(", ") }}</dd></div>
+					{% endif %}
+				</dl>
+			</div>
+		</section>
+
+		{% if item.getBodyHtml %}
+			<section class="admin-section">
+				<h2 class="admin-section__title">Text</h2>
+				<div class="admin-panel admin-prose">
+					{{ item.getBodyHtml|raw }}
+				</div>
+			</section>
+		{% endif %}
+
+		{% if files %}
+			<section class="admin-section">
+				<h2 class="admin-section__title">Fotky</h2>
+				<ul class="admin-ingest-gallery">
+					{% for file in files %}
+						<li class="admin-ingest-gallery__item">
+							{% if file.previewUrl %}
+								<img src="{{ file.previewUrl }}" alt="{{ file.caption|default(file.fileName) }}">
+							{% elseif file.thumbnailUrl %}
+								<img src="{{ file.thumbnailUrl }}" alt="{{ file.caption|default(file.fileName) }}">
+							{% else %}
+								<span class="admin-ingest-gallery__missing">{{ file.fileName }}</span>
+							{% endif %}
+							{% if file.caption %}
+								<p>{{ file.caption }}</p>
+							{% endif %}
+							{% if file.keywords %}
+								<p class="admin-ingest-gallery__keywords">{{ file.keywords|join(", ") }}</p>
+							{% endif %}
+						</li>
+					{% endfor %}
+				</ul>
+			</section>
+		{% endif %}
+	</div>
+
+{% endblock body %}
