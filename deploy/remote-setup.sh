@@ -33,7 +33,7 @@ mkdir -p tmp/composer public/tmp tmp data/instagram
 "${COMPOSE[@]}" up -d --no-build nginx php mysql redis
 echo "Installing Composer dependencies..."
 "${COMPOSE[@]}" exec -T -e COMPOSER_HOME="${ROOT}/tmp/composer" -u "$(id -u):$(id -g)" php composer install --no-dev --optimize-autoloader --no-interaction
-"${COMPOSE[@]}" exec -T php php bin/migrate.php
+"${COMPOSE[@]}" exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Database.Migrate -f
 # PHP-FPM runs as www-data; image versions and GCS downloads need writable tmp dirs.
 # The storage key is rsynced as mode 600. www-data (gid 82) still has to read it.
 echo "Ensuring www-data can write image/tmp caches..."

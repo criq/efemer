@@ -2,6 +2,7 @@
 
 namespace App\Classes\Import;
 
+use App\Classes\Jobs\ConsoleStyle;
 use App\Classes\Pages\Components\Kinds\ImageGalleryKind;
 use App\Classes\Pages\Components\Kinds\ImageKind;
 use App\Classes\Pages\Components\Kinds\PageGalleryKind;
@@ -37,29 +38,29 @@ class EfemerCzImporter
 
 	public function run(): void
 	{
-		$this->log("Fetching homepage…");
+		$this->log(ConsoleStyle::step("Fetching homepage…"));
 		$homeHtml = $this->fetch(self::BASE_URL);
 		$homeDoc = $this->parseHtml($homeHtml);
 		$homeXpath = new DOMXPath($homeDoc);
 
 		$posts = $this->extractPostIndex($homeXpath);
-		$this->log(sprintf("Found %d diary posts.", count($posts)));
+		$this->log(ConsoleStyle::step("Found " . count($posts) . " diary posts."));
 
 		$this->wipeExistingContent();
 
 		$diaryPages = [];
 		foreach ($posts as $index => $post) {
-			$this->log(sprintf("[%d/%d] %s", $index + 1, count($posts), $post["title"]));
+			$this->log(ConsoleStyle::item($index + 1, count($posts), (string)$post["title"]));
 			$diaryPages[] = $this->importPost($post);
 		}
 
 		$this->importHomepage($homeXpath, $diaryPages);
-		$this->log("Import complete.");
+		$this->log(ConsoleStyle::done("page import"));
 	}
 
 	private function wipeExistingContent(): void
 	{
-		$this->log("Clearing existing pages…");
+		$this->log(ConsoleStyle::step("Clearing existing pages…"));
 
 		foreach (Page::getAll() as $page) {
 			foreach ($page->getPageComponents() as $pageComponent) {
@@ -171,7 +172,7 @@ class EfemerCzImporter
 	 */
 	private function importHomepage(DOMXPath $xpath, array $diaryPages): void
 	{
-		$this->log("Building homepage…");
+		$this->log(ConsoleStyle::step("Building homepage…"));
 
 		$page = new Page;
 		$page->setTimeCreated(new Time);
@@ -247,7 +248,7 @@ class EfemerCzImporter
 	{
 		$storageFile = $this->storageFileFromUrl($sourceUrl);
 		if (!$storageFile) {
-			$this->log("  skip image (download failed): " . $sourceUrl);
+			$this->log(ConsoleStyle::skip("Skip") . " image " . ConsoleStyle::path($sourceUrl));
 
 			return;
 		}

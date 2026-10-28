@@ -16,7 +16,7 @@
     "post-create-project-cmd": [
       "npm install"
     ],
-    "migrate": "php bin/migrate.php"
+    "migrate": "php bin/cli.php jobs:run App.Classes.Jobs.Database.Migrate -f"
   },
   "config": {
     "platform": {

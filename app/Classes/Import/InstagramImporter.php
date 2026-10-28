@@ -4,6 +4,7 @@ namespace App\Classes\Import;
 
 use App\Classes\Content\Post;
 use App\Classes\Content\Section;
+use App\Classes\Jobs\ConsoleStyle;
 use App\Classes\Storage\StorageFile;
 use Katu\Tools\Calendar\Time;
 
@@ -28,7 +29,7 @@ class InstagramImporter
 		foreach (["efemer_flowers", "himmlhaus"] as $account) {
 			$accountDir = $root . "/" . $account;
 			if (!is_dir($accountDir)) {
-				$this->log("Missing dump: " . $accountDir);
+				$this->log(ConsoleStyle::warn("Missing dump: " . $accountDir));
 				continue;
 			}
 
@@ -44,7 +45,7 @@ class InstagramImporter
 			}
 		}
 
-		$this->log("Imported {$imported} Instagram posts.");
+		$this->log(ConsoleStyle::done("Instagram posts", $imported));
 	}
 
 	public function importOne(array $data, string $postDir, ?InstagramClassifier $classifier = null): bool
@@ -107,12 +108,12 @@ class InstagramImporter
 		}
 
 		$this->log(sprintf(
-			"%s/%s → %s [%s %.2f]",
-			$account,
-			$shortcode,
-			Section::title($classified["section"]),
-			$classified["status"],
-			$classified["confidence"],
+			"%s %s %s [%s %s]",
+			ConsoleStyle::path($account . "/" . $shortcode),
+			ConsoleStyle::muted("→"),
+			ConsoleStyle::title(Section::title($classified["section"])),
+			ConsoleStyle::muted($classified["status"]),
+			ConsoleStyle::count(number_format($classified["confidence"], 2)),
 		));
 
 		return true;

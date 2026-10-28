@@ -49,7 +49,7 @@ services:
   instagram-archive:
     image: efemer
     container_name: efemer_instagram_archive
-    command: ["php", "bin/archive-instagram.php", "--loop", "--interval=21600"]
+    command: ["php", "bin/cli.php", "jobs:loop", "App.Classes.Jobs.Ingest.RefreshInstagramAccounts", "--interval=21600", "-f"]
     volumes:
       - ./.env:/var/www/.env
       - ./.platform:/var/www/.platform

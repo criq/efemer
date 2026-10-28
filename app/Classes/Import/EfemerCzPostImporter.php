@@ -4,6 +4,7 @@ namespace App\Classes\Import;
 
 use App\Classes\Content\Post;
 use App\Classes\Content\Section;
+use App\Classes\Jobs\ConsoleStyle;
 use App\Classes\Storage\StorageFile;
 use DOMDocument;
 use DOMElement;
@@ -32,18 +33,18 @@ class EfemerCzPostImporter
 		$classifier = new InstagramClassifier;
 		$html = $this->fetch(self::BASE_URL);
 		$posts = $this->extractPostIndex(new DOMXPath($this->parseHtml($html)));
-		$this->log(sprintf("Found %d diary posts.", count($posts)));
+		$this->log(ConsoleStyle::step("Found " . count($posts) . " diary posts."));
 
 		$imported = 0;
 		foreach ($posts as $index => $post) {
 			$title = $post["title"] ?: ("Záznam " . ($index + 1));
-			$this->log(sprintf("[%d/%d] %s", $index + 1, count($posts), $title));
+			$this->log(ConsoleStyle::item($index + 1, count($posts), $title));
 			if ($this->importPost($post, $classifier)) {
 				$imported++;
 			}
 		}
 
-		$this->log("Imported {$imported} posts from efemer.cz.");
+		$this->log(ConsoleStyle::done("posts from efemer.cz", $imported));
 	}
 
 	/**
@@ -97,7 +98,7 @@ class EfemerCzPostImporter
 			$object->attachStorageFile($storageFile, $position++);
 		}
 
-		$this->log("  → " . Section::title($classified["section"]));
+		$this->log(ConsoleStyle::muted("→") . " " . ConsoleStyle::title(Section::title($classified["section"])));
 
 		return true;
 	}
