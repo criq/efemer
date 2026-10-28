@@ -11,6 +11,7 @@ use Google\Cloud\SecretManager\V1\SecretPayload;
 class Secrets
 {
 	public const INSTAGRAM_SESSION_ID = "instagram-session-id";
+	public const GEMINI_API_KEY = "gemini-api-key";
 
 	public static function get(string $name): ?string
 	{

@@ -1,0 +1,672 @@
+<?php
+
+namespace App\Classes\Ingest;
+
+use App\Classes\Jobs\ConsoleStyle;
+use App\Classes\Jobs\Signals;
+use App\Classes\ThirdParty\Google\Gemini;
+use Katu\Tools\Calendar\Time;
+
+class KeywordAnalyzer
+{
+	public const ENRICHMENT_VERSION = IngestItem::ENRICHMENT_VERSION;
+	private const MAX_BODY_CHARS = 4000;
+	private const MAX_IMAGE_EDGE = 1024;
+	private const JPEG_QUALITY = 80;
+
+	private Gemini $gemini;
+
+	/** @var list<callable(string): void> */
+	private array $loggers = [];
+
+	public function __construct(?Gemini $gemini = null)
+	{
+		$this->gemini = $gemini ?? new Gemini;
+	}
+
+	public function onLog(callable $logger): self
+	{
+		$this->loggers[] = $logger;
+		$this->gemini->onLog($logger);
+
+		return $this;
+	}
+
+	/**
+	 * @return array{item: IngestItem, dryRunPayload?: array}
+	 */
+	public function analyze(IngestItem $item, int $maxImages = 12, bool $dryRun = false): array
+	{
+		Signals::throwIfStopped();
+
+		$files = array_values($item->getFiles()->getArrayCopy());
+		$prepared = $this->prepareImages($files, $maxImages);
+		$parts = [];
+		$parts[] = ["text" => $this->buildUserPrompt($item, $files, $prepared)];
+		foreach ($prepared["images"] as $image) {
+			$parts[] = [
+				"inline_data" => [
+					"mime_type" => "image/jpeg",
+					"data" => $image["base64"],
+				],
+			];
+			$parts[] = ["text" => "[photo position={$image["position"]} fileIndex={$image["index"]}]"];
+		}
+
+		$result = $this->gemini->generateContent($parts, $this->systemInstruction());
+		$usage = $result["usage"];
+		$this->log(sprintf(
+			"Tokens prompt=%s candidates=%s total=%s",
+			$usage["promptTokens"] ?? "?",
+			$usage["candidatesTokens"] ?? "?",
+			$usage["totalTokens"] ?? "?",
+		));
+
+		$payload = $this->decodeJson($result["text"]);
+		if ($dryRun) {
+			$this->log(ConsoleStyle::muted("dryRun JSON: " . mb_substr(json_encode($payload, JSON_UNESCAPED_UNICODE), 0, 2000)));
+
+			return ["item" => $item, "dryRunPayload" => $payload];
+		}
+
+		$this->apply($item, $files, $payload, $result["text"]);
+
+		return ["item" => $item];
+	}
+
+	/**
+	 * @param list<IngestItemFile> $files
+	 * @return array{images: list<array{index: int, position: int, base64: string}>, missing: list<int>, skippedVideo: list<int>}
+	 */
+	private function prepareImages(array $files, int $maxImages): array
+	{
+		$images = [];
+		$missing = [];
+		$skippedVideo = [];
+
+		foreach ($files as $index => $file) {
+			if (count($images) >= $maxImages) {
+				break;
+			}
+
+			$position = (int)($file->getPosition() ?? ($index + 1));
+			try {
+				$storage = $file->getStorageFile();
+				$local = $storage->getFile();
+				if (!$local || !$local->exists()) {
+					$missing[] = $position;
+					continue;
+				}
+
+				$path = (string)$local;
+				$mime = $this->detectMime($path);
+				if (str_starts_with($mime, "video/")) {
+					$skippedVideo[] = $position;
+					continue;
+				}
+				if (!in_array($mime, ["image/jpeg", "image/png", "image/webp", "image/gif"], true)) {
+					$missing[] = $position;
+					continue;
+				}
+
+				$jpeg = $this->resizeToJpeg($path, $mime);
+				if ($jpeg === null) {
+					$missing[] = $position;
+					continue;
+				}
+
+				$images[] = [
+					"index" => $index,
+					"position" => $position,
+					"base64" => base64_encode($jpeg),
+				];
+			} catch (\Throwable) {
+				$missing[] = $position;
+			}
+		}
+
+		return [
+			"images" => $images,
+			"missing" => $missing,
+			"skippedVideo" => $skippedVideo,
+		];
+	}
+
+	private function detectMime(string $path): string
+	{
+		$info = @getimagesize($path);
+		if (is_array($info) && !empty($info["mime"])) {
+			return (string)$info["mime"];
+		}
+
+		$finfo = new \finfo(FILEINFO_MIME_TYPE);
+		$mime = $finfo->file($path);
+
+		return is_string($mime) ? $mime : "application/octet-stream";
+	}
+
+	private function resizeToJpeg(string $path, string $mime): ?string
+	{
+		if (!function_exists("imagecreatefromstring")) {
+			$raw = (string)file_get_contents($path);
+			if ($raw === "" || strlen($raw) > 4_000_000) {
+				return null;
+			}
+			if ($mime === "image/jpeg") {
+				return $raw;
+			}
+
+			return null;
+		}
+
+		$raw = (string)file_get_contents($path);
+		if ($raw === "") {
+			return null;
+		}
+
+		$image = @imagecreatefromstring($raw);
+		if (!$image) {
+			return null;
+		}
+
+		$width = imagesx($image);
+		$height = imagesy($image);
+		$max = self::MAX_IMAGE_EDGE;
+		if ($width > $max || $height > $max) {
+			$scale = min($max / $width, $max / $height);
+			$newW = max(1, (int)round($width * $scale));
+			$newH = max(1, (int)round($height * $scale));
+			$resized = imagecreatetruecolor($newW, $newH);
+			imagecopyresampled($resized, $image, 0, 0, 0, 0, $newW, $newH, $width, $height);
+			imagedestroy($image);
+			$image = $resized;
+		}
+
+		ob_start();
+		imagejpeg($image, null, self::JPEG_QUALITY);
+		$jpeg = ob_get_clean();
+		imagedestroy($image);
+
+		return is_string($jpeg) && $jpeg !== "" ? $jpeg : null;
+	}
+
+	/**
+	 * @param list<IngestItemFile> $files
+	 * @param array{images: list<array{index: int, position: int, base64: string}>, missing: list<int>, skippedVideo: list<int>} $prepared
+	 */
+	private function buildUserPrompt(IngestItem $item, array $files, array $prepared): string
+	{
+		$body = trim(html_entity_decode(strip_tags((string)$item->getBodyHtml()), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+		if (mb_strlen($body) > self::MAX_BODY_CHARS) {
+			$body = mb_substr($body, 0, self::MAX_BODY_CHARS) . "…";
+		}
+
+		$fileLines = [];
+		foreach ($files as $index => $file) {
+			$fileLines[] = sprintf(
+				"- index=%d id=%d position=%d sourceSlot=%s galleryIndex=%s",
+				$index,
+				(int)$file->getId(),
+				(int)($file->getPosition() ?? ($index + 1)),
+				$file->getSourceSlot() ?: "unknown",
+				$file->getGalleryIndex() === null ? "null" : (string)$file->getGalleryIndex(),
+			);
+		}
+
+		$attached = array_map(
+			fn (array $img) => "position={$img["position"]} fileIndex={$img["index"]}",
+			$prepared["images"],
+		);
+
+		return implode("\n", [
+			"Analyze this florist / floral-art ingest item.",
+			"Source: " . $item->getSourceLabel(),
+			"Title: " . ($item->getTitle() ?: "(none)"),
+			"Quality flags: " . implode(", ", $item->getQualityFlags() ?: ["(none)"]),
+			"Body text (Czech, may be empty):",
+			$body !== "" ? $body : "(empty)",
+			"",
+			"Files (all):",
+			...$fileLines,
+			"",
+			"Attached images (in order after this text): " . ($attached ? implode("; ", $attached) : "(none)"),
+			"Missing downloads: " . ($prepared["missing"] ? implode(", ", $prepared["missing"]) : "(none)"),
+			"Skipped videos: " . ($prepared["skippedVideo"] ? implode(", ", $prepared["skippedVideo"]) : "(none)"),
+			"",
+			"Return JSON only matching the schema in the system instruction.",
+			"coverFileId must be an ingest_item_files id from the list above (or null).",
+			"layoutHints.blocks[].fileIds must use those same file ids.",
+		]);
+	}
+
+	private function systemInstruction(): string
+	{
+		return <<<'PROMPT'
+You enrich floral / wedding / art content for the Czech studio Efemér.
+Respond with a single JSON object (no markdown) using this shape:
+{
+  "keywords": ["česká klíčová slova"],
+  "themes": ["témata"],
+  "entities": ["jména lidí, míst, rostlin"],
+  "kind": "diary|wedding|mourning|gift|portrait|workshop|installation|bouquet|product|other",
+  "coverFileId": 123,
+  "coverRationale": "krátky česky důvod",
+  "palette": ["#aabbcc"],
+  "seriesKey": null,
+  "layoutHints": {
+    "pattern": "hero_text_gallery|text_lead_gallery|gallery_essay|single",
+    "blocks": [
+      {"type": "image", "fileIds": [123], "role": "lead"},
+      {"type": "text", "from": "body"},
+      {"type": "gallery", "fileIds": [124, 125], "role": "support"}
+    ]
+  },
+  "files": [
+    {
+      "fileId": 123,
+      "keywords": ["specifická klíčová slova k této fotce"],
+      "rating": 0.0,
+      "role": "lead|support|detail|context|skip",
+      "roleRationale": "česky",
+      "altText": "český alt",
+      "orientation": "landscape|portrait|square",
+      "focalCrop": {"x": 0.5, "y": 0.4, "zoom": 1.0},
+      "demote": false
+    }
+  ]
+}
+
+Rules:
+- Item keywords/themes/entities and per-file keywords, altText, rationales in correct Czech (spell-check; no typos like florisitika).
+- Keywords: lowercase except proper names / place names. Avoid duplicate casing variants.
+- Each file needs 3–8 specific keywords (plants, objects, people, mood, place) — not only copies of item keywords.
+- kind:
+  - wedding = svatba / novomanželé
+  - mourning = smuteční / pietní / rozloučení
+  - gift = dar / kytice pro mámu / named gift bouquet
+  - portrait = person-focused floral portrait without clear wedding/mourning
+  - bouquet = standalone authored bouquet / commission (not a shop SKU)
+  - product = only shop-like / catalog product shots
+  - workshop / installation / diary / other as appropriate
+  - Prefer mourning|gift|portrait|bouquet over diary when those fit better.
+- Role and pattern codes in English as above.
+- sourceSlot=pre_copy ⇒ role=lead (strong). post_copy ⇒ support|detail|context (lead only if truly a second story beat).
+- COVER (critical): if any non-demoted pre_copy file exists, coverFileId MUST be one of those pre_copy ids (prefer the best lead among them). Never pick a post_copy cover when pre_copy exists.
+- demote=true for blurry, duplicate, meme, off-brand, accidental frames ⇒ role=skip. Use demote when warranted; do not rate junk as 0.8+.
+- rating calibration: 0.9–1.0 rare hero; ~0.7 solid; ~0.5 ordinary filler; ≤0.4 weak / demote candidates.
+- layout pattern:
+  - hero_text_gallery when there is real body text AND a pre_copy lead
+  - text_lead_gallery when body opens and lead comes after
+  - gallery_essay only for thin_text / image-led posts with little prose
+  - single when essentially one frame
+- Include an entry in files[] for every listed file id when possible.
+- Do not invent file ids.
+PROMPT;
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function decodeJson(string $text): array
+	{
+		$text = trim($text);
+		if (str_starts_with($text, "```")) {
+			$text = preg_replace("/^```(?:json)?\s*/i", "", $text) ?? $text;
+			$text = preg_replace("/\s*```$/", "", $text) ?? $text;
+			$text = trim($text);
+		}
+
+		$decoded = json_decode($text, true);
+		if (!is_array($decoded)) {
+			throw new \RuntimeException("Could not parse Gemini JSON: " . mb_substr($text, 0, 200));
+		}
+
+		return $decoded;
+	}
+
+	/**
+	 * @param list<IngestItemFile> $files
+	 * @param array<string, mixed> $payload
+	 */
+	private function apply(IngestItem $item, array $files, array $payload, string $rawText): void
+	{
+		$byId = [];
+		foreach ($files as $file) {
+			$byId[(int)$file->getId()] = $file;
+		}
+
+		$item->setKeywordsList($this->normalizeKeywordList($payload["keywords"] ?? null));
+		$item->setThemesList($this->normalizeKeywordList($payload["themes"] ?? null));
+		$item->setEntitiesList($this->normalizeKeywordList($payload["entities"] ?? null, preserveCase: true));
+		$item->setKind($this->normalizeKind($payload["kind"] ?? null));
+		$item->setPalette($this->stringList($payload["palette"] ?? null));
+		$seriesKey = isset($payload["seriesKey"]) && is_string($payload["seriesKey"]) ? trim($payload["seriesKey"]) : null;
+		$item->setSeriesKey($seriesKey !== "" ? $seriesKey : null);
+		$item->setLayoutHints($this->normalizeLayoutHints(
+			isset($payload["layoutHints"]) && is_array($payload["layoutHints"]) ? $payload["layoutHints"] : null,
+			$item,
+			$files,
+		));
+		$item->setClassificationRaw($rawText);
+
+		$filePayloads = isset($payload["files"]) && is_array($payload["files"]) ? $payload["files"] : [];
+		foreach ($files as $file) {
+			$file->clearEnrichment(true);
+		}
+
+		foreach ($filePayloads as $row) {
+			if (!is_array($row)) {
+				continue;
+			}
+			$fileId = isset($row["fileId"]) ? (int)$row["fileId"] : 0;
+			$file = $byId[$fileId] ?? null;
+			if (!$file) {
+				continue;
+			}
+
+			$demote = !empty($row["demote"]);
+			$file->setDemote($demote);
+			$file->setKeywords($this->normalizeKeywordList($row["keywords"] ?? null) ?: null);
+			$file->setRating($this->clampRating($row["rating"] ?? null));
+			$file->setAltText($this->nullableString($row["altText"] ?? null));
+			$file->setOrientation($this->nullableString($row["orientation"] ?? null));
+			if (isset($row["focalCrop"]) && is_array($row["focalCrop"])) {
+				$file->setFocalCrop($row["focalCrop"]);
+			} else {
+				$file->setFocalCrop(null);
+			}
+
+			if (!$file->isRoleLocked()) {
+				$role = $this->normalizeRole($row["role"] ?? null, $demote);
+				// pre_copy stays lead unless demoted/skip.
+				if (
+					!$demote
+					&& $file->getSourceSlot() === IngestItemFile::SLOT_PRE_COPY
+					&& $role !== IngestItemFile::ROLE_SKIP
+				) {
+					$role = IngestItemFile::ROLE_LEAD;
+				}
+				$file->setRole($role);
+				$file->setRoleRationale($this->nullableString($row["roleRationale"] ?? null));
+			}
+
+			$file->setIsCover(false);
+			$file->persist();
+		}
+
+		foreach ($files as $file) {
+			if ($file->getRole() === null && !$file->isRoleLocked()) {
+				$prior = $file->getSourceSlot() === IngestItemFile::SLOT_PRE_COPY
+					? IngestItemFile::ROLE_LEAD
+					: IngestItemFile::ROLE_SUPPORT;
+				$file->setRole($file->isDemoted() ? IngestItemFile::ROLE_SKIP : $prior);
+				$file->persist();
+			}
+		}
+
+		if (!$item->isCoverLocked()) {
+			$coverId = isset($payload["coverFileId"]) ? (int)$payload["coverFileId"] : 0;
+			$cover = $byId[$coverId] ?? null;
+			$cover = $this->resolveCover($files, $cover);
+			foreach ($files as $file) {
+				$isCover = $cover && (int)$file->getId() === (int)$cover->getId();
+				$file->setIsCover($isCover);
+				$file->persist();
+			}
+			$item->setCoverFileId($cover ? (int)$cover->getId() : null);
+			$rationale = $this->nullableString($payload["coverRationale"] ?? null);
+			if ($cover && $coverId > 0 && (int)$cover->getId() !== $coverId) {
+				$rationale = trim(($rationale ? $rationale . " " : "") . "(cover vynucen z pre_copy)");
+			}
+			$item->setCoverRationale($rationale);
+		} else {
+			$lockedId = $item->getCoverFileId();
+			foreach ($files as $file) {
+				$file->setIsCover($lockedId !== null && (int)$file->getId() === $lockedId);
+				$file->persist();
+			}
+		}
+
+		$item->setEnrichmentVersion(self::ENRICHMENT_VERSION);
+		$item->setEnrichedAt(new Time);
+		$item->setStatus(IngestItem::STATUS_KEYWORDED);
+		$item->touchUpdated();
+		$item->persist();
+	}
+
+	/**
+	 * @param list<IngestItemFile> $files
+	 */
+	private function resolveCover(array $files, ?IngestItemFile $proposed): ?IngestItemFile
+	{
+		$usable = static fn (IngestItemFile $f): bool => $f->getRole() !== IngestItemFile::ROLE_SKIP && !$f->isDemoted();
+
+		$preCopy = array_values(array_filter(
+			$files,
+			fn (IngestItemFile $f) => $f->getSourceSlot() === IngestItemFile::SLOT_PRE_COPY && $usable($f),
+		));
+
+		if ($preCopy !== []) {
+			if ($proposed && $proposed->getSourceSlot() === IngestItemFile::SLOT_PRE_COPY && $usable($proposed)) {
+				return $proposed;
+			}
+
+			return $this->rankCoverCandidates($preCopy);
+		}
+
+		if ($proposed && $usable($proposed)) {
+			return $proposed;
+		}
+
+		return $this->rankCoverCandidates(array_values(array_filter($files, $usable)));
+	}
+
+	/**
+	 * @param list<IngestItemFile> $candidates
+	 */
+	private function rankCoverCandidates(array $candidates): ?IngestItemFile
+	{
+		if ($candidates === []) {
+			return null;
+		}
+
+		usort($candidates, function (IngestItemFile $a, IngestItemFile $b) {
+			$score = fn (IngestItemFile $f) => match ($f->getRole()) {
+				IngestItemFile::ROLE_LEAD => 3,
+				IngestItemFile::ROLE_SUPPORT => 2,
+				IngestItemFile::ROLE_DETAIL => 1,
+				default => 0,
+			} + (($f->getRating() ?? 0) * 0.1) - ((int)($f->getPosition() ?? 99) * 0.001);
+
+			return $score($b) <=> $score($a);
+		});
+
+		return $candidates[0];
+	}
+
+	/**
+	 * @param list<IngestItemFile> $files
+	 * @param array<string, mixed>|null $hints
+	 * @return array<string, mixed>|null
+	 */
+	private function normalizeLayoutHints(?array $hints, IngestItem $item, array $files): ?array
+	{
+		$hasPreCopy = false;
+		foreach ($files as $file) {
+			if ($file->getSourceSlot() === IngestItemFile::SLOT_PRE_COPY) {
+				$hasPreCopy = true;
+				break;
+			}
+		}
+
+		$body = trim(html_entity_decode(strip_tags((string)$item->getBodyHtml()), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+		$thinText = in_array("thin_text", $item->getQualityFlags(), true) || mb_strlen($body) < 80;
+		$fileCount = count($files);
+
+		$pattern = is_array($hints) && isset($hints["pattern"]) && is_string($hints["pattern"])
+			? trim($hints["pattern"])
+			: "";
+
+		$allowed = ["hero_text_gallery", "text_lead_gallery", "gallery_essay", "single"];
+		if (!in_array($pattern, $allowed, true)) {
+			$pattern = "";
+		}
+
+		if ($fileCount <= 1) {
+			$pattern = "single";
+		} elseif ($thinText) {
+			$pattern = "gallery_essay";
+		} elseif ($hasPreCopy && $body !== "") {
+			$pattern = "hero_text_gallery";
+		} elseif ($body !== "" && !$hasPreCopy) {
+			$pattern = $pattern === "gallery_essay" ? "text_lead_gallery" : ($pattern ?: "text_lead_gallery");
+		} elseif ($pattern === "") {
+			$pattern = $thinText ? "gallery_essay" : "hero_text_gallery";
+		}
+
+		if ($hints === null) {
+			$hints = [];
+		}
+		$hints["pattern"] = $pattern;
+
+		return $hints;
+	}
+
+	private function normalizeKind(mixed $kind): ?string
+	{
+		if (!is_string($kind)) {
+			return null;
+		}
+
+		$kind = strtolower(trim($kind));
+		$aliases = [
+			"funeral" => "mourning",
+			"smuteční" => "mourning",
+			"smutecni" => "mourning",
+			"memorial" => "mourning",
+			"commission" => "bouquet",
+			"kytice" => "bouquet",
+		];
+		$kind = $aliases[$kind] ?? $kind;
+
+		$allowed = [
+			"diary", "wedding", "mourning", "gift", "portrait",
+			"workshop", "installation", "bouquet", "product", "other",
+		];
+
+		return in_array($kind, $allowed, true) ? $kind : "other";
+	}
+
+	private function normalizeRole(mixed $role, bool $demote): string
+	{
+		if ($demote) {
+			return IngestItemFile::ROLE_SKIP;
+		}
+
+		$role = is_string($role) ? strtolower(trim($role)) : "";
+		$allowed = [
+			IngestItemFile::ROLE_LEAD,
+			IngestItemFile::ROLE_SUPPORT,
+			IngestItemFile::ROLE_DETAIL,
+			IngestItemFile::ROLE_CONTEXT,
+			IngestItemFile::ROLE_SKIP,
+		];
+
+		return in_array($role, $allowed, true) ? $role : IngestItemFile::ROLE_SUPPORT;
+	}
+
+	private function clampRating(mixed $rating): ?float
+	{
+		if ($rating === null || $rating === "") {
+			return null;
+		}
+		if (!is_numeric($rating)) {
+			return null;
+		}
+
+		return max(0.0, min(1.0, round((float)$rating, 2)));
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	private function stringList(mixed $value): array
+	{
+		if (!is_array($value)) {
+			return [];
+		}
+
+		$out = [];
+		foreach ($value as $item) {
+			if (is_string($item) && trim($item) !== "") {
+				$out[] = trim($item);
+			}
+		}
+
+		return array_values(array_unique($out));
+	}
+
+	/**
+	 * Lowercase Czech keywords (unless preserveCase for entities), collapse dupes, fix known typos.
+	 *
+	 * @return list<string>
+	 */
+	private function normalizeKeywordList(mixed $value, bool $preserveCase = false): array
+	{
+		$out = [];
+		$seen = [];
+		foreach ($this->stringList($value) as $raw) {
+			$keyword = $this->fixKnownTypos($raw);
+			if (!$preserveCase) {
+				$keyword = $this->lowercaseKeyword($keyword);
+			}
+			$key = mb_strtolower($keyword);
+			if (isset($seen[$key])) {
+				continue;
+			}
+			$seen[$key] = true;
+			$out[] = $keyword;
+		}
+
+		return $out;
+	}
+
+	private function lowercaseKeyword(string $keyword): string
+	{
+		// Keep short ALLCAPS tokens (LP, PF) and mixed proper-looking tokens with capitals after space handled simply:
+		if (preg_match('/^[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]{2,5}$/u', $keyword)) {
+			return $keyword;
+		}
+
+		return mb_strtolower($keyword);
+	}
+
+	private function fixKnownTypos(string $keyword): string
+	{
+		$map = [
+			"florisitika" => "floristika",
+			"přírodní florisitika" => "přírodní floristika",
+			"autorská florisitika" => "autorská floristika",
+		];
+		$lower = mb_strtolower(trim($keyword));
+
+		return $map[$lower] ?? trim($keyword);
+	}
+
+	private function nullableString(mixed $value): ?string
+	{
+		if (!is_string($value)) {
+			return null;
+		}
+		$value = trim($value);
+
+		return $value !== "" ? $value : null;
+	}
+
+	private function log(string $message): void
+	{
+		foreach ($this->loggers as $logger) {
+			$logger($message);
+		}
+	}
+}

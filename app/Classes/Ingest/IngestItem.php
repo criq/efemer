@@ -34,6 +34,14 @@ class IngestItem extends \Katu\Models\Model
 	public int|string|null $duplicateOfId = null;
 	public int|string|null $postId = null;
 	public int|string|null $eventId = null;
+	public int|string|null $coverFileId = null;
+	public ?string $coverRationale = null;
+	public int|string|null $coverLocked = null;
+	public ?string $seriesKey = null;
+	public ?string $palette = null;
+	public ?string $layoutHints = null;
+	public ?string $enrichmentVersion = null;
+	public Time|string|null $enrichedAt = null;
 
 	public const SOURCE_EFEMER_CZ = "efemer_cz";
 	public const SOURCE_INSTAGRAM = "instagram";
@@ -43,6 +51,8 @@ class IngestItem extends \Katu\Models\Model
 	public const STATUS_CATEGORIZED = "categorized";
 	public const STATUS_MATERIALIZED = "materialized";
 	public const STATUS_SKIPPED = "skipped";
+
+	public const ENRICHMENT_VERSION = "kw-v3";
 
 	/**
 	 * Canonical source key: no leading slash (paths like 2017/08/08/post.html).
@@ -245,8 +255,248 @@ class IngestItem extends \Katu\Models\Model
 		$this->categories = null;
 		$this->classificationRaw = null;
 		$this->embedding = null;
+		if (!(int)$this->coverLocked) {
+			$this->coverFileId = null;
+			$this->coverRationale = null;
+		}
+		$this->seriesKey = null;
+		$this->palette = null;
+		$this->layoutHints = null;
+		$this->enrichmentVersion = null;
+		$this->enrichedAt = null;
 
 		return $this;
+	}
+
+	/**
+	 * Wipe LLM / vision fields and return status to loaded (keeps stage-1 content + files).
+	 * Respects coverLocked / roleLocked unless $forceLocks is true.
+	 */
+	public function resetEnrichment(bool $forceLocks = false): IngestItem
+	{
+		if ($forceLocks) {
+			$this->coverLocked = 0;
+		}
+
+		$this->clearEnrichment();
+		if ($forceLocks || !(int)$this->coverLocked) {
+			$this->coverFileId = null;
+			$this->coverRationale = null;
+		}
+
+		foreach ($this->getFiles() as $file) {
+			if ($forceLocks) {
+				$file->setRoleLocked(false);
+			}
+			$file->clearEnrichment(!$forceLocks);
+			$file->persist();
+		}
+
+		if (in_array($this->getStatus(), [
+			self::STATUS_KEYWORDED,
+			self::STATUS_CATEGORIZED,
+		], true)) {
+			$this->setStatus(self::STATUS_LOADED);
+		}
+
+		$this->touchUpdated();
+		$this->persist();
+
+		return $this;
+	}
+
+	public function setKind(?string $kind): IngestItem
+	{
+		$this->kind = $kind;
+
+		return $this;
+	}
+
+	public function getKind(): ?string
+	{
+		return $this->kind;
+	}
+
+	public function setKeywordsList(array $keywords): IngestItem
+	{
+		$keywords = array_values(array_unique(array_filter($keywords, fn ($k) => is_string($k) && $k !== "")));
+		$this->keywords = $keywords === [] ? null : json_encode($keywords, JSON_UNESCAPED_UNICODE);
+
+		return $this;
+	}
+
+	public function setThemesList(array $themes): IngestItem
+	{
+		$themes = array_values(array_unique(array_filter($themes, fn ($t) => is_string($t) && $t !== "")));
+		$this->themes = $themes === [] ? null : json_encode($themes, JSON_UNESCAPED_UNICODE);
+
+		return $this;
+	}
+
+	public function setEntitiesList(array $entities): IngestItem
+	{
+		$entities = array_values(array_unique(array_filter($entities, fn ($e) => is_string($e) && $e !== "")));
+		$this->entities = $entities === [] ? null : json_encode($entities, JSON_UNESCAPED_UNICODE);
+
+		return $this;
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	public function getEntitiesList(): array
+	{
+		if ($this->entities === null || $this->entities === "") {
+			return [];
+		}
+
+		$decoded = json_decode($this->entities, true);
+
+		return is_array($decoded) ? array_values(array_filter($decoded, "is_string")) : [];
+	}
+
+	public function setClassificationRaw(?string $raw): IngestItem
+	{
+		$this->classificationRaw = $raw;
+
+		return $this;
+	}
+
+	public function getClassificationRaw(): ?string
+	{
+		return $this->classificationRaw;
+	}
+
+	public function setCoverFileId(?int $coverFileId): IngestItem
+	{
+		$this->coverFileId = $coverFileId;
+
+		return $this;
+	}
+
+	public function getCoverFileId(): ?int
+	{
+		return $this->coverFileId !== null ? (int)$this->coverFileId : null;
+	}
+
+	public function setCoverRationale(?string $coverRationale): IngestItem
+	{
+		$this->coverRationale = $coverRationale;
+
+		return $this;
+	}
+
+	public function getCoverRationale(): ?string
+	{
+		return $this->coverRationale;
+	}
+
+	public function setCoverLocked(bool $locked): IngestItem
+	{
+		$this->coverLocked = $locked ? 1 : 0;
+
+		return $this;
+	}
+
+	public function isCoverLocked(): bool
+	{
+		return (bool)(int)$this->coverLocked;
+	}
+
+	public function setSeriesKey(?string $seriesKey): IngestItem
+	{
+		$this->seriesKey = $seriesKey;
+
+		return $this;
+	}
+
+	public function getSeriesKey(): ?string
+	{
+		return $this->seriesKey;
+	}
+
+	public function setPalette(?array $palette): IngestItem
+	{
+		$this->palette = $palette === null || $palette === []
+			? null
+			: json_encode(array_values($palette), JSON_UNESCAPED_UNICODE);
+
+		return $this;
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	public function getPalette(): array
+	{
+		if ($this->palette === null || $this->palette === "") {
+			return [];
+		}
+
+		$decoded = json_decode($this->palette, true);
+
+		return is_array($decoded) ? array_values(array_filter($decoded, "is_string")) : [];
+	}
+
+	public function setLayoutHints(?array $hints): IngestItem
+	{
+		$this->layoutHints = $hints === null
+			? null
+			: json_encode($hints, JSON_UNESCAPED_UNICODE);
+
+		return $this;
+	}
+
+	public function getLayoutHints(): ?array
+	{
+		if ($this->layoutHints === null || $this->layoutHints === "") {
+			return null;
+		}
+
+		$decoded = json_decode($this->layoutHints, true);
+
+		return is_array($decoded) ? $decoded : null;
+	}
+
+	public function setEnrichmentVersion(?string $version): IngestItem
+	{
+		$this->enrichmentVersion = $version;
+
+		return $this;
+	}
+
+	public function getEnrichmentVersion(): ?string
+	{
+		return $this->enrichmentVersion;
+	}
+
+	public function setEnrichedAt(?Time $time): IngestItem
+	{
+		$this->enrichedAt = $time;
+
+		return $this;
+	}
+
+	public function getEnrichedAt(): ?Time
+	{
+		if ($this->enrichedAt instanceof Time) {
+			return $this->enrichedAt;
+		}
+
+		if (is_string($this->enrichedAt) && $this->enrichedAt !== "") {
+			return new Time($this->enrichedAt);
+		}
+
+		return null;
+	}
+
+	public function needsEnrichment(string $version = self::ENRICHMENT_VERSION): bool
+	{
+		if ($this->getStatus() !== self::STATUS_KEYWORDED) {
+			return true;
+		}
+
+		return $this->getEnrichmentVersion() !== $version;
 	}
 
 	public function touchUpdated(): IngestItem
@@ -326,9 +576,29 @@ class IngestItem extends \Katu\Models\Model
 		};
 	}
 
+	public function getCoverFile(): ?IngestItemFile
+	{
+		$coverId = $this->getCoverFileId();
+		if ($coverId) {
+			foreach ($this->getFiles() as $file) {
+				if ((int)$file->getId() === $coverId) {
+					return $file;
+				}
+			}
+		}
+
+		foreach ($this->getFiles() as $file) {
+			if ($file->isCover()) {
+				return $file;
+			}
+		}
+
+		return $this->getFiles()->getFirst();
+	}
+
 	public function getHeroImage(): ?\Katu\Tools\Images\Image
 	{
-		$file = $this->getFiles()->getFirst();
+		$file = $this->getCoverFile() ?: $this->getFiles()->getFirst();
 		if (!$file) {
 			return null;
 		}
