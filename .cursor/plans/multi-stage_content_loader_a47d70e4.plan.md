@@ -1,6 +1,6 @@
 ---
 name: Multi-stage content loader
-overview: "Master plan: kw-v3 enrich looking good (cover/roles 100%) → finish remaining ~86 loaded → optional bodyHtml thin_text fix → embeddings → taxonomy → materialize."
+overview: "Master plan: efemer.cz keyworded (107) → Instagram stage-1 (rate-limited; dump empty) → KeywordIngest IG → embeddings → taxonomy → materialize."
 todos:
   - id: schema-ingest
     content: Base ingest schema + stage-1 load tables
@@ -54,8 +54,8 @@ todos:
     content: "kw-v3 prompt: cover prefers pre_copy; layout pattern priors; kind funeral/mourning; keyword normalize; allow demote"
     status: completed
   - id: finish-keyword-corpus
-    content: KeywordIngest remaining loaded items (batches); re-eval; re-export
-    status: in_progress
+    content: "efemer.cz KeywordIngest done (107 kw-v3); eval 100%; export 20261028; Instagram keywording later if needed"
+    status: completed
   - id: stage1-body-thin-text
     content: "Investigate empty bodyHtml / thin_text on ~59 efemer posts (blocks hero_text_gallery); fix scraper or accept image-led"
     status: pending
@@ -282,12 +282,14 @@ Prod Instagram archive loop remains **off**.
 
 ### Next
 
-1. **Keep batching** remaining `loaded` (`limit:10`/`20`) — QC is inline; `needs_rekeyword` is re-picked by KeywordIngest; include *Svatba Mlhových* for full eval coverage
-2. Optional: investigate empty `bodyHtml` / `thin_text` on newer diaries
-3. Periodic: EvaluateKeywords + ExportCorpus after ~50–100 keyworded
-4. Embeddings / dedup → taxonomy pause → materialize → rich admin
+1. **Instagram stage-1 first** (blocked on API 429; `data/instagram` empty) — retry with TTY:
+   `./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f`
+   Or one account / capped: `--args='{"account":"efemer_flowers","full":true,"maxNew":20}'`
+2. KeywordIngest Instagram `loaded` items (same kw-v3 + inline QC)
+3. Re-export + EvaluateKeywords → embeddings / dedup → taxonomy → materialize
+4. Optional: empty `bodyHtml` / `thin_text` on efemer.cz
 
-No KeywordIngest prod cron yet. Demote can wait until real skip-worthy frames show up.
+Prod Instagram archive loop stays **off**. No KeywordIngest prod cron yet.
 
 ---
 
@@ -296,9 +298,9 @@ No KeywordIngest prod cron yet. Demote can wait until real skip-worthy frames sh
 1. ~~Stage 1 + KeywordIngest + light admin~~
 2. ~~Eval sets + corpus export + facets~~
 3. ~~QC prompt bump `kw-v3` + re-eval~~
-4. **Finish keywording remaining loaded items** (in progress)
-5. Optional stage-1 bodyHtml / thin_text investigation
-6. Embeddings / dedup
+4. ~~Finish efemer.cz keywording~~ (107 kw-v3; eval cover/roles 100%)
+5. Optional stage-1 bodyHtml / thin_text; Instagram keywording later
+6. **Embeddings / dedup**
 7. Taxonomy pause → assign
 8. Materialize
 9. Rich admin + rules polish
