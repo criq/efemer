@@ -23,18 +23,87 @@
 					<div><dt>Datum</dt><dd>{% if item.getPostedAt %}{{ item.getPostedAt|date("j. n. Y H:i") }}{% else %}—{% endif %}</dd></div>
 					<div><dt>Stav</dt><dd>{{ item.getStatusLabel }}</dd></div>
 					<div><dt>Fotky</dt><dd>{{ files|length }}</dd></div>
+					{% if kind %}
+						<div><dt>Druh</dt><dd>{{ kind }}</dd></div>
+					{% endif %}
 					{% if item.getQualityFlags %}
 						<div><dt>Příznaky</dt><dd>{{ item.getQualityFlags|join(", ") }}</dd></div>
 					{% endif %}
-					{% if item.getKeywordsList %}
-						<div><dt>Klíčová slova</dt><dd>{{ item.getKeywordsList|join(", ") }}</dd></div>
+					{% if enrichmentVersion %}
+						<div><dt>Enrichment</dt><dd>{{ enrichmentVersion }}{% if enrichedAt %} · {{ enrichedAt|date("j. n. Y H:i") }}{% endif %}</dd></div>
 					{% endif %}
-					{% if item.getThemesList %}
-						<div><dt>Témata</dt><dd>{{ item.getThemesList|join(", ") }}</dd></div>
+					{% if seriesKey %}
+						<div><dt>Série</dt><dd>{{ seriesKey }}</dd></div>
 					{% endif %}
 				</dl>
 			</div>
 		</section>
+
+		{% if item.getKeywordsList or item.getThemesList or entities or coverFileId or palette or layoutHints %}
+			<section class="admin-section">
+				<h2 class="admin-section__title">LLM enrichment</h2>
+				<div class="admin-panel admin-ingest-enrichment">
+					{% if item.getKeywordsList %}
+						<div class="admin-ingest-enrichment__block">
+							<h3>Klíčová slova</h3>
+							<ul class="admin-ingest-tags">
+								{% for keyword in item.getKeywordsList %}
+									<li>{{ keyword }}</li>
+								{% endfor %}
+							</ul>
+						</div>
+					{% endif %}
+					{% if item.getThemesList %}
+						<div class="admin-ingest-enrichment__block">
+							<h3>Témata</h3>
+							<ul class="admin-ingest-tags">
+								{% for theme in item.getThemesList %}
+									<li>{{ theme }}</li>
+								{% endfor %}
+							</ul>
+						</div>
+					{% endif %}
+					{% if entities %}
+						<div class="admin-ingest-enrichment__block">
+							<h3>Entity</h3>
+							<ul class="admin-ingest-tags">
+								{% for entity in entities %}
+									<li>{{ entity }}</li>
+								{% endfor %}
+							</ul>
+						</div>
+					{% endif %}
+					{% if coverFileId %}
+						<div class="admin-ingest-enrichment__block">
+							<h3>Cover{% if coverLocked %} <span class="admin-ingest-badge admin-ingest-badge--locked">locked</span>{% endif %}</h3>
+							<p class="admin-ingest-enrichment__text">
+								soubor <code>#{{ coverFileId }}</code>
+								{% if coverRationale %}— {{ coverRationale }}{% endif %}
+							</p>
+						</div>
+					{% endif %}
+					{% if palette %}
+						<div class="admin-ingest-enrichment__block">
+							<h3>Paleta</h3>
+							<ul class="admin-ingest-palette">
+								{% for color in palette %}
+									<li title="{{ color }}">
+										<span class="admin-ingest-palette__swatch" style="background: {{ color }}"></span>
+										<code>{{ color }}</code>
+									</li>
+								{% endfor %}
+							</ul>
+						</div>
+					{% endif %}
+					{% if layoutHintsPretty %}
+						<div class="admin-ingest-enrichment__block">
+							<h3>Layout hints{% if layoutHints.pattern is defined %} · {{ layoutHints.pattern }}{% endif %}</h3>
+							<pre class="admin-ingest-json">{{ layoutHintsPretty }}</pre>
+						</div>
+					{% endif %}
+				</div>
+			</section>
+		{% endif %}
 
 		{% if item.getBodyHtml %}
 			<section class="admin-section">
@@ -47,33 +116,60 @@
 
 		{% if files %}
 			<section class="admin-section">
-				<h2 class="admin-section__title">Fotky</h2>
+				<h2 class="admin-section__title">Fotky · vision</h2>
 				<ul class="admin-ingest-gallery">
 					{% for file in files %}
-						<li class="admin-ingest-gallery__item">
+						<li class="admin-ingest-gallery__item{% if file.isCover %} is-cover{% endif %}{% if file.demote or file.role == "skip" %} is-demoted{% endif %}">
 							{% if file.previewUrl %}
-								<img src="{{ file.previewUrl }}" alt="{{ file.caption|default(file.fileName) }}">
+								<img src="{{ file.previewUrl }}" alt="{{ file.altText|default(file.caption|default(file.fileName)) }}">
 							{% elseif file.thumbnailUrl %}
-								<img src="{{ file.thumbnailUrl }}" alt="{{ file.caption|default(file.fileName) }}">
+								<img src="{{ file.thumbnailUrl }}" alt="{{ file.altText|default(file.caption|default(file.fileName)) }}">
 							{% else %}
 								<span class="admin-ingest-gallery__missing">{{ file.fileName }}</span>
 							{% endif %}
-							<p class="admin-ingest-gallery__meta">
-								#{{ file.position }}
-								{% if file.sourceSlot %}
-									· {{ file.sourceSlotLabel }}
-									{% if file.galleryIndex is not null %}(galerie {{ file.galleryIndex }}){% endif %}
+							<div class="admin-ingest-gallery__body">
+								<p class="admin-ingest-gallery__meta">
+									#{{ file.position }}
+									· <code>id {{ file.id }}</code>
+								</p>
+								<p class="admin-ingest-gallery__badges">
+									{% if file.isCover %}<span class="admin-ingest-badge admin-ingest-badge--cover">cover</span>{% endif %}
+									{% if file.role %}<span class="admin-ingest-badge admin-ingest-badge--role-{{ file.role }}">{{ file.roleLabel }}</span>{% endif %}
+									{% if file.roleLocked %}<span class="admin-ingest-badge admin-ingest-badge--locked">role locked</span>{% endif %}
+									{% if file.demote %}<span class="admin-ingest-badge admin-ingest-badge--demote">demote</span>{% endif %}
+									{% if file.rating is not null %}<span class="admin-ingest-badge">{{ file.rating|number_format(2) }}</span>{% endif %}
+									{% if file.orientation %}<span class="admin-ingest-badge">{{ file.orientation }}</span>{% endif %}
+									{% if file.sourceSlot %}<span class="admin-ingest-badge">{{ file.sourceSlotLabel }}{% if file.galleryIndex is not null %} · g{{ file.galleryIndex }}{% endif %}</span>{% endif %}
+								</p>
+								{% if file.altText %}
+									<p class="admin-ingest-gallery__alt"><strong>Alt</strong> {{ file.altText }}</p>
 								{% endif %}
-							</p>
-							{% if file.caption %}
-								<p>{{ file.caption }}</p>
-							{% endif %}
-							{% if file.keywords %}
-								<p class="admin-ingest-gallery__keywords">{{ file.keywords|join(", ") }}</p>
-							{% endif %}
+								{% if file.roleRationale %}
+									<p class="admin-ingest-gallery__rationale"><strong>Role</strong> {{ file.roleRationale }}</p>
+								{% endif %}
+								{% if file.focalCrop %}
+									<p class="admin-ingest-gallery__crop"><strong>Crop</strong> <code>{{ file.focalCrop }}</code></p>
+								{% endif %}
+								{% if file.caption and file.caption != file.altText %}
+									<p class="admin-ingest-gallery__caption">{{ file.caption }}</p>
+								{% endif %}
+								{% if file.keywords %}
+									<p class="admin-ingest-gallery__keywords"><strong>Kw</strong> {{ file.keywords|join(", ") }}</p>
+								{% endif %}
+							</div>
 						</li>
 					{% endfor %}
 				</ul>
+			</section>
+		{% endif %}
+
+		{% if classificationPretty %}
+			<section class="admin-section">
+				<h2 class="admin-section__title">Raw LLM JSON</h2>
+				<details class="admin-panel admin-ingest-raw" open>
+					<summary>classificationRaw</summary>
+					<pre class="admin-ingest-json">{{ classificationPretty }}</pre>
+				</details>
 			</section>
 		{% endif %}
 	</div>

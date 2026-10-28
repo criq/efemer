@@ -8,16 +8,79 @@
 		<div class="admin-page__header">
 			<h1 class="admin-page__title">Import</h1>
 			<div class="admin-page__actions">
-				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}">Vše</a>
-				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?source=efemer_cz">efemer.cz</a>
-				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?account=efemer_flowers">@efemer_flowers</a>
-				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?account=himmlhaus">@himmlhaus</a>
-				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?status=loaded">Načteno</a>
-				<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?status=keyworded">Klíčová slova</a>
+				<a class="admin-button admin-button--ghost{% if not sourceFilter and not statusFilter and not accountFilter and not kindFilter and not q %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}">Vše</a>
+				<a class="admin-button admin-button--ghost{% if sourceFilter == "efemer_cz" %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}?source=efemer_cz">efemer.cz</a>
+				<a class="admin-button admin-button--ghost{% if accountFilter == "efemer_flowers" %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}?account=efemer_flowers">@efemer_flowers</a>
+				<a class="admin-button admin-button--ghost{% if accountFilter == "himmlhaus" %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}?account=himmlhaus">@himmlhaus</a>
 			</div>
 		</div>
 
-		<p class="admin-page__lede">Načtené zdroje před kategorizací a vytvořením veřejných příspěvků. Celkem {{ items|length }}.</p>
+		<form class="admin-ingest-search" method="get" action="{{ url("admin.ingest.index") }}">
+			{% if sourceFilter %}<input type="hidden" name="source" value="{{ sourceFilter }}">{% endif %}
+			{% if statusFilter %}<input type="hidden" name="status" value="{{ statusFilter }}">{% endif %}
+			{% if accountFilter %}<input type="hidden" name="account" value="{{ accountFilter }}">{% endif %}
+			{% if kindFilter %}<input type="hidden" name="kind" value="{{ kindFilter }}">{% endif %}
+			<label>
+				<span class="admin-muted">Hledat</span>
+				<input type="search" name="q" value="{{ q }}" placeholder="název, keyword, entita…">
+			</label>
+			<button class="admin-button" type="submit">Hledat</button>
+		</form>
+
+		<section class="admin-section">
+			<h2 class="admin-section__title">Pipeline</h2>
+			<div class="admin-panel admin-ingest-pipeline">
+				<ol class="admin-ingest-pipeline__stages">
+					{% for stage in pipeline.stages %}
+						<li class="admin-ingest-pipeline__stage{% if statusFilter == stage.code %} is-active{% endif %}{% if stage.count == 0 %} is-empty{% endif %}">
+							<a href="{{ url("admin.ingest.index") }}?status={{ stage.code }}">
+								<span class="admin-ingest-pipeline__count">{{ stage.count }}</span>
+								<span class="admin-ingest-pipeline__label">{{ stage.label }}</span>
+							</a>
+						</li>
+					{% endfor %}
+				</ol>
+				<div class="admin-ingest-pipeline__meta">
+					<p>
+						Celkem <strong>{{ pipeline.total }}</strong>
+						· prompt <code>{{ enrichmentVersion }}</code>
+						{% if pipeline.stale %}
+							· <a href="{{ url("admin.ingest.index") }}?status=stale"><strong>{{ pipeline.stale }}</strong> zastaralých LLM</a>
+						{% endif %}
+						{% if pipeline.skipped %}
+							· {{ pipeline.skipped }} přeskočeno
+						{% endif %}
+					</p>
+					{% if pipeline.bySource %}
+						<p class="admin-ingest-pipeline__sources">
+							{% for source, count in pipeline.bySource %}
+								<span>{{ source }} {{ count }}</span>
+							{% endfor %}
+						</p>
+					{% endif %}
+				</div>
+			</div>
+		</section>
+
+		{% if kinds %}
+			<section class="admin-section">
+				<h2 class="admin-section__title">Druh (kind)</h2>
+				<div class="admin-ingest-facets">
+					{% for row in kinds %}
+						<a class="admin-button admin-button--ghost{% if kindFilter == row.kind %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}?kind={{ row.kind|url_encode }}{% if statusFilter %}&status={{ statusFilter }}{% endif %}{% if q %}&q={{ q|url_encode }}{% endif %}">{{ row.kind }} <span class="admin-muted">{{ row.count }}</span></a>
+					{% endfor %}
+				</div>
+			</section>
+		{% endif %}
+
+		<p class="admin-page__lede">
+			Zobrazeno {{ rows|length }}
+			{% if statusFilter %}· filtr stavu <code>{{ statusFilter }}</code>{% endif %}
+			{% if sourceFilter %}· zdroj <code>{{ sourceFilter }}</code>{% endif %}
+			{% if accountFilter %}· účet <code>@{{ accountFilter }}</code>{% endif %}
+			{% if kindFilter %}· druh <code>{{ kindFilter }}</code>{% endif %}
+			{% if q %}· hledání <code>{{ q }}</code>{% endif %}
+		</p>
 
 		<div class="admin-panel">
 			<table class="admin-table">
@@ -28,13 +91,16 @@
 						<th>Název</th>
 						<th>Zdroj</th>
 						<th>Datum</th>
-						<th>Stav</th>
+						<th>Druh</th>
+						<th>Pipeline</th>
+						<th>LLM</th>
 						<th>Fotky</th>
 						<th class="admin-table__actions">Akce</th>
 					</tr>
 				</thead>
 				<tbody>
-					{% for item in items %}
+					{% for row in rows %}
+						{% set item = row.item %}
 						<tr>
 							<td class="admin-table__id">{{ item.getId }}</td>
 							<td>
@@ -45,7 +111,23 @@
 							<td><a href="{{ url("admin.ingest.view", { ingestItemId: item.getId }) }}">{{ item.getTitle|default("—") }}</a></td>
 							<td>{{ item.getSourceLabel }}</td>
 							<td>{% if item.getPostedAt %}{{ item.getPostedAt|date("j. n. Y") }}{% else %}—{% endif %}</td>
-							<td>{{ item.getStatusLabel }}</td>
+							<td>{% if row.kind %}<code>{{ row.kind }}</code>{% else %}—{% endif %}</td>
+							<td>
+								<span class="admin-ingest-badge admin-ingest-badge--status-{{ item.getStatus }}">{{ item.getStatusLabel }}</span>
+							</td>
+							<td class="admin-ingest-llm-cell">
+								{% if item.getStatus == "keyworded" or item.getStatus == "categorized" or item.getStatus == "materialized" %}
+									{% if row.isStale %}
+										<span class="admin-ingest-badge admin-ingest-badge--stale">{{ row.enrichmentVersion|default("—") }} stale</span>
+									{% elseif row.enrichmentVersion %}
+										<span class="admin-ingest-badge">{{ row.enrichmentVersion }}</span>
+									{% endif %}
+									{% if row.hasCover %}<span class="admin-ingest-badge admin-ingest-badge--cover">cover</span>{% endif %}
+									{% if row.keywordCount %}<span class="admin-ingest-badge">{{ row.keywordCount }} kw</span>{% endif %}
+								{% else %}
+									<span class="admin-muted">—</span>
+								{% endif %}
+							</td>
 							<td>{{ item.getFileCount }}</td>
 							<td class="admin-table__actions">
 								<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.view", { ingestItemId: item.getId }) }}">Otevřít</a>
@@ -53,7 +135,7 @@
 						</tr>
 					{% else %}
 						<tr>
-							<td colspan="8">Zatím žádné načtené položky. Spusťte refresh CLIs.</td>
+							<td colspan="10">Žádné položky pro tento filtr.</td>
 						</tr>
 					{% endfor %}
 				</tbody>
