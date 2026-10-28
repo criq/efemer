@@ -43,4 +43,4 @@ Prefer `./bin/job` (TTY) so Ctrl+C kills the job:
 
 On HTTP 429 the client waits (60s → … capped at 15m, up to 8 attempts, honors `Retry-After`) then retries; Ctrl+C still interrupts waits. Browser OK ≠ archive API unthrottled.
 
-Production `instagram-archive` loops `jobs:loop …RefreshInstagramAccounts` every 6 hours.
+Production `instagram-archive` loop is **off** (stopped on deploy). Run RefreshInstagram jobs manually when needed.
