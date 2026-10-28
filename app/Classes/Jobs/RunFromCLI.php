@@ -36,6 +36,12 @@ class RunFromCLI extends Command
 		$output->setDecorated(true);
 		Job::setIgnoreMaxLoadAverage(true);
 
+		Signals::install(static function () use ($output): void {
+			$output->writeln("");
+			$output->writeln(ConsoleStyle::warn("Interrupted — stopping job."));
+			exit(130);
+		});
+
 		$class = TClass::createFromPortableName($input->getArgument("class"));
 		if (!$class->exists()) {
 			$output->writeln(ConsoleStyle::error("Unknown job class."));
@@ -76,7 +82,16 @@ class RunFromCLI extends Command
 			$job->setArgs($decodedArgs);
 		}
 
-		$success = $job->run();
+		try {
+			$success = $job->run();
+		} catch (\RuntimeException $exception) {
+			if (Signals::shouldStop() || $exception->getMessage() === "Interrupted.") {
+				$output->writeln(ConsoleStyle::warn("Interrupted — stopping job."));
+
+				return 130;
+			}
+			throw $exception;
+		}
 
 		return $success ? Command::SUCCESS : Command::FAILURE;
 	}

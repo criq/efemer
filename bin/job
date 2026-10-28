@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Interactive job runner — allocates a TTY so Ctrl+C reaches PHP.
+# Usage: ./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshEfemerCz -f
+#        ./bin/job jobs:kill
+set -euo pipefail
+cd "$(dirname "$0")/.."
+exec docker compose exec php php bin/cli.php "$@"

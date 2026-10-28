@@ -45,18 +45,12 @@ class RunLoop extends Command
 
 		$className = $class->getName();
 		$interval = max(60, (int)$input->getOption("interval"));
-		$stop = false;
 
-		if (function_exists("pcntl_async_signals")) {
-			pcntl_async_signals(true);
-			$halt = static function () use (&$stop): void {
-				$stop = true;
-			};
-			pcntl_signal(SIGTERM, $halt);
-			pcntl_signal(SIGINT, $halt);
-		}
+		Signals::install(static function () use ($output): void {
+			$output->writeln(ConsoleStyle::warn("Stop requested — finishing current cycle."));
+		});
 
-		while (!$stop) {
+		while (!Signals::shouldStop()) {
 			$job = new $className;
 			if (!($job instanceof Job)) {
 				$output->writeln(ConsoleStyle::error("Class is not a Katu job."));
@@ -90,13 +84,13 @@ class RunLoop extends Command
 
 			$job->run();
 
-			if ($stop) {
+			if (Signals::shouldStop()) {
 				break;
 			}
 
 			$output->writeln(ConsoleStyle::muted(date("c") . " Sleeping {$interval}s until the next run."));
 			$slept = 0;
-			while ($slept < $interval && !$stop) {
+			while ($slept < $interval && !Signals::shouldStop()) {
 				sleep(min(30, $interval - $slept));
 				$slept += 30;
 			}

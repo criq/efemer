@@ -9,4 +9,5 @@ require dirname(__DIR__) . "/vendor/autoload.php";
 $app = new \Symfony\Component\Console\Application("efemer", "1.0");
 $app->add(new \App\Classes\Jobs\RunFromCLI);
 $app->add(new \App\Classes\Jobs\RunLoop);
+$app->add(new \App\Classes\Jobs\Kill);
 $app->run();

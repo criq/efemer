@@ -7,21 +7,18 @@ alwaysApply: true
 
 Sources load into **`ingest_items` / `ingest_item_files`** only (stage 1). Keywords, taxonomy, and materializing public `posts` come later.
 
-All operational scripts are Katu jobs via `bin/cli.php`:
+All operational scripts are Katu jobs via `bin/cli.php`. **Interactive long jobs:** use `./bin/job` (TTY, Ctrl+C works). **Do not use `-T`** for those or Ctrl+C leaves orphans — then `./bin/job jobs:kill -f`.
 
 ```bash
 cd ~/Sites/efemer
 
-docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Database.Migrate -f
+./bin/job jobs:run App.Classes.Jobs.Database.Migrate -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.ResetImportedContent --args='{"yes":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshEfemerCz -f
 
-docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.ResetImportedContent --args='{"yes":true}' -f
-
-docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.RefreshEfemerCz -f
-
-docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"efemer_flowers","full":true}' -f
-docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"himmlhaus","full":true}' -f
-# or both:
-docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"efemer_flowers","full":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"himmlhaus","full":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f
 ```
 
 Uploads go to GCS `gs://efemer/{DEV|PROD}/…`. Reset/purge only touches the current env shard. Admin: `/admin/ingest`.

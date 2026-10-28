@@ -5,15 +5,36 @@ alwaysApply: true
 
 # Katu jobs
 
-Use `bin/cli.php` from the project directory (`~/Sites/efemer`):
+From `~/Sites/efemer`.
+
+## Interactive (Ctrl+C must work)
+
+**Never use `-T` for long-running jobs in a terminal.** `-T` disconnects without signaling PHP, so the job keeps running in the container.
+
+```bash
+./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshEfemerCz -f
+# same as:
+docker compose exec php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.RefreshEfemerCz -f
+```
+
+Kill orphans (after a bad Ctrl+C with `-T`):
+
+```bash
+./bin/job jobs:kill
+# or force:
+./bin/job jobs:kill -f
+```
+
+## Scripts / CI / agent (no TTY)
 
 ```bash
 docker compose exec -T php php bin/cli.php jobs:run App.Classes.Jobs.… -f
 docker compose exec -T php php bin/cli.php jobs:loop App.Classes.Jobs.… --interval=21600 -f
+docker compose exec -T php php bin/cli.php jobs:kill -f
 ```
 
 Portable class names use dots instead of backslashes. Pass JSON with `--args='{"key":"value"}'`.
 
 Do not add new `bin/*.php` one-off scripts for ops — add a job under `app/Classes/Jobs/` instead. Legacy `bin/*` stubs only print the job command.
 
-Color all job / ingest / import logs via `App\Classes\Jobs\ConsoleStyle` (never raw `<fg=…>` or `<error>` tags). Palette: cyan steps/progress, green success, yellow skip/warn, red errors, magenta paths, white bold titles/counts, gray secondary.
+Color logs via `App\Classes\Jobs\ConsoleStyle`. Signals via `App\Classes\Jobs\Signals`.

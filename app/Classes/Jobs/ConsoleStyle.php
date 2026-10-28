@@ -56,6 +56,36 @@ class ConsoleStyle
 		return "<fg=red;options=bold>" . self::escape($message) . "</>";
 	}
 
+	/**
+	 * Always show something useful — Google/PDO throwables sometimes have an empty message.
+	 */
+	public static function failure(\Throwable $exception): string
+	{
+		$message = trim($exception->getMessage());
+		if ($message === "") {
+			$message = (new \ReflectionClass($exception))->getShortName();
+		}
+
+		$where = basename($exception->getFile()) . ":" . $exception->getLine();
+		$previous = $exception->getPrevious();
+		$extra = "";
+		if ($previous) {
+			$prevMsg = trim($previous->getMessage());
+			if ($prevMsg === "") {
+				$prevMsg = (new \ReflectionClass($previous))->getShortName();
+			}
+			$extra = " " . self::muted("← " . $prevMsg);
+		}
+
+		return sprintf(
+			"%s %s %s%s",
+			self::error("!"),
+			self::escape($message),
+			self::muted("(" . $where . ")"),
+			$extra,
+		);
+	}
+
 	public static function muted(string $text): string
 	{
 		return "<fg=gray>" . self::escape($text) . "</>";
