@@ -528,6 +528,10 @@ class IngestItem extends \Katu\Models\Model
 			return true;
 		}
 
+		if ($this->hasQualityFlag(KeywordQc::FLAG_NEEDS_REKEYWORD)) {
+			return true;
+		}
+
 		return $this->getEnrichmentVersion() !== $version;
 	}
 

@@ -4,6 +4,7 @@ namespace App\Classes\Jobs\Ingest;
 
 use App\Classes\Ingest\IngestItem;
 use App\Classes\Ingest\KeywordAnalyzer;
+use App\Classes\Ingest\KeywordQc;
 use App\Classes\Jobs\ConsoleStyle;
 use App\Classes\Jobs\Job;
 use App\Classes\Jobs\Signals;
@@ -12,6 +13,7 @@ use Katu\Tools\Calendar\Timeout;
 
 /**
  * Stage 2: Gemini keyword / vision enrichment on loaded ingest items.
+ * Runs deterministic KeywordQc synchronously after each successful LLM apply.
  *
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest --args='{"limit":5,"rekeyword":true}' -f
@@ -124,7 +126,14 @@ class KeywordIngest extends Job
 		}
 
 		$items = IngestItem::getAll()->getItems();
+		// Prefer QC retries, then newest postedAt.
 		usort($items, function (IngestItem $a, IngestItem $b) {
+			$aFlag = $a->hasQualityFlag(KeywordQc::FLAG_NEEDS_REKEYWORD) ? 1 : 0;
+			$bFlag = $b->hasQualityFlag(KeywordQc::FLAG_NEEDS_REKEYWORD) ? 1 : 0;
+			if ($aFlag !== $bFlag) {
+				return $bFlag <=> $aFlag;
+			}
+
 			return ((int)($b->getPostedAt()?->format("U") ?? 0)) <=> ((int)($a->getPostedAt()?->format("U") ?? 0));
 		});
 

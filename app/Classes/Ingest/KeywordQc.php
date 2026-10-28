@@ -3,7 +3,8 @@
 namespace App\Classes\Ingest;
 
 /**
- * Deterministic QC after KeywordIngest — auto-fix what code can, flag hard failures for re-LLM.
+ * Deterministic QC run by KeywordAnalyzer right after each LLM apply.
+ * Auto-fixes typos/cover/roles/pattern; flags needs_rekeyword for a later KeywordIngest pass.
  */
 class KeywordQc
 {

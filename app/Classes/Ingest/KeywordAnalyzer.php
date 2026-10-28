@@ -100,7 +100,20 @@ class KeywordAnalyzer
 			$this->markBlockedFiles($files, $blockedPositions, $item);
 		}
 
-		return ["item" => $item];
+		// Deterministic QC immediately after LLM apply (typos, cover, roles, pattern).
+		$item = IngestItem::get((int)$item->getId()) ?: $item;
+		$qc = (new KeywordQc)->review($item, true);
+		foreach ($qc["fixed"] as $line) {
+			$this->log(ConsoleStyle::ok("QC") . " " . $line);
+		}
+		foreach ($qc["issues"] as $line) {
+			$this->log(ConsoleStyle::warn("QC: " . $line));
+		}
+		if ($qc["needsRekeyword"]) {
+			$this->log(ConsoleStyle::warn("QC: flagged needs_rekeyword"));
+		}
+
+		return ["item" => IngestItem::get((int)$item->getId()) ?: $item];
 	}
 
 	/**

@@ -63,7 +63,7 @@ todos:
     content: Expand typo map (florika→floristika); keep demote calibration soft until junk frames appear
     status: completed
   - id: keyword-qc-loop
-    content: Deterministic KeywordQc job (typos/cover/roles/pattern + needs_rekeyword); run on keyworded corpus
+    content: KeywordQc inline after each LLM apply (typos/cover/roles/pattern); needs_rekeyword re-queued via KeywordIngest
     status: completed
   - id: embeddings-dedup
     content: Embeddings for clustering/dedup/series; duplicateOfId
@@ -282,9 +282,9 @@ Prod Instagram archive loop remains **off**.
 
 ### Next
 
-1. **Keep batching** remaining ~86 `loaded` (`limit:10`/`20`) — include *Svatba Mlhových* for full eval coverage
-2. Optional: expand typo map (`florika`); investigate empty `bodyHtml` / `thin_text` on newer diaries
-3. Re-export + EvaluateKeywords after ~50–100 keyworded
+1. **Keep batching** remaining `loaded` (`limit:10`/`20`) — QC is inline; `needs_rekeyword` is re-picked by KeywordIngest; include *Svatba Mlhových* for full eval coverage
+2. Optional: investigate empty `bodyHtml` / `thin_text` on newer diaries
+3. Periodic: EvaluateKeywords + ExportCorpus after ~50–100 keyworded
 4. Embeddings / dedup → taxonomy pause → materialize → rich admin
 
 No KeywordIngest prod cron yet. Demote can wait until real skip-worthy frames show up.

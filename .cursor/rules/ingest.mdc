@@ -20,23 +20,20 @@ cd ~/Sites/efemer
 ./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"himmlhaus","full":true}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f
 
-# stage 2 — Gemini keywords / roles / cover (default limit 20)
+# stage 2 — Gemini keywords / roles / cover (KeywordQc runs inline after each item)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest --args='{"limit":1}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest --args='{"id":123,"rekeyword":true}' -f
+# items flagged needs_rekeyword are picked up again by KeywordIngest (needsEnrichment)
 
-# eval golden covers/roles + corpus export for taxonomy
+# eval golden covers/roles + corpus export for taxonomy (periodic, not per batch)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.EvaluateKeywords -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ExportCorpus -f
-
-# deterministic QC on keyworded items (typos/cover/roles/pattern); optional re-LLM
-./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordQc -f
-./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordQc --args='{"dryRun":true}' -f
-./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordQc --args='{"rekeyword":true}' -f
 
 # clear LLM results only (keeps stage-1 ingest)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ResetKeywordEnrichment --args='{"yes":true}' -f
 ```
+
 
 
 
@@ -52,8 +49,7 @@ Eval sets (edit after human review): `app/Resources/Ingest/eval/covers.json`, `r
 | `Ingest.RefreshInstagram` | one IG account → ingest |
 | `Ingest.RefreshInstagramAccounts` | both IG accounts → ingest |
 | `Ingest.ImportInstagramDump` | `data/instagram` dump → ingest |
-| `Ingest.KeywordIngest` | Gemini keywords / vision → `keyworded` |
-| `Ingest.KeywordQc` | Deterministic QC (+ optional rekeyword for `needs_rekeyword`) |
+| `Ingest.KeywordIngest` | Gemini → keyworded; inline KeywordQc; retries `needs_rekeyword` |
 | `Ingest.EvaluateKeywords` | score cover/role eval sets |
 | `Ingest.ExportCorpus` | CSV/JSON + keyword co-occurrence |
 | `Ingest.ResetKeywordEnrichment` | clear LLM fields only (`yes:true`); status → `loaded` |
