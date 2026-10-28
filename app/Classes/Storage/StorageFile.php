@@ -13,6 +13,7 @@ class StorageFile extends \Katu\Models\Model
 	public int|string|null $id = null;
 	public Time|string|null $timeCreated = null;
 	public ?string $uri = null;
+	public ?string $contentHash = null;
 
 	public static function createFromUpload(Upload $upload): StorageFile
 	{
@@ -25,8 +26,14 @@ class StorageFile extends \Katu\Models\Model
 	public static function createFromContents(string $contents, string $fileName, ?Time $time = null): StorageFile
 	{
 		$time = $time ?: new Time;
+		$hash = hash("sha256", $contents);
+		$existing = static::getByContentHash($hash);
+		if ($existing && \App\Classes\ThirdParty\Google\Cloud::uriBelongsToCurrentEnvironment($existing->getURI())) {
+			return $existing;
+		}
 
 		$path = implode("/", [
+			\App\Classes\ThirdParty\Google\Cloud::getFilesEnvironmentShard(),
 			$time->format("Y"),
 			$time->format("m"),
 			$time->format("d"),
@@ -42,9 +49,31 @@ class StorageFile extends \Katu\Models\Model
 		$object = new StorageFile;
 		$object->setTimeCreated($time);
 		$object->setURI($storageObject->gcsUri());
+		$object->setContentHash($hash);
 		$object->persist();
 
 		return $object;
+	}
+
+	public static function getByContentHash(string $hash): ?StorageFile
+	{
+		if ($hash === "") {
+			return null;
+		}
+
+		return static::getOneBy(["contentHash" => $hash]);
+	}
+
+	public function setContentHash(?string $contentHash): StorageFile
+	{
+		$this->contentHash = $contentHash;
+
+		return $this;
+	}
+
+	public function getContentHash(): ?string
+	{
+		return $this->contentHash;
 	}
 
 	public function setTimeCreated(Time $time): StorageFile
