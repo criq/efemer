@@ -61,7 +61,10 @@ todos:
     status: pending
   - id: kw-normalize-typos
     content: Expand typo map (florika→floristika); keep demote calibration soft until junk frames appear
-    status: pending
+    status: completed
+  - id: keyword-qc-loop
+    content: Deterministic KeywordQc job (typos/cover/roles/pattern + needs_rekeyword); run on keyworded corpus
+    status: completed
   - id: embeddings-dedup
     content: Embeddings for clustering/dedup/series; duplicateOfId
     status: pending

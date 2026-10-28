@@ -29,9 +29,15 @@ cd ~/Sites/efemer
 ./bin/job jobs:run App.Classes.Jobs.Ingest.EvaluateKeywords -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ExportCorpus -f
 
+# deterministic QC on keyworded items (typos/cover/roles/pattern); optional re-LLM
+./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordQc -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordQc --args='{"dryRun":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordQc --args='{"rekeyword":true}' -f
+
 # clear LLM results only (keeps stage-1 ingest)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ResetKeywordEnrichment --args='{"yes":true}' -f
 ```
+
 
 
 Uploads go to GCS `gs://efemer/{DEV|PROD}/…`. Reset/purge only touches the current env shard. Admin: `/admin/ingest` (pipeline + kind facets + keyword search).
@@ -47,6 +53,7 @@ Eval sets (edit after human review): `app/Resources/Ingest/eval/covers.json`, `r
 | `Ingest.RefreshInstagramAccounts` | both IG accounts → ingest |
 | `Ingest.ImportInstagramDump` | `data/instagram` dump → ingest |
 | `Ingest.KeywordIngest` | Gemini keywords / vision → `keyworded` |
+| `Ingest.KeywordQc` | Deterministic QC (+ optional rekeyword for `needs_rekeyword`) |
 | `Ingest.EvaluateKeywords` | score cover/role eval sets |
 | `Ingest.ExportCorpus` | CSV/JSON + keyword co-occurrence |
 | `Ingest.ResetKeywordEnrichment` | clear LLM fields only (`yes:true`); status → `loaded` |
