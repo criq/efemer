@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Ingest pipeline
 
-Sources load into **`ingest_items` / `ingest_item_files`** only (stage 1). Keywords, taxonomy, and materializing public `posts` come later.
+Sources load into **`ingest_items` / `ingest_item_files`** (stage 1). Stage 2 (`KeywordIngest`) adds Gemini keywords / photo roles / cover. Taxonomy and public `posts` come later.
 
 All operational scripts are Katu jobs via `bin/cli.php`. **Interactive long jobs:** use `./bin/job` (TTY, Ctrl+C works). **Do not use `-T`** for those or Ctrl+C leaves orphans — then `./bin/job jobs:kill -f`.
 
@@ -19,9 +19,26 @@ cd ~/Sites/efemer
 ./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"efemer_flowers","full":true}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"himmlhaus","full":true}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f
+
+# stage 2 — Gemini keywords / roles / cover (default limit 20)
+./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest --args='{"limit":1}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest --args='{"id":123,"rekeyword":true}' -f
+
+# eval golden covers/roles + corpus export for taxonomy
+./bin/job jobs:run App.Classes.Jobs.Ingest.EvaluateKeywords -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.ExportCorpus -f
+
+# clear LLM results only (keeps stage-1 ingest)
+./bin/job jobs:run App.Classes.Jobs.Ingest.ResetKeywordEnrichment --args='{"yes":true}' -f
 ```
 
-Uploads go to GCS `gs://efemer/{DEV|PROD}/…`. Reset/purge only touches the current env shard. Admin: `/admin/ingest`.
+
+Uploads go to GCS `gs://efemer/{DEV|PROD}/…`. Reset/purge only touches the current env shard. Admin: `/admin/ingest` (pipeline + kind facets + keyword search).
+
+Gemini key: Secret Manager `gemini-api-key` (see `gcloud-project.mdc`); local fallback `.secret/gemini.api`.
+
+Eval sets (edit after human review): `app/Resources/Ingest/eval/covers.json`, `roles.json`. Exports land in `tmp/ingest/exports/` (gitignored, mounted).
 
 | Job | Role |
 |---|---|
@@ -29,6 +46,10 @@ Uploads go to GCS `gs://efemer/{DEV|PROD}/…`. Reset/purge only touches the cur
 | `Ingest.RefreshInstagram` | one IG account → ingest |
 | `Ingest.RefreshInstagramAccounts` | both IG accounts → ingest |
 | `Ingest.ImportInstagramDump` | `data/instagram` dump → ingest |
+| `Ingest.KeywordIngest` | Gemini keywords / vision → `keyworded` |
+| `Ingest.EvaluateKeywords` | score cover/role eval sets |
+| `Ingest.ExportCorpus` | CSV/JSON + keyword co-occurrence |
+| `Ingest.ResetKeywordEnrichment` | clear LLM fields only (`yes:true`); status → `loaded` |
 | `Ingest.ResetImportedContent` | wipe posts/ingest/pages + env GCS shard |
 | `Database.Migrate` | schema migrations |
 | `Pages.ImportEfemerCz` | legacy page-builder import |

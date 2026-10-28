@@ -1,6 +1,6 @@
 ---
 name: Multi-stage content loader
-overview: "Master plan: stage-1 ingest (done) → Gemini KeywordIngest (next) → corpus/embeddings → taxonomy → role-driven materialize, with sticky human cover/role locks."
+overview: "Master plan: stage-1 + KeywordIngest + eval/corpus (done) → QC prompt bump kw-v3 → finish corpus → embeddings → taxonomy → materialize."
 todos:
   - id: schema-ingest
     content: Base ingest schema + stage-1 load tables
@@ -19,36 +19,42 @@ todos:
     status: completed
   - id: migration-enrichment
     content: IngestEnrichmentSchema — cover/role/vision/layoutHints/enrichmentVersion; migrate locally
-    status: pending
+    status: completed
   - id: models-enrichment
     content: Extend IngestItem / IngestItemFile for enrichment fields + locks
-    status: pending
+    status: completed
   - id: gemini-client
     content: Gemini REST client + Secrets::GEMINI_API_KEY (+ .secret/gemini.api fallback)
-    status: pending
+    status: completed
   - id: keyword-analyzer
     content: KeywordAnalyzer prompt, image attach, JSON apply with lock respect
-    status: pending
+    status: completed
   - id: keyword-job
     content: Jobs.Ingest.KeywordIngest (limit/rekeyword/id/maxImages/dryRun)
-    status: pending
+    status: completed
   - id: admin-enrichment-light
     content: Admin detail — cover/role/rating/alt + enrichmentVersion
-    status: pending
+    status: completed
   - id: docs-ingest-stage2
     content: Update ingest.mdc with KeywordIngest + Gemini secret
-    status: pending
+    status: completed
   - id: smoke-one-item
     content: Smoke KeywordIngest on one local item; check admin
-    status: pending
+    status: completed
   - id: cover-eval-set
     content: Golden set of ~20 cover judgments for prompt regression
-    status: pending
+    status: completed
   - id: role-eval-set
     content: Golden set of ~15 posts with expected lead vs support roles
-    status: pending
+    status: completed
   - id: corpus-tooling
     content: Keyword export CSV/JSON, co-occurrence, admin facets
+    status: completed
+  - id: qc-prompt-v3
+    content: "kw-v3 prompt: cover prefers pre_copy; layout pattern priors; kind funeral/mourning; keyword normalize; allow demote"
+    status: completed
+  - id: finish-keyword-corpus
+    content: KeywordIngest remaining loaded items (batches); re-eval; re-export
     status: pending
   - id: embeddings-dedup
     content: Embeddings for clustering/dedup/series; duplicateOfId
@@ -185,7 +191,7 @@ flowchart LR
   apply --> admin[Admin detail]
 ```
 
-- **Model:** `gemini-2.0-flash` via `generativelanguage.googleapis.com` REST (no new Composer package)
+- **Model:** `gemini-3.8-flash` via `generativelanguage.googleapis.com` REST (no new Composer package)
 - **Secret:** `Secrets::GEMINI_API_KEY` (`gemini-api-key` in GSM); local fallback `.secret/gemini.api`; fail fast if missing
 - **Per item:** one multimodal call — title + ~4k stripped body + up to **12** images (GCS → GD resize ≤1024 → JPEG ~80 → base64)
 - **Skip** videos / failed downloads; note missing positions in prompt
@@ -228,39 +234,62 @@ One real item locally; confirm admin detail.
 
 ---
 
-## Later stages (after KeywordIngest)
+## LLM quality control (21 keyworded, 2026-10-28)
 
-### Eval sets
+Sample: 21 items / 102 files / 127 distinct item keywords. Eval: cover **95%**, roles **100%**, pattern 5/6.
 
-- Cover: ~20 golden cover file ids
-- Roles: ~15 posts with expected leads (efemer `pre_copy` as weak labels)
+### What looks good
 
-### Corpus / embeddings / taxonomy
+- Czech keywords on-brand (plants, rituals, places); per-file kw always 4–8
+- `pre_copy` → `lead` perfect (21/21); roles usefully split support/detail/context
+- Every item has cover + non-empty alt (~85 chars avg)
+- Soft `kind` mostly sensible: wedding 8, diary 6, installation 5, workshop 1, product 1
+- Themes/entities often richer than keywords (good taxonomy signal)
 
-Export + facets (incl. role/sourceSlot); embeddings + `duplicateOfId`; human multi-label taxonomy then assign. No full materialize until categorized.
+### Issues → prompt `kw-v3`
 
-### Stage 3 — materialize
+| Issue | Evidence | Fix |
+|---|---|---|
+| Cover ignores `pre_copy` for flashier later frame | *svatba Na Svatého Jana*: cover pos 4 vs expected 1 | If any `pre_copy` exists, cover ∈ pre_copy unless demoted/skip |
+| `gallery_essay` overused | 16/21 patterns | Prefer `hero_text_gallery` when body nonempty + pre_copy; `gallery_essay` only thin_text / image-led |
+| `kind=diary` for funeral/gift/portrait | *Poslední květy…*, *pro mámu*, *Filip* | Add `mourning` / `gift` / `portrait` (or map mourning→ritual) |
+| `kind=product` for named bouquet | *Anna* | Prefer `bouquet` / `commission`; reserve product for shop-like |
+| Demote never used | 0 demoted; ratings 0.7–0.9 | Encourage demote for blurry/dup; widen rating spread |
+| Keyword noise | `florisitika`; Festival casing | Normalize case; ask model to spell-check Czech |
+| Dual leads | Jana lead at 1 and 4 | Extra leads OK; cover still from pre_copy |
+| Rating inflation | mean 0.81 | Calibrate: 0.9+ rare hero; ~0.5 filler |
 
-Build from `layoutHints` / admin `layoutJson`; hero from cover (never skip/demote); lead large, support gallery; copy alts/roles; pilot 5–10 patterns then full; related-by-keywords.
+### Taxonomy implications (don’t lock yet)
 
-### Admin (rich)
+Emerging facets: occasion (svatba/smuteční/workshop/instalace/dar), material, place, medium. Site sections still provisional until full corpus + co-occurrence review.
 
-Facets; click cover/role → locks; demoted visibility; layout preview; category assign.
+### Eval + export (done)
 
-### Ops
+- Eval JSON: `app/Resources/Ingest/eval/covers.json`, `roles.json` — job `EvaluateKeywords`
+- Export: `ExportCorpus` → `tmp/ingest/exports/`; admin kind facets + search
 
-Production Instagram archive remains stage-1 loop only. No KeywordIngest cron until cost/quality proven. Rules polish.
+---
+
+## Later stages
+
+### Next
+
+1. **`kw-v3` prompt + apply rules**; bump `ENRICHMENT_VERSION`
+2. Rekeyword eval set; re-run EvaluateKeywords (target cover ≥98%)
+3. Batch remaining `loaded` (~86); re-export
+4. Embeddings / dedup → taxonomy pause → materialize → rich admin
+
+No KeywordIngest prod cron until kw-v3 eval is solid and demote appears on real junk frames.
 
 ---
 
 ## Implement order
 
-1. ~~Stage 1 load + reset + slots + jobs Ctrl+C~~
-2. **Enrichment migration + models**
-3. **Gemini + KeywordAnalyzer + KeywordIngest job**
-4. **Light admin + docs + smoke**
-5. Cover/role eval sets
-6. Corpus export + embeddings/dedup
-7. Taxonomy pause → assign
-8. Materialize
-9. Rich admin + rules polish
+1. ~~Stage 1 + KeywordIngest + light admin~~
+2. ~~Eval sets + corpus export + facets~~
+3. **QC prompt bump `kw-v3` + re-eval**
+4. Finish keywording remaining loaded items
+5. Embeddings / dedup
+6. Taxonomy pause → assign
+7. Materialize
+8. Rich admin + rules polish
