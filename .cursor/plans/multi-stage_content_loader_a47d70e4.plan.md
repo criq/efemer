@@ -1,6 +1,6 @@
 ---
 name: Multi-stage content loader
-overview: "Master plan: stage-1 + KeywordIngest + eval/corpus (done) → QC prompt bump kw-v3 → finish corpus → embeddings → taxonomy → materialize."
+overview: "Master plan: kw-v3 enrich looking good (cover/roles 100%) → finish remaining ~86 loaded → optional bodyHtml thin_text fix → embeddings → taxonomy → materialize."
 todos:
   - id: schema-ingest
     content: Base ingest schema + stage-1 load tables
@@ -55,6 +55,12 @@ todos:
     status: completed
   - id: finish-keyword-corpus
     content: KeywordIngest remaining loaded items (batches); re-eval; re-export
+    status: in_progress
+  - id: stage1-body-thin-text
+    content: "Investigate empty bodyHtml / thin_text on ~59 efemer posts (blocks hero_text_gallery); fix scraper or accept image-led"
+    status: pending
+  - id: kw-normalize-typos
+    content: Expand typo map (florika→floristika); keep demote calibration soft until junk frames appear
     status: pending
   - id: embeddings-dedup
     content: Embeddings for clustering/dedup/series; duplicateOfId
@@ -234,39 +240,38 @@ One real item locally; confirm admin detail.
 
 ---
 
-## LLM quality control (21 keyworded, 2026-10-28)
+## LLM quality control
 
-Sample: 21 items / 102 files / 127 distinct item keywords. Eval: cover **95%**, roles **100%**, pattern 5/6.
+### Round 1 (pre–kw-v3) — addressed
 
-### What looks good
+Cover sometimes ignored `pre_copy`; `diary`/`product` overused; `gallery_essay` default; typos; rating inflation. Fixed in **kw-v3** prompt + apply rules.
 
-- Czech keywords on-brand (plants, rituals, places); per-file kw always 4–8
-- `pre_copy` → `lead` perfect (21/21); roles usefully split support/detail/context
-- Every item has cover + non-empty alt (~85 chars avg)
-- Soft `kind` mostly sensible: wedding 8, diary 6, installation 5, workshop 1, product 1
-- Themes/entities often richer than keywords (good taxonomy signal)
+### Round 2 (kw-v3, 21 items, 2026-10-28 afternoon)
 
-### Issues → prompt `kw-v3`
+| Metric | Result |
+|---|---|
+| Status | 21 `keyworded` / `kw-v3`, 86 `loaded` |
+| Eval cover | **100%** (19/19 scored; *Svatba Mlhových* not in batch yet) |
+| Eval roles | **100%** (16/16) |
+| Eval patterns | **5/5** pass |
+| Cover slot | **21/21 pre_copy** (0 post_copy covers) |
+| pre_copy → lead | **21/21** |
+| Demote | still **0** (corpus may simply lack junk frames) |
+| Rating mean | **0.75** (was ~0.81) — improved |
 
-| Issue | Evidence | Fix |
-|---|---|---|
-| Cover ignores `pre_copy` for flashier later frame | *svatba Na Svatého Jana*: cover pos 4 vs expected 1 | If any `pre_copy` exists, cover ∈ pre_copy unless demoted/skip |
-| `gallery_essay` overused | 16/21 patterns | Prefer `hero_text_gallery` when body nonempty + pre_copy; `gallery_essay` only thin_text / image-led |
-| `kind=diary` for funeral/gift/portrait | *Poslední květy…*, *pro mámu*, *Filip* | Add `mourning` / `gift` / `portrait` (or map mourning→ritual) |
-| `kind=product` for named bouquet | *Anna* | Prefer `bouquet` / `commission`; reserve product for shop-like |
-| Demote never used | 0 demoted; ratings 0.7–0.9 | Encourage demote for blurry/dup; widen rating spread |
-| Keyword noise | `florisitika`; Festival casing | Normalize case; ask model to spell-check Czech |
-| Dual leads | Jana lead at 1 and 4 | Extra leads OK; cover still from pre_copy |
-| Rating inflation | mean 0.81 | Calibrate: 0.9+ rare hero; ~0.5 filler |
+**Kinds now useful:** wedding 6, installation 5, bouquet 4, portrait 2, gift 2, workshop 1, mourning 1. Examples look right (*Poslední květy* → mourning, *pro mámu* → gift, *Filip*/*čemeřice* → bouquet). Mild ambiguity: *Barbora* as bouquet vs wedding — acceptable for soft kind.
 
-### Taxonomy implications (don’t lock yet)
+**Keywords:** mostly clean Czech; one leak `přírodní florika` (typo map should add `florika`→`floristika`). Festival casing normalized to lowercase in v3 runs.
 
-Emerging facets: occasion (svatba/smuteční/workshop/instalace/dar), material, place, medium. Site sections still provisional until full corpus + co-occurrence review.
+**Layout patterns:** `gallery_essay` 16 / `single` 4 / `hero_text_gallery` 1. **Not a prompt bug** — 20/21 keyworded items are `thin_text` with **empty `bodyHtml`**. Only *masopustní veselky* has body (771 chars) → correctly `hero_text_gallery`. Site-wide: **59/107** efemer items have empty body; **48** have text (mostly older posts not yet keyworded). So pattern diversity will improve as long-copy posts get enriched — and/or after a stage-1 body extraction fix.
 
-### Eval + export (done)
+### Taxonomy implications (unchanged)
 
-- Eval JSON: `app/Resources/Ingest/eval/covers.json`, `roles.json` — job `EvaluateKeywords`
-- Export: `ExportCorpus` → `tmp/ingest/exports/`; admin kind facets + search
+Occasion / material / place / medium facets emerging. Don’t lock site sections until full corpus + export co-occurrence.
+
+### Ops note
+
+Prod Instagram archive loop remains **off**.
 
 ---
 
@@ -274,12 +279,12 @@ Emerging facets: occasion (svatba/smuteční/workshop/instalace/dar), material, 
 
 ### Next
 
-1. **`kw-v3` prompt + apply rules**; bump `ENRICHMENT_VERSION`
-2. Rekeyword eval set; re-run EvaluateKeywords (target cover ≥98%)
-3. Batch remaining `loaded` (~86); re-export
+1. **Keep batching** remaining ~86 `loaded` (`limit:10`/`20`) — include *Svatba Mlhových* for full eval coverage
+2. Optional: expand typo map (`florika`); investigate empty `bodyHtml` / `thin_text` on newer diaries
+3. Re-export + EvaluateKeywords after ~50–100 keyworded
 4. Embeddings / dedup → taxonomy pause → materialize → rich admin
 
-No KeywordIngest prod cron until kw-v3 eval is solid and demote appears on real junk frames.
+No KeywordIngest prod cron yet. Demote can wait until real skip-worthy frames show up.
 
 ---
 
@@ -287,9 +292,10 @@ No KeywordIngest prod cron until kw-v3 eval is solid and demote appears on real 
 
 1. ~~Stage 1 + KeywordIngest + light admin~~
 2. ~~Eval sets + corpus export + facets~~
-3. **QC prompt bump `kw-v3` + re-eval**
-4. Finish keywording remaining loaded items
-5. Embeddings / dedup
-6. Taxonomy pause → assign
-7. Materialize
-8. Rich admin + rules polish
+3. ~~QC prompt bump `kw-v3` + re-eval~~
+4. **Finish keywording remaining loaded items** (in progress)
+5. Optional stage-1 bodyHtml / thin_text investigation
+6. Embeddings / dedup
+7. Taxonomy pause → assign
+8. Materialize
+9. Rich admin + rules polish
