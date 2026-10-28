@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "description": "Expected lead photo positions (1-based) and optional layout pattern. Bootstrap from pre_copy slot; edit after human review.",
+  "items": [
+    {"source": "efemer_cz", "sourceKey": "2013/08/31/Svatba-Mlhovych.html", "leadPositions": [1], "pattern": "hero_text_gallery", "notes": "pre_copy bride portrait"},
+    {"source": "efemer_cz", "sourceKey": "2014/01/18/masopustni-veselky.html", "leadPositions": [1], "pattern": "hero_text_gallery"},
+    {"source": "efemer_cz", "sourceKey": "2017/08/08/Efemer-pro-sklarnu-Ruckl-spoluprace-s-Boysplaynice.html", "leadPositions": [1], "pattern": "gallery_essay"},
+    {"source": "efemer_cz", "sourceKey": "2017/07/19/Muj-tajny-pruvodce-detsky-workshop-pro-festival-Uprostred.html", "leadPositions": [1]},
+    {"source": "efemer_cz", "sourceKey": "2017/07/12/Pojdte-zat-happening-pro-festival-Uprostred.html", "leadPositions": [1]},
+    {"source": "efemer_cz", "sourceKey": "2017/07/08/Island-v-lete.html", "leadPositions": [1], "pattern": "single"},
+    {"source": "efemer_cz", "sourceKey": "2017/06/24/svatba-Na-Svateho-Jana.html", "leadPositions": [1], "pattern": "gallery_essay", "notes": "thin_text + pre_copy lead; cover must be pos 1"},
+    {"source": "efemer_cz", "sourceKey": "2017/06/23/Posledni-kvety-pro-Helenu-Vlasinovou.html", "leadPositions": [1]},
+    {"source": "efemer_cz", "sourceKey": "2017/05/20/Filip.html", "leadPositions": [1]},
+    {"source": "efemer_cz", "sourceKey": "2017/05/13/japonsko-z-bile-hory.html", "leadPositions": [1]},
+    {"source": "efemer_cz", "sourceKey": "2017/04/05/ROZA-scena-pro-klip-NEVER-SOL.html", "leadPositions": [1]},
+    {"source": "efemer_cz", "sourceKey": "2017/02/11/Laura.html", "leadPositions": [1], "pattern": "single"},
+    {"source": "efemer_cz", "sourceKey": "2016/10/01/Zuzka-a-Tom.html", "leadPositions": [1]},
+    {"source": "efemer_cz", "sourceKey": "2016/09/20/Veru.html", "leadPositions": [1]},
+    {"source": "efemer_cz", "sourceKey": "2016/09/10/Barbora.html", "leadPositions": [1]},
+    {"source": "efemer_cz", "sourceKey": "2016/05/07/Slavici-svatba.html", "leadPositions": [1]},
+    {"source": "efemer_cz", "sourceKey": "2016/05/02/pamatnik-lidove-architektury.html", "leadPositions": [1]}
+  ]
+}

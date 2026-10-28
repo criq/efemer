@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "description": "Expected cover photo by sourceKey + 1-based position. Bootstrap: prefer first pre_copy gallery frame; edit after human review.",
+  "items": [
+    {"source": "efemer_cz", "sourceKey": "2013/08/31/Svatba-Mlhovych.html", "coverPosition": 1, "notes": "pre_copy lead portrait"},
+    {"source": "efemer_cz", "sourceKey": "2014/01/18/masopustni-veselky.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2017/08/08/Efemer-pro-sklarnu-Ruckl-spoluprace-s-Boysplaynice.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2017/07/19/Muj-tajny-pruvodce-detsky-workshop-pro-festival-Uprostred.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2017/07/12/Pojdte-zat-happening-pro-festival-Uprostred.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2017/07/08/Island-v-lete.html", "coverPosition": 1, "notes": "pre_copy / single"},
+    {"source": "efemer_cz", "sourceKey": "2017/06/24/svatba-Na-Svateho-Jana.html", "coverPosition": 1, "notes": "pre_copy should win over later lead"},
+    {"source": "efemer_cz", "sourceKey": "2017/06/23/Posledni-kvety-pro-Helenu-Vlasinovou.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2017/05/20/Filip.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2017/05/13/japonsko-z-bile-hory.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2017/04/05/ROZA-scena-pro-klip-NEVER-SOL.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2017/02/11/Laura.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2016/10/01/Zuzka-a-Tom.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2016/09/20/Veru.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2016/09/10/Barbora.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2016/06/10/Anna.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2016/05/25/pro-mamu.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2016/05/07/Slavici-svatba.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2016/05/02/pamatnik-lidove-architektury.html", "coverPosition": 1, "notes": "pre_copy"},
+    {"source": "efemer_cz", "sourceKey": "2016/04/10/cemerice.html", "coverPosition": 1, "notes": "pre_copy"}
+  ]
+}
