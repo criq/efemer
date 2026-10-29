@@ -10,31 +10,31 @@ Public site is **not** assembled from the page-component tree. Typed entities:
 | Entity | Role |
 |---|---|
 | `ingest_items` | Raw imported sources (stage 1+); not public |
-| `posts` | Work shown in practice sections (after materialize) |
-| `events` | Happenings; fourth public section + homepage banner |
+| `posts` | All public content after materialize (work + invitations) |
+| `events` | Legacy admin table only; public site uses invitation posts |
 | `appearances` | Press / v tisku |
 
 ## Sections (provisional — taxonomy may change after keyword corpus)
 
 | Code | Czech | Path | Entity |
 |---|---|---|---|
-| `ritualy` | Svatební rituály | `/svatebni-ritualy` | posts |
-| `himmelhaus` | Himmelhaus | `/himmelhaus` | posts |
-| `umeni` | Umění | `/umeni` | posts |
-| `udalosti` | Události | `/udalosti` | events |
+| `ritualy` | Svatební rituály | `/svatebni-ritualy` | lasting posts |
+| `himmelhaus` | Himmelhaus | `/himmelhaus` | lasting posts |
+| `umeni` | Umění | `/umeni` | lasting posts |
+| `udalosti` | Události | `/udalosti` | invitation posts (`isInvitation`) |
 
 Himmelhaus is the house; Instagram handle is `@himmlhaus`.
 
-`Section::work()` is the three post sections. `Section::all()` includes Události. Posts and event “Souvisí se” never use `udalosti`.
+`Section::work()` is the three lasting sections. `Section::all()` includes Události.
 
 ## Homepage
 
-Visual layout is in `homepage.mdc`. Text is the next published current or upcoming event, else the latest post. The five hero photos are a mock for now. Then three work-section plots (not Události), one photo above the text in each.
+Visual layout is in `homepage.mdc`. Text is the next **current invitation** post, else the latest lasting work post. The five hero photos are still partly mock (invitation cover as lead). Then three work-section plots (not Události).
 
-## Events
+## Invitations
 
-Public listing at `/udalosti` (nadcházející / proběhlé). Detail at `/udalosti/{slug}`. Optional related work section + Instagram `url`. Admin **Události**: create/edit with optional Instagram URL (“Načíst z Instagramu”).
+Materialized as posts with `isInvitation`, `startsAt` / `endsAt` / `place`, section `udalosti`. Public only while current (effective end ≥ now); expired → hidden everywhere including detail **404**. Listing `/udalosti` is current invites only (no archive). Admin legacy **Události** (`events` table) remains until migrated.
 
 ## Import
 
-Load into ingest via Katu jobs first (see `ingest.mdc`). Do not write public `posts` from refresh jobs.
+Load into ingest via Katu jobs first (see `ingest.mdc`). Public `posts` come from `MaterializePosts`, not refresh jobs.

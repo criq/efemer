@@ -1,6 +1,6 @@
 ---
 name: Multi-stage content loader
-overview: "Master plan: efemer.cz keyworded (107) → IG stage-1 done (631) → KeywordIngest IG in progress (80/631) with LLM timeframe/event fields → finish IG → export/eval → event materialize + embeddings → taxonomy → posts."
+overview: "Master plan: efemer.cz keyworded → IG stage-1 done → KeywordIngest IG in progress → MaterializePosts (invitations ephemeral on /udalosti; Wanderlust + diary pilots) → finish IG → export/eval → embeddings → taxonomy → broader posts."
 todos:
   - id: schema-ingest
     content: Base ingest schema + stage-1 load tables
@@ -84,8 +84,8 @@ todos:
     content: "After IG KeywordIngest finishes: ExportCorpus + EvaluateKeywords; spot-check demote/text-slide skips; optional IG invite eval rows"
     status: pending
   - id: event-materialize
-    content: "Materialize isInvitation items → events (title/startsAt/endsAt/place/hero/url); homepage hero from next upcoming event"
-    status: pending
+    content: "Superseded: invitations are posts (MaterializePosts), not Event entity"
+    status: cancelled
   - id: embeddings-dedup
     content: Embeddings for clustering/dedup/series; duplicateOfId (seriesKey nearly unused so far — do not lean on it yet)
     status: pending
@@ -93,8 +93,8 @@ todos:
     content: "Pause after full keyworded corpus; multi-label facets (occasion/material/place/medium + event); do not map kind→section 1:1"
     status: pending
   - id: stage3-materialize
-    content: Pilot then materialize posts; layoutJson from layoutHints; cover/alts/demote
-    status: pending
+    content: "PostMaterializer: title/perex/files/layoutJson; invitations → udalosti (ephemeral); pilot Wanderlust #427 + diary #621"
+    status: completed
   - id: ingest-admin-rich
     content: Manual cover/role pick (locks), reject visibility, layout preview (list facets already shipped)
     status: pending
@@ -296,10 +296,10 @@ Prod Instagram archive loop remains **off**. Prefer Instaloader dump + Import wh
 ### Next
 
 1. **Finish KeywordIngest** on remaining IG `loaded` (~551) — includes timeframe for free
-2. Optional: rekeyword older efemer.cz items that lack `timeframe` JSON (low priority unless building events from them)
-3. **Event materialize** from `isInvitation` → `events` + homepage hero (next upcoming)
+2. **Post materialize** (`MaterializePosts`) — universal; invitations as ephemeral `udalosti` posts; Wanderlust pilot
+3. Optional: rekeyword older efemer.cz items that lack `timeframe` JSON
 4. ExportCorpus + EvaluateKeywords; optional IG invite/cover eval rows
-5. Embeddings / dedup → taxonomy pause → post materialize
+5. Embeddings / dedup → taxonomy pause → broader post materialize
 6. Optional: empty `bodyHtml` / `thin_text` on efemer.cz (~59)
 
 ---
@@ -313,7 +313,7 @@ Prod Instagram archive loop remains **off**. Prefer Instaloader dump + Import wh
 5. ~~IG stage-1 Instaloader~~
 6. ~~LLM timeframe + drop mourning + invite re-enrich~~
 7. **Finish IG KeywordIngest** (in progress)
-8. **Event materialize** (invitations → events / homepage)
+8. **Post materialize** (unified posts; invitations ephemeral on `/udalosti`)
 9. Re-export / eval → embeddings / dedup
-10. Taxonomy pause → assign → post materialize
-11. Rich admin + rules polish; optional efemer bodyHtml fix
+10. Taxonomy pause → assign → broader materialize
+11. Rich admin + rules polish; drop legacy `events` UI; optional efemer bodyHtml fix
