@@ -161,7 +161,7 @@ class Index extends \Katu\Controllers\Controller
 
 		$stages = [
 			["code" => IngestItem::STATUS_LOADED, "label" => "Načteno", "count" => $byStatus[IngestItem::STATUS_LOADED]],
-			["code" => IngestItem::STATUS_KEYWORDED, "label" => "LLM / keywords", "count" => $byStatus[IngestItem::STATUS_KEYWORDED]],
+			["code" => IngestItem::STATUS_KEYWORDED, "label" => "LLM", "count" => $byStatus[IngestItem::STATUS_KEYWORDED]],
 			["code" => IngestItem::STATUS_CATEGORIZED, "label" => "Kategorie", "count" => $byStatus[IngestItem::STATUS_CATEGORIZED]],
 			["code" => IngestItem::STATUS_MATERIALIZED, "label" => "Příspěvky", "count" => $byStatus[IngestItem::STATUS_MATERIALIZED]],
 		];

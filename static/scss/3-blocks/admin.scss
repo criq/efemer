@@ -48,6 +48,10 @@
 	padding: .5rem 1rem;
 }
 
+body:has(.admin-page--wide) .admin-header__inner {
+	max-width: 90rem;
+}
+
 .admin-header__brand {
 	font-size: .8125rem;
 	font-weight: 600;
@@ -74,6 +78,10 @@
 	margin: 0 auto;
 	max-width: 72rem;
 	padding: 1rem 1rem 1.5rem;
+
+	&:has(.admin-page--wide) {
+		max-width: 90rem;
+	}
 }
 
 .admin-page__header {
@@ -266,8 +274,12 @@
 }
 
 .admin-ingest-llm-cell {
+	max-width: 12rem;
+	white-space: normal;
+
 	.admin-ingest-badge {
 		margin: 0 .15rem .15rem 0;
+		white-space: nowrap;
 	}
 }
 
@@ -520,6 +532,10 @@
 	border-radius: var(--admin-radius);
 	box-shadow: var(--admin-shadow);
 	overflow: hidden;
+
+	&--scroll {
+		overflow-x: auto;
+	}
 }
 
 .admin-table {
@@ -551,9 +567,45 @@
 	tbody tr:hover {
 		background: rgb(242 240 234 / 35%);
 	}
+
+	&--ingest {
+		min-width: 56rem;
+
+		th,
+		td {
+			padding: .4rem .5rem;
+		}
+	}
 }
 
 .admin-table__id {
+	white-space: nowrap;
+	width: 1px;
+}
+
+.admin-table__thumb {
+	line-height: 0;
+	width: 1px;
+
+	a {
+		display: block;
+		text-decoration: none;
+	}
+}
+
+.admin-table__title {
+	max-width: 18rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.admin-table__nowrap {
+	white-space: nowrap;
+}
+
+.admin-table__num {
+	text-align: right;
 	white-space: nowrap;
 	width: 1px;
 }

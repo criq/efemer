@@ -4,14 +4,14 @@
 
 {% block body %}
 
-	<div class="admin-page">
+	<div class="admin-page admin-page--wide">
 		<div class="admin-page__header">
 			<h1 class="admin-page__title">Import</h1>
 			<div class="admin-page__actions">
-				<a class="admin-button admin-button--ghost{% if not sourceFilter and not statusFilter and not accountFilter and not kindFilter and not q %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}">Vše</a>
-				<a class="admin-button admin-button--ghost{% if sourceFilter == "efemer_cz" %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}?source=efemer_cz">efemer.cz</a>
-				<a class="admin-button admin-button--ghost{% if accountFilter == "efemer_flowers" %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}?account=efemer_flowers">@efemer_flowers</a>
-				<a class="admin-button admin-button--ghost{% if accountFilter == "himmlhaus" %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}?account=himmlhaus">@himmlhaus</a>
+				<a class="admin-button admin-button--ghost{% if not sourceFilter and not accountFilter %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}{% if statusFilter or kindFilter or q %}?{% endif %}{% if statusFilter %}status={{ statusFilter }}{% endif %}{% if kindFilter %}{% if statusFilter %}&{% endif %}kind={{ kindFilter|url_encode }}{% endif %}{% if q %}{% if statusFilter or kindFilter %}&{% endif %}q={{ q|url_encode }}{% endif %}">Vše</a>
+				<a class="admin-button admin-button--ghost{% if sourceFilter == "efemer_cz" %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}?source=efemer_cz{% if statusFilter %}&status={{ statusFilter }}{% endif %}{% if kindFilter %}&kind={{ kindFilter|url_encode }}{% endif %}{% if q %}&q={{ q|url_encode }}{% endif %}">efemer.cz</a>
+				<a class="admin-button admin-button--ghost{% if accountFilter == "efemer_flowers" %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}?account=efemer_flowers{% if statusFilter %}&status={{ statusFilter }}{% endif %}{% if kindFilter %}&kind={{ kindFilter|url_encode }}{% endif %}{% if q %}&q={{ q|url_encode }}{% endif %}">@efemer_flowers</a>
+				<a class="admin-button admin-button--ghost{% if accountFilter == "himmlhaus" %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}?account=himmlhaus{% if statusFilter %}&status={{ statusFilter }}{% endif %}{% if kindFilter %}&kind={{ kindFilter|url_encode }}{% endif %}{% if q %}&q={{ q|url_encode }}{% endif %}">@himmlhaus</a>
 			</div>
 		</div>
 
@@ -33,7 +33,7 @@
 				<ol class="admin-ingest-pipeline__stages">
 					{% for stage in pipeline.stages %}
 						<li class="admin-ingest-pipeline__stage{% if statusFilter == stage.code %} is-active{% endif %}{% if stage.count == 0 %} is-empty{% endif %}">
-							<a href="{{ url("admin.ingest.index") }}?status={{ stage.code }}">
+							<a href="{{ url("admin.ingest.index") }}?status={{ stage.code }}{% if sourceFilter %}&source={{ sourceFilter }}{% endif %}{% if accountFilter %}&account={{ accountFilter }}{% endif %}{% if kindFilter %}&kind={{ kindFilter|url_encode }}{% endif %}{% if q %}&q={{ q|url_encode }}{% endif %}">
 								<span class="admin-ingest-pipeline__count">{{ stage.count }}</span>
 								<span class="admin-ingest-pipeline__label">{{ stage.label }}</span>
 							</a>
@@ -45,7 +45,7 @@
 						Celkem <strong>{{ pipeline.total }}</strong>
 						· prompt <code>{{ enrichmentVersion }}</code>
 						{% if pipeline.stale %}
-							· <a href="{{ url("admin.ingest.index") }}?status=stale"><strong>{{ pipeline.stale }}</strong> zastaralých LLM</a>
+							· <a href="{{ url("admin.ingest.index") }}?status=stale{% if sourceFilter %}&source={{ sourceFilter }}{% endif %}{% if accountFilter %}&account={{ accountFilter }}{% endif %}{% if kindFilter %}&kind={{ kindFilter|url_encode }}{% endif %}{% if q %}&q={{ q|url_encode }}{% endif %}"><strong>{{ pipeline.stale }}</strong> zastaralých LLM</a>
 						{% endif %}
 						{% if pipeline.skipped %}
 							· {{ pipeline.skipped }} přeskočeno
@@ -67,7 +67,7 @@
 				<h2 class="admin-section__title">Druh (kind)</h2>
 				<div class="admin-ingest-facets">
 					{% for row in kinds %}
-						<a class="admin-button admin-button--ghost{% if kindFilter == row.kind %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}?kind={{ row.kind|url_encode }}{% if statusFilter %}&status={{ statusFilter }}{% endif %}{% if q %}&q={{ q|url_encode }}{% endif %}">{{ row.kind }} <span class="admin-muted">{{ row.count }}</span></a>
+						<a class="admin-button admin-button--ghost{% if kindFilter == row.kind %} is-active{% endif %}" href="{{ url("admin.ingest.index") }}?kind={{ row.kind|url_encode }}{% if statusFilter %}&status={{ statusFilter }}{% endif %}{% if sourceFilter %}&source={{ sourceFilter }}{% endif %}{% if accountFilter %}&account={{ accountFilter }}{% endif %}{% if q %}&q={{ q|url_encode }}{% endif %}">{{ row.kind }} <span class="admin-muted">{{ row.count }}</span></a>
 					{% endfor %}
 				</div>
 			</section>
@@ -82,8 +82,8 @@
 			{% if q %}· hledání <code>{{ q }}</code>{% endif %}
 		</p>
 
-		<div class="admin-panel">
-			<table class="admin-table">
+		<div class="admin-panel admin-panel--scroll">
+			<table class="admin-table admin-table--ingest">
 				<thead>
 					<tr>
 						<th class="admin-table__id">ID</th>
@@ -92,10 +92,9 @@
 						<th>Zdroj</th>
 						<th>Datum</th>
 						<th>Druh</th>
-						<th>Pipeline</th>
+						<th>Stav</th>
 						<th>LLM</th>
-						<th>Fotky</th>
-						<th class="admin-table__actions">Akce</th>
+						<th class="admin-table__num">Fotky</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -103,17 +102,21 @@
 						{% set item = row.item %}
 						<tr>
 							<td class="admin-table__id">{{ item.getId }}</td>
-							<td>
+							<td class="admin-table__thumb">
 								{% if item.getHeroImage %}
-									<img class="admin-thumbnail" src="{{ item.getHeroImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+									<a href="{{ url("admin.ingest.view", { ingestItemId: item.getId }) }}">
+										<img class="admin-thumbnail" src="{{ item.getHeroImage.getImageVersion("THUMBNAIL").getURL }}" alt="">
+									</a>
 								{% endif %}
 							</td>
-							<td><a href="{{ url("admin.ingest.view", { ingestItemId: item.getId }) }}">{{ item.getTitle|default("—") }}</a></td>
-							<td>{{ item.getSourceLabel }}</td>
-							<td>{% if item.getPostedAt %}{{ item.getPostedAt|date("j. n. Y") }}{% else %}—{% endif %}</td>
-							<td>{% if row.kind %}<code>{{ row.kind }}</code>{% else %}—{% endif %}</td>
+							<td class="admin-table__title">
+								<a href="{{ url("admin.ingest.view", { ingestItemId: item.getId }) }}">{{ item.getTitle|default("—") }}</a>
+							</td>
+							<td class="admin-table__nowrap">{{ item.getSourceLabel }}</td>
+							<td class="admin-table__nowrap">{% if item.getPostedAt %}{{ item.getPostedAt|date("j. n. Y") }}{% else %}—{% endif %}</td>
+							<td class="admin-table__nowrap">{% if row.kind %}<code>{{ row.kind }}</code>{% else %}<span class="admin-muted">—</span>{% endif %}</td>
 							<td>
-								<span class="admin-ingest-badge admin-ingest-badge--status-{{ item.getStatus }}">{{ item.getStatusLabel }}</span>
+								<span class="admin-ingest-badge admin-ingest-badge--status-{{ item.getStatus }}">{{ item.getStatusBadgeLabel }}</span>
 							</td>
 							<td class="admin-ingest-llm-cell">
 								{% if item.getStatus == "keyworded" or item.getStatus == "categorized" or item.getStatus == "materialized" %}
@@ -128,14 +131,11 @@
 									<span class="admin-muted">—</span>
 								{% endif %}
 							</td>
-							<td>{{ item.getFileCount }}</td>
-							<td class="admin-table__actions">
-								<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.view", { ingestItemId: item.getId }) }}">Otevřít</a>
-							</td>
+							<td class="admin-table__num">{{ item.getFileCount }}</td>
 						</tr>
 					{% else %}
 						<tr>
-							<td colspan="10">Žádné položky pro tento filtr.</td>
+							<td colspan="9">Žádné položky pro tento filtr.</td>
 						</tr>
 					{% endfor %}
 				</tbody>
