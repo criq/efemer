@@ -30,14 +30,14 @@ class IngestItemFile extends \Katu\Models\Model
 	public ?string $sourceSlot = null;
 	public int|string|null $galleryIndex = null;
 	public int|float|string|null $rating = null;
-	public int|string|null $isCover = null;
+	public int|string|null $isCover = 0;
 	public ?string $role = null;
 	public ?string $roleRationale = null;
-	public int|string|null $roleLocked = null;
+	public int|string|null $roleLocked = 0;
 	public ?string $altText = null;
 	public ?string $orientation = null;
 	public ?string $focalCrop = null;
-	public int|string|null $demote = null;
+	public int|string|null $demote = 0;
 
 	public function setIngestItem(IngestItem $item): IngestItemFile
 	{

@@ -48,7 +48,7 @@ Eval sets (edit after human review): `app/Resources/Ingest/eval/covers.json`, `r
 | `Ingest.RefreshEfemerCz` | efemer.cz → ingest |
 | `Ingest.RefreshInstagram` | one IG account → ingest |
 | `Ingest.RefreshInstagramAccounts` | both IG accounts → ingest |
-| `Ingest.ImportInstagramDump` | `data/instagram` dump → ingest |
+| `Ingest.ImportInstagramDump` | `data/instagram` dump → ingest (Archiver or Instaloader layout) |
 | `Ingest.KeywordIngest` | Gemini → keyworded; inline KeywordQc; retries `needs_rekeyword` |
 | `Ingest.EvaluateKeywords` | score cover/role eval sets |
 | `Ingest.ExportCorpus` | CSV/JSON + keyword co-occurrence |

@@ -48,6 +48,7 @@ class Loader
 			$item->timeCreated = new Time;
 			$item->setSource($source);
 			$item->setSourceKey($sourceKey);
+			$item->setCoverLocked(false);
 		} elseif ($item->getSourceKey() !== $sourceKey) {
 			// Migrate legacy "/path" keys to the canonical form on touch.
 			$item->setSourceKey($sourceKey);

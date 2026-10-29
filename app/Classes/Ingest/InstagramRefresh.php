@@ -132,7 +132,7 @@ class InstagramRefresh
 		$account = (string)$data["account"];
 		$shortcode = (string)$data["shortcode"];
 		$sourceKey = $account . ":" . $shortcode;
-		$takenAt = !empty($data["taken_at"]) ? new Time((int)$data["taken_at"]) : new Time;
+		$takenAt = !empty($data["taken_at"]) ? Time::createFromTimestamp((int)$data["taken_at"]) : new Time;
 		$caption = trim((string)($data["caption"] ?? ""));
 		$title = $this->titleFromCaption($caption) ?: $shortcode;
 		$bodyHtml = $this->captionToHtml($caption);

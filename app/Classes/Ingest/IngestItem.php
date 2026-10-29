@@ -36,7 +36,7 @@ class IngestItem extends \Katu\Models\Model
 	public int|string|null $eventId = null;
 	public int|string|null $coverFileId = null;
 	public ?string $coverRationale = null;
-	public int|string|null $coverLocked = null;
+	public int|string|null $coverLocked = 0;
 	public ?string $seriesKey = null;
 	public ?string $palette = null;
 	public ?string $layoutHints = null;
@@ -579,6 +579,9 @@ class IngestItem extends \Katu\Models\Model
 		$link->setContentHash($contentHash ?: $storageFile->getContentHash());
 		$link->setSourceSlot($sourceSlot);
 		$link->setGalleryIndex($galleryIndex);
+		$link->setIsCover(false);
+		$link->setRoleLocked(false);
+		$link->setDemote(false);
 		$link->persist();
 
 		return $link;
@@ -606,8 +609,20 @@ class IngestItem extends \Katu\Models\Model
 			self::STATUS_LOADED => "Načteno",
 			self::STATUS_KEYWORDED => "Klíčová slova",
 			self::STATUS_CATEGORIZED => "Kategorie",
-			self::STATUS_MATERIALIZED => "Zveřejněno do příspěvků",
+			self::STATUS_MATERIALIZED => "Příspěvky",
 			self::STATUS_SKIPPED => "Přeskočeno",
+			default => $this->getStatus(),
+		};
+	}
+
+	public function getStatusBadgeLabel(): string
+	{
+		return match ($this->getStatus()) {
+			self::STATUS_LOADED => "načteno",
+			self::STATUS_KEYWORDED => "llm",
+			self::STATUS_CATEGORIZED => "kategorie",
+			self::STATUS_MATERIALIZED => "příspěvky",
+			self::STATUS_SKIPPED => "přeskočeno",
 			default => $this->getStatus(),
 		};
 	}

@@ -37,10 +37,32 @@ Prefer `./bin/job` (TTY) so Ctrl+C kills the job:
 # both accounts
 ./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f
 
-# offline dump under data/instagram
+# offline dump under data/instagram (Archiver layout OR Instaloader)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
 ```
 
-On HTTP 429 the client waits (60s → … capped at 15m, up to 8 attempts, honors `Retry-After`) then retries; Ctrl+C still interrupts waits. Browser OK ≠ archive API unthrottled.
+On HTTP 429 the client waits (60s → … capped at 15m, up to 8 attempts, honors `Retry-After`) then retries; Ctrl+C still interrupts waits. Browser OK ≠ archive API unthrottled. **Do not keep re-running RefreshInstagram while 429 persists** — it deepens the throttle.
 
-Production `instagram-archive` loop is **off** (stopped on deploy). Run RefreshInstagram jobs manually when needed.
+### Bypass when API is rate-limited: Instaloader
+
+`ImportInstagramDump` also reads native Instaloader dumps (`data/instagram/{account}/*_UTC.json.xz` + jpgs). Local venv: `tmp/instagram-venv`.
+
+```bash
+# stop if a RefreshInstagram backoff is still running
+./bin/job jobs:kill -f
+
+cd ~/Sites/efemer
+mkdir -p data/instagram
+# anonymous often works when session archive API is 429’d
+# omit --fast-update for a first full dump (it stops at the first already-downloaded post)
+tmp/instagram-venv/bin/instaloader \
+  --no-videos \
+  --dirname-pattern 'data/instagram/{profile}' \
+  --filename-pattern '{date_utc}_UTC' \
+  efemer_flowers himmlhaus
+
+./bin/job jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
+# then: KeywordIngest on status=loaded Instagram items
+```
+
+Production `instagram-archive` loop is **off** (stopped on deploy). Prefer Instaloader dump + Import when RefreshInstagram stays 429.

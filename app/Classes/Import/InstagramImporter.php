@@ -65,7 +65,7 @@ class InstagramImporter
 		}
 
 		$classified = $classifier->classify($data);
-		$takenAt = !empty($data["taken_at"]) ? new Time((int)$data["taken_at"]) : new Time;
+		$takenAt = !empty($data["taken_at"]) ? Time::createFromTimestamp((int)$data["taken_at"]) : new Time;
 		$slugSource = $classified["title"] !== "Bez názvu"
 			? $classified["title"]
 			: $shortcode;
