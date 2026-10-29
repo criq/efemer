@@ -1,6 +1,6 @@
 ---
 name: Multi-stage content loader
-overview: "Master plan: efemer.cz keyworded (107) → Instagram stage-1 (rate-limited; dump empty) → KeywordIngest IG → embeddings → taxonomy → materialize."
+overview: "Master plan: efemer.cz keyworded (107) → IG stage-1 done (631) → KeywordIngest IG in progress (~64/631) → export/eval → embeddings → taxonomy → materialize."
 todos:
   - id: schema-ingest
     content: Base ingest schema + stage-1 load tables
@@ -54,31 +54,43 @@ todos:
     content: "kw-v3 prompt: cover prefers pre_copy; layout pattern priors; kind funeral/mourning; keyword normalize; allow demote"
     status: completed
   - id: finish-keyword-corpus
-    content: "efemer.cz KeywordIngest done (107 kw-v3); eval 100%; export 20261028; Instagram keywording later if needed"
+    content: "efemer.cz KeywordIngest done (107 kw-v3); eval 100%; export 20261028"
     status: completed
+  - id: stage1-instagram-dump
+    content: "IG stage-1 via Instaloader — 400 efemer_flowers + 231 himmlhaus; ImportInstagramDump idempotent"
+    status: completed
+  - id: ig-keyword-corpus
+    content: "KeywordIngest remaining Instagram loaded (~567); same kw-v3 + inline QC"
+    status: in_progress
   - id: stage1-body-thin-text
     content: "Investigate empty bodyHtml / thin_text on ~59 efemer posts (blocks hero_text_gallery); fix scraper or accept image-led"
     status: pending
   - id: kw-normalize-typos
-    content: Expand typo map (florika→floristika); keep demote calibration soft until junk frames appear
-    status: completed
+    content: "Expand typo map (florika→floristika done; add košilela→košile); demote now fires on IG text slides"
+    status: pending
   - id: keyword-qc-loop
     content: KeywordQc inline after each LLM apply (typos/cover/roles/pattern); needs_rekeyword re-queued via KeywordIngest
     status: completed
+  - id: ig-kind-soft-labels
+    content: "Watch himmlhaus diary collapse (38/38 diary so far); after full IG run, decide if kind prompt needs event/workshop priors for @himmlhaus"
+    status: pending
+  - id: corpus-reexport-after-ig
+    content: "After IG KeywordIngest finishes: ExportCorpus + EvaluateKeywords; spot-check demote/text-slide skips"
+    status: pending
   - id: embeddings-dedup
-    content: Embeddings for clustering/dedup/series; duplicateOfId
+    content: Embeddings for clustering/dedup/series; duplicateOfId (seriesKey nearly unused so far — do not lean on it yet)
     status: pending
   - id: taxonomy-discovery
-    content: Pause after keyworded corpus; decide multi-label taxonomy; assign
+    content: "Pause after full keyworded corpus; multi-label facets (occasion/material/place/medium + event); do not map kind→section 1:1"
     status: pending
   - id: stage3-materialize
     content: Pilot then materialize; layoutJson from layoutHints; cover/alts/demote
     status: pending
   - id: ingest-admin-rich
-    content: Admin facets, manual cover/role pick (locks), reject visibility, layout preview
+    content: Manual cover/role pick (locks), reject visibility, layout preview (list facets already shipped)
     status: pending
   - id: rules-wire-archive
-    content: Rules polish; keywords as search index; archive stays stage-1 loop
+    content: Rules polish; keywords as search index; Prefer Instaloader dump when API 429; archive loop stays off
     status: pending
 isProject: false
 ---
@@ -268,13 +280,37 @@ Cover sometimes ignored `pre_copy`; `diary`/`product` overused; `gallery_essay` 
 
 **Layout patterns:** `gallery_essay` 16 / `single` 4 / `hero_text_gallery` 1. **Not a prompt bug** — 20/21 keyworded items are `thin_text` with **empty `bodyHtml`**. Only *masopustní veselky* has body (771 chars) → correctly `hero_text_gallery`. Site-wide: **59/107** efemer items have empty body; **48** have text (mostly older posts not yet keyworded). So pattern diversity will improve as long-copy posts get enriched — and/or after a stage-1 body extraction fix.
 
-### Taxonomy implications (unchanged)
+### Round 3 (kw-v3 + Instagram mid-run, 2026-10-29)
 
-Occasion / material / place / medium facets emerging. Don’t lock site sections until full corpus + export co-occurrence.
+| Metric | Result |
+|---|---|
+| Status | **107** efemer + **64** IG `keyworded` / `kw-v3`; **567** IG still `loaded` |
+| Eval cover / roles / patterns | **100%** (20/20, 17/17, 6/6) — golden set still efemer-heavy |
+| Cover | every keyworded item has `coverFileId`; efemer covers **106/107 pre_copy** |
+| Demote | **54** files demoted (was 0) — IG carousel **text slides**, blur, missing thumbs |
+| Rating mean | **~0.71** |
+| Keywords | ~8.7/item; mostly clean Czech; new typo leak `košilela` |
+| seriesKey | almost unused (2/171) — ignore until embeddings |
+
+**Kind split (keyworded):**
+
+| Source | Notable |
+|---|---|
+| efemer_cz | wedding 35, diary 25, gift 13, installation/bouquet/portrait ~10 each, mourning 3 |
+| `@efemer_flowers` | workshop 12, diary 7, installation 4 — looks usable |
+| `@himmlhaus` | **38/38 diary** so far — soft-label collapse; many are events/rituály by caption |
+
+**Layout patterns:** efemer still `gallery_essay`/`hero_text_gallery` (thin_text body gap). IG captions → mostly `text_lead_gallery` (58/65) — expected and useful.
+
+**Taxonomy implications (updated)**
+
+- Soft `kind` is a hint, not a section. Especially do **not** map himmlhaus `diary` → a site section.
+- Emerging facets still: occasion / material / place / medium; IG adds **event/workshop** language in captions (Kupalo, Volání na stromy, …) — consider an event-ish facet when assigning, separate from public `events` entities.
+- Demote on text slides is good for materialize; keep watching false demotes of real photos.
 
 ### Ops note
 
-Prod Instagram archive loop remains **off**.
+Prod Instagram archive loop remains **off**. Prefer Instaloader dump + Import when private API 429. Stage-1 re-runs are upsert/idempotent (hash skip).
 
 ---
 
@@ -282,12 +318,15 @@ Prod Instagram archive loop remains **off**.
 
 ### Next
 
-1. ~~Instagram stage-1 via Instaloader~~ — **400** `@efemer_flowers` + **231** `@himmlhaus` in ingest (private API still 429)
-2. **KeywordIngest** remaining Instagram `loaded` (~621) with inline QC
-3. Re-export + EvaluateKeywords → embeddings / dedup → taxonomy → materialize
-4. Optional: empty `bodyHtml` / `thin_text` on efemer.cz
+1. ~~Instagram stage-1 via Instaloader~~ — **400** + **231** in ingest
+2. **Finish KeywordIngest** on remaining IG `loaded` (~567)
+3. Typo map: `košilela`→`košile` (and re-QC / needs_rekeyword if it spreads)
+4. After IG done: **ExportCorpus + EvaluateKeywords**; optional small IG cover/role eval rows
+5. Decide whether himmlhaus kind prompt needs a bump (event/workshop priors) — only if diary collapse holds on full account
+6. Embeddings / dedup → taxonomy pause → materialize
+7. Optional: empty `bodyHtml` / `thin_text` on efemer.cz (still ~59)
 
-Prod Instagram archive loop stays **off**. No KeywordIngest prod cron yet.
+No KeywordIngest prod cron yet.
 
 ---
 
@@ -296,9 +335,10 @@ Prod Instagram archive loop stays **off**. No KeywordIngest prod cron yet.
 1. ~~Stage 1 + KeywordIngest + light admin~~
 2. ~~Eval sets + corpus export + facets~~
 3. ~~QC prompt bump `kw-v3` + re-eval~~
-4. ~~Finish efemer.cz keywording~~ (107 kw-v3; eval cover/roles 100%)
-5. Optional stage-1 bodyHtml / thin_text; Instagram keywording later
-6. **Embeddings / dedup**
-7. Taxonomy pause → assign
-8. Materialize
-9. Rich admin + rules polish
+4. ~~Finish efemer.cz keywording~~ (107 kw-v3; eval 100%)
+5. ~~IG stage-1 Instaloader~~
+6. **Finish IG KeywordIngest** (in progress) + typo/kind watch items
+7. Re-export / eval → **embeddings / dedup**
+8. Taxonomy pause → assign
+9. Materialize
+10. Rich admin + rules polish; optional efemer bodyHtml fix
