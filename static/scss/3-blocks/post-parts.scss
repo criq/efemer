@@ -62,6 +62,14 @@
 	margin: 0;
 	padding: 0;
 	width: 100%;
+
+	// Desktop: break out wider than the text column (portraits scale taller with it).
+	@media screen and (min-width: 901px) {
+		gap: clamp(1.25rem, 2vw, 1.75rem);
+		margin-inline: calc((100% - min(68rem, 92vw)) / 2);
+		max-width: none;
+		width: min(68rem, 92vw);
+	}
 }
 
 .post-parts__frame {
@@ -104,11 +112,11 @@
 	.post-parts__image {
 		&.home-print {
 			border-radius: 0;
-			box-shadow: none;
 		}
 
 		.home-print__photo {
 			border-radius: 0;
+			box-shadow: none;
 		}
 	}
 
@@ -126,11 +134,11 @@
 
 		.home-print {
 			border-radius: 0;
-			box-shadow: none;
 		}
 
 		.home-print__photo {
 			border-radius: 0;
+			box-shadow: none;
 		}
 	}
 

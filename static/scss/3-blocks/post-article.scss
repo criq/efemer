@@ -23,6 +23,11 @@
 		min-width: 0;
 		width: 100%;
 	}
+
+	// Let wide galleries break out of the article column.
+	@media screen and (min-width: 901px) {
+		overflow-x: visible;
+	}
 }
 
 .post-article__header {
