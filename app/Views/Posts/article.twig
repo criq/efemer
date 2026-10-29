@@ -1,0 +1,45 @@
+{% extends "Templates/default.twig" %}
+
+{% block title %}{{ post.getTitle }} · Efemér{% endblock %}
+
+{% block bodyClass %}site--post{% endblock %}
+
+{% block body %}
+
+	<article class="post-article" id="post-body">
+		<header class="post-article__header" data-reveal>
+			<p class="text-eyebrow"><a href="{{ sectionPath }}">{{ sectionTitle|lower }}</a></p>
+			{% if post.isInvitation %}
+				<span class="post-article__kicker">{{ post.getInviteKicker }}</span>
+			{% endif %}
+			<h1 class="post-article__title">{{ post.getTitle }}</h1>
+			{% if post.isInvitation and (post.getPlace or post.getDateLabel) %}
+				<p class="post-article__meta">
+					{% if post.getPlace %}<span>{{ post.getPlace }}</span>{% endif %}
+					{% if post.getPlace and post.getDateLabel %}<span> · </span>{% endif %}
+					{% if post.getDateLabel %}
+						<span>
+							{{ post.getDateLabel }}{% if post.getTimeLabel %} · {{ post.getTimeLabel }}{% endif %}
+						</span>
+					{% endif %}
+				</p>
+			{% elseif post.getPublishedAt %}
+				<p class="post-article__meta">{{ post.getPublishedAt|date("j. n. Y") }}</p>
+			{% endif %}
+			{% if post.isInvitation and post.getInstagramShortcode %}
+				<p class="post-article__actions">
+					<a class="post-article__cta" href="https://www.instagram.com/p/{{ post.getInstagramShortcode }}/" target="_blank" rel="noopener noreferrer">Připoj se</a>
+				</p>
+			{% endif %}
+		</header>
+
+		{% include "Posts/parts.twig" with { parts: post.getResolvedParts } %}
+
+		{% if post.getInstagramShortcode %}
+			<p class="post-article__out" data-reveal>
+				<a href="https://www.instagram.com/p/{{ post.getInstagramShortcode }}/" target="_blank" rel="noopener noreferrer">na Instagramu</a>
+			</p>
+		{% endif %}
+	</article>
+
+{% endblock body %}

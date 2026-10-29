@@ -311,72 +311,9 @@ class Post extends \Katu\Models\Model
 	 *
 	 * @return list<array{type: string, html?: string, file?: PostFile|null, files?: list<PostFile>}>
 	 */
-	public function getResolvedParts(bool $skipFirstImage = false, bool $skipExcerptText = false): array
+	public function getResolvedParts(): array
 	{
-		$parts = PostParts::resolveForRender($this);
-		$excerpt = $skipExcerptText ? trim((string)$this->getExcerpt()) : "";
-		$excerptNorm = $excerpt !== "" ? $this->normalizeComparableText($excerpt) : "";
-
-		$seenImage = false;
-		$skippedExcerpt = false;
-		$out = [];
-		foreach ($parts as $part) {
-			$type = $part["type"] ?? "";
-			if ($skipFirstImage && !$seenImage && $type === PostParts::TYPE_IMAGE) {
-				$seenImage = true;
-				continue;
-			}
-			if (
-				$excerptNorm !== ""
-				&& !$skippedExcerpt
-				&& $type === PostParts::TYPE_TEXT
-				&& isset($part["html"])
-			) {
-				$plain = $this->normalizeComparableText(
-					html_entity_decode(strip_tags((string)$part["html"]), ENT_QUOTES | ENT_HTML5, "UTF-8"),
-				);
-				if (
-					$plain === $excerptNorm
-					|| str_starts_with($plain, $excerptNorm)
-					|| str_starts_with($excerptNorm, mb_substr($plain, 0, min(80, mb_strlen($plain))))
-				) {
-					$skippedExcerpt = true;
-					continue;
-				}
-			}
-			$out[] = $part;
-		}
-
-		return $out;
-	}
-
-	private function normalizeComparableText(string $text): string
-	{
-		$text = mb_strtolower(trim(preg_replace("/\s+/u", " ", $text) ?? $text));
-
-		return $text;
-	}
-
-	public function getFirstImagePartFile(): ?PostFile
-	{
-		foreach ($this->getResolvedParts() as $part) {
-			if (($part["type"] ?? "") === PostParts::TYPE_IMAGE && isset($part["file"])) {
-				return $part["file"];
-			}
-		}
-
-		return $this->getHeroFile();
-	}
-
-	public function getFileById(int $id): ?PostFile
-	{
-		foreach ($this->getFiles() as $file) {
-			if ((int)$file->getId() === $id) {
-				return $file;
-			}
-		}
-
-		return null;
+		return PostParts::resolveForRender($this);
 	}
 
 	public function setTitle(?string $title): Post

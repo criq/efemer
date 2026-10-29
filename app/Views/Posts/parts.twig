@@ -1,11 +1,14 @@
 {# Shared post parts renderer. Pass already-resolved parts (Post::getResolvedParts). #}
-<div class="post-parts">
+{% set tilt = 0 %}
+<div class="post-parts" data-lightbox-gallery>
 	{% for part in parts %}
 		{% if part.type == "image" and part.file and part.file.getImage %}
-			<figure class="post-parts__image home-print" data-reveal>
-				<span class="home-print__photo">
-					<img src="{{ part.file.getImage.getImageVersion("GALLERY").getURL }}" alt="{{ part.file.getCaption }}">
-				</span>
+			{% set src = part.file.getImage.getImageVersion("GALLERY").getURL %}
+			{% set tilt = tilt + 1 %}
+			<figure class="post-parts__image home-print post-parts__tilt-{{ tilt % 3 }}" data-reveal>
+				<a class="post-parts__zoom home-print__photo" href="{{ src }}" data-lightbox-item data-caption="{{ part.file.getCaption|default("")|e("html_attr") }}">
+					<img src="{{ src }}" alt="{{ part.file.getCaption }}">
+				</a>
 				{% if part.file.getCaption %}
 					<figcaption class="post-parts__caption">{{ part.file.getCaption }}</figcaption>
 				{% endif %}
@@ -18,11 +21,13 @@
 			<ul class="post-parts__gallery" data-reveal aria-label="Galerie">
 				{% for file in part.files %}
 					{% if file.getImage %}
-						<li class="post-parts__frame post-parts__frame--{{ loop.index0 % 3 }}">
+						{% set src = file.getImage.getImageVersion("GALLERY").getURL %}
+						{% set tilt = tilt + 1 %}
+						<li class="post-parts__frame post-parts__tilt-{{ tilt % 3 }}">
 							<figure class="home-print">
-								<span class="home-print__photo">
-									<img src="{{ file.getImage.getImageVersion("GALLERY").getURL }}" alt="{{ file.getCaption }}">
-								</span>
+								<a class="post-parts__zoom home-print__photo" href="{{ src }}" data-lightbox-item data-caption="{{ file.getCaption|default("")|e("html_attr") }}">
+									<img src="{{ src }}" alt="{{ file.getCaption }}">
+								</a>
 								{% if file.getCaption %}
 									<figcaption class="post-parts__caption">{{ file.getCaption }}</figcaption>
 								{% endif %}

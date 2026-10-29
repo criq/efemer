@@ -22,14 +22,36 @@
 }
 
 .post-parts__image {
-	margin: 0 auto;
+	display: block;
+	margin-inline: auto;
 	max-width: min(22rem, 72%);
+	transform-origin: center center;
 	width: 100%;
 
-	.home-print__photo img {
-		display: block;
-		height: auto;
+	@media screen and (max-width: 700px) {
+		max-width: none;
 		width: 100%;
+	}
+}
+
+// Match homepage print tilt (≤0.5deg); neighbors lean opposite ways.
+.post-parts__tilt-1 {
+	transform: rotate(-0.4deg);
+}
+
+.post-parts__tilt-2 {
+	transform: rotate(0.45deg);
+}
+
+.post-parts__tilt-0 {
+	transform: rotate(-0.3deg);
+}
+
+@media screen and (max-width: 700px) {
+	.post-parts__tilt-0,
+	.post-parts__tilt-1,
+	.post-parts__tilt-2 {
+		transform: none;
 	}
 }
 
@@ -42,23 +64,33 @@
 }
 
 .post-parts__gallery {
+	align-items: flex-start;
 	display: flex;
 	flex-wrap: nowrap;
-	gap: .65rem;
+	gap: 1.15rem;
+	justify-content: center;
 	list-style: none;
 	margin: 0;
 	padding: 0;
 	width: 100%;
+
+	@media screen and (max-width: 700px) {
+		align-items: stretch;
+		flex-direction: column;
+		flex-wrap: nowrap;
+	}
 }
 
 .post-parts__frame {
 	flex: 1 1 0;
 	margin: 0;
 	min-width: 0;
+	transform-origin: center center;
 
 	.home-print,
 	figure {
 		margin: 0;
+		width: 100%;
 	}
 
 	img {
@@ -66,8 +98,10 @@
 		height: auto;
 		width: 100%;
 	}
-}
 
-.post-page .post-parts {
-	margin-top: 1.5rem;
+	@media screen and (max-width: 700px) {
+		flex: 0 0 auto;
+		max-width: none;
+		width: 100%;
+	}
 }

@@ -80,7 +80,129 @@ const initSiteNav = () => {
 	});
 };
 
+const initLightboxGalleries = () => {
+	const galleries = [...document.querySelectorAll("[data-lightbox-gallery]")];
+	if (!galleries.length) {
+		return;
+	}
+
+	const root = document.createElement("div");
+	root.className = "lightbox";
+	root.hidden = true;
+	root.setAttribute("role", "dialog");
+	root.setAttribute("aria-modal", "true");
+	root.setAttribute("aria-label", "Galerie");
+	root.innerHTML = `
+		<button type="button" class="lightbox__close" data-lightbox-close aria-label="Zavřít">×</button>
+		<button type="button" class="lightbox__prev" data-lightbox-prev aria-label="Předchozí">‹</button>
+		<figure class="lightbox__figure">
+			<img class="lightbox__img" data-lightbox-img alt="">
+			<figcaption class="lightbox__caption" data-lightbox-caption hidden></figcaption>
+		</figure>
+		<button type="button" class="lightbox__next" data-lightbox-next aria-label="Další">›</button>
+		<div class="lightbox__counter" data-lightbox-counter></div>
+	`;
+	document.body.appendChild(root);
+
+	const imgEl = root.querySelector("[data-lightbox-img]");
+	const captionEl = root.querySelector("[data-lightbox-caption]");
+	const counterEl = root.querySelector("[data-lightbox-counter]");
+	const closeBtn = root.querySelector("[data-lightbox-close]");
+	const prevBtn = root.querySelector("[data-lightbox-prev]");
+	const nextBtn = root.querySelector("[data-lightbox-next]");
+
+	let items = [];
+	let index = 0;
+
+	const render = () => {
+		const item = items[index];
+		if (!item) {
+			return;
+		}
+		imgEl.src = item.src;
+		imgEl.alt = item.caption || "";
+		if (item.caption) {
+			captionEl.hidden = false;
+			captionEl.textContent = item.caption;
+		} else {
+			captionEl.hidden = true;
+			captionEl.textContent = "";
+		}
+		counterEl.textContent = `${index + 1} / ${items.length}`;
+		const multi = items.length > 1;
+		prevBtn.hidden = !multi;
+		nextBtn.hidden = !multi;
+	};
+
+	const open = (galleryItems, startIndex) => {
+		items = galleryItems;
+		index = startIndex;
+		root.hidden = false;
+		requestAnimationFrame(() => root.classList.add("is-open"));
+		document.body.classList.add("is-lightbox-open");
+		render();
+		closeBtn.focus();
+	};
+
+	const close = () => {
+		root.classList.remove("is-open");
+		document.body.classList.remove("is-lightbox-open");
+		window.setTimeout(() => {
+			if (!root.classList.contains("is-open")) {
+				root.hidden = true;
+				imgEl.removeAttribute("src");
+			}
+		}, 200);
+	};
+
+	const go = (delta) => {
+		if (items.length < 2) {
+			return;
+		}
+		index = (index + delta + items.length) % items.length;
+		render();
+	};
+
+	galleries.forEach((gallery) => {
+		const links = [...gallery.querySelectorAll("[data-lightbox-item]")];
+		const galleryItems = links.map((link) => ({
+			src: link.getAttribute("href"),
+			caption: link.dataset.caption || "",
+		}));
+
+		links.forEach((link, linkIndex) => {
+			link.addEventListener("click", (event) => {
+				event.preventDefault();
+				open(galleryItems, linkIndex);
+			});
+		});
+	});
+
+	closeBtn.addEventListener("click", close);
+	prevBtn.addEventListener("click", () => go(-1));
+	nextBtn.addEventListener("click", () => go(1));
+	root.addEventListener("click", (event) => {
+		if (event.target === root) {
+			close();
+		}
+	});
+
+	document.addEventListener("keydown", (event) => {
+		if (!root.classList.contains("is-open")) {
+			return;
+		}
+		if (event.key === "Escape") {
+			close();
+		} else if (event.key === "ArrowLeft") {
+			go(-1);
+		} else if (event.key === "ArrowRight") {
+			go(1);
+		}
+	});
+};
+
 document.addEventListener("DOMContentLoaded", () => {
 	initGallerySlideshows();
 	initSiteNav();
+	initLightboxGalleries();
 });

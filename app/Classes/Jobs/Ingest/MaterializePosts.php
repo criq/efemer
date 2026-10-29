@@ -15,6 +15,7 @@ use Katu\Tools\Calendar\Timeout;
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"id":427}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"invitationsOnly":true}' -f
+ * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"existingOnly":true}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"dryRun":true,"limit":5}' -f
  */
 class MaterializePosts extends Job
@@ -35,17 +36,19 @@ class MaterializePosts extends Job
 			$args = $this->getArgs();
 			$dryRun = !empty($args["dryRun"]);
 			$invitationsOnly = !empty($args["invitationsOnly"]);
+			$existingOnly = !empty($args["existingOnly"]);
 			$id = isset($args["id"]) ? (int)$args["id"] : null;
 			$limit = isset($args["limit"]) ? max(1, (int)$args["limit"]) : null;
 			if ($this->getLimit()) {
 				$limit = $this->getLimit();
 			}
 
-			$items = $this->selectItems($id, $invitationsOnly, $limit);
+			$items = $this->selectItems($id, $invitationsOnly, $existingOnly, $limit);
 			$this->outputLine(ConsoleStyle::step(sprintf(
-				"MaterializePosts: %s item(s)%s%s.",
+				"MaterializePosts: %s item(s)%s%s%s.",
 				count($items),
 				$invitationsOnly ? ", invitationsOnly" : "",
+				$existingOnly ? ", existingOnly" : "",
 				$dryRun ? ", dryRun" : "",
 			)));
 
@@ -82,7 +85,7 @@ class MaterializePosts extends Job
 	/**
 	 * @return list<IngestItem>
 	 */
-	private function selectItems(?int $id, bool $invitationsOnly, ?int $limit): array
+	private function selectItems(?int $id, bool $invitationsOnly, bool $existingOnly, ?int $limit): array
 	{
 		if ($id) {
 			$item = IngestItem::get($id);
@@ -96,7 +99,11 @@ class MaterializePosts extends Job
 		$selected = [];
 		foreach (IngestItem::getAll()->getItems() as $item) {
 			$status = $item->getStatus();
-			if (
+			if ($existingOnly) {
+				if ($status !== IngestItem::STATUS_MATERIALIZED) {
+					continue;
+				}
+			} elseif (
 				$status !== IngestItem::STATUS_KEYWORDED
 				&& $status !== IngestItem::STATUS_CATEGORIZED
 				&& $status !== IngestItem::STATUS_MATERIALIZED

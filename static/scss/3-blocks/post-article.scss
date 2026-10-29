@@ -1,4 +1,4 @@
-.site--invitation {
+.site--post {
 	background: $color-bg;
 
 	.site-header {
@@ -6,7 +6,7 @@
 	}
 }
 
-.invite {
+.post-article {
 	display: flex;
 	flex-direction: column;
 	gap: clamp(1.5rem, 4vw, 2.5rem);
@@ -21,7 +21,7 @@
 	}
 }
 
-.invite__header {
+.post-article__header {
 	align-items: center;
 	display: flex;
 	flex-direction: column;
@@ -31,7 +31,7 @@
 	width: 100%;
 }
 
-.invite__kicker {
+.post-article__kicker {
 	color: $color-faint;
 	font-family: $font-ui;
 	font-size: .68rem;
@@ -41,7 +41,7 @@
 	text-transform: uppercase;
 }
 
-.invite__title {
+.post-article__title {
 	font-family: $font-display;
 	font-size: clamp(2.4rem, 5vw, 3.6rem);
 	font-weight: 400;
@@ -50,7 +50,7 @@
 	margin: 0;
 }
 
-.invite__meta {
+.post-article__meta {
 	color: $color-faint;
 	font-family: $font-ui;
 	font-size: .95rem;
@@ -60,11 +60,11 @@
 	text-wrap: balance;
 }
 
-.invite__actions {
+.post-article__actions {
 	margin: 1.35rem 0 0;
 }
 
-.invite__cta {
+.post-article__cta {
 	border: 1px solid $color-ink;
 	color: $color-ink;
 	display: inline-block;
@@ -83,7 +83,7 @@
 	}
 }
 
-.invite__out {
+.post-article__out {
 	color: $color-faint;
 	font-family: $font-ui;
 	font-size: .78rem;

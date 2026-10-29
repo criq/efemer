@@ -33,7 +33,7 @@ class View extends \Katu\Controllers\Controller
 			throw new \Katu\Exceptions\ModelNotFoundException;
 		}
 
-		return $response->withBody((new HTMLEngine($request))->render("Posts/view.twig", [
+		return $response->withBody((new HTMLEngine($request))->render("Posts/article.twig", [
 			"post" => $post,
 			"sectionTitle" => Section::title($post->getSection()),
 			"sectionPath" => Section::pathPrefix($post->getSection()),
