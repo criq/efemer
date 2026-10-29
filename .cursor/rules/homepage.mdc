@@ -17,7 +17,7 @@ Text sits in the wide center column. Photos from the **same** featured post (cur
 ## Every homepage photo
 
 - Keep the file’s aspect ratio. Never stretch, squash, or crop to a new ratio (`height: auto`, no fixed height, no `object-fit: cover`). Overflow past the side is position only.
-- Hero prints and section photos share one drop shadow (`.home-print`): from above, soft and wide, same values on leads, asides, and section photos.
+- Drop shadow lives on `.home-print__photo` (tight to the image, not the outer link/figure). Leads and section photos share one soft wide shadow; asides use a tighter, smaller blur so it doesn’t dwarf the print.
 - Tilt at most **0.5deg**. Neighbors lean opposite ways.
 - A **1px** corner radius. No border, no white mat, no entrance or hover animation.
 

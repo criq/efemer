@@ -21,16 +21,18 @@
 
 .home-print {
 	border-radius: 1px;
+	display: block;
+	height: fit-content;
+	line-height: 0;
+}
+
+// Shadow on the photo itself so it matches the image box (not a larger wrapper).
+.home-print__photo {
+	border-radius: 1px;
 	box-shadow:
 		0 2px 8px rgba(48, 40, 32, 0.16),
 		0 16px 36px rgba(48, 40, 32, 0.18),
 		0 28px 56px rgba(48, 40, 32, 0.1);
-	display: block;
-	line-height: 0;
-}
-
-.home-print__photo {
-	border-radius: 1px;
 	display: block;
 	line-height: 0;
 	overflow: hidden;
@@ -42,6 +44,14 @@
 		max-width: 100%;
 		width: 100%;
 	}
+}
+
+// Asides are much smaller — use a tighter shadow so the blur doesn’t dwarf the print.
+.home-print--aside .home-print__photo {
+	box-shadow:
+		0 1px 3px rgba(48, 40, 32, 0.14),
+		0 6px 14px rgba(48, 40, 32, 0.16),
+		0 10px 22px rgba(48, 40, 32, 0.08);
 }
 
 .home-hero {
@@ -86,6 +96,7 @@
 
 .home-print--lead,
 .home-print--aside {
+	height: fit-content;
 	position: absolute;
 }
 

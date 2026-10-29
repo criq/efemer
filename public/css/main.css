@@ -11638,13 +11638,15 @@ body.builder .builder-file-list--insert:not(:empty),
 
 .home-print {
   border-radius: 1px;
-  box-shadow: 0 2px 8px rgba(48, 40, 32, 0.16), 0 16px 36px rgba(48, 40, 32, 0.18), 0 28px 56px rgba(48, 40, 32, 0.1);
   display: block;
+  height: -moz-fit-content;
+  height: fit-content;
   line-height: 0;
 }
 
 .home-print__photo {
   border-radius: 1px;
+  box-shadow: 0 2px 8px rgba(48, 40, 32, 0.16), 0 16px 36px rgba(48, 40, 32, 0.18), 0 28px 56px rgba(48, 40, 32, 0.1);
   display: block;
   line-height: 0;
   overflow: hidden;
@@ -11655,6 +11657,10 @@ body.builder .builder-file-list--insert:not(:empty),
   height: auto;
   max-width: 100%;
   width: 100%;
+}
+
+.home-print--aside .home-print__photo {
+  box-shadow: 0 1px 3px rgba(48, 40, 32, 0.14), 0 6px 14px rgba(48, 40, 32, 0.16), 0 10px 22px rgba(48, 40, 32, 0.08);
 }
 
 .home-hero {
@@ -11697,6 +11703,8 @@ body.builder .builder-file-list--insert:not(:empty),
 
 .home-print--lead,
 .home-print--aside {
+  height: -moz-fit-content;
+  height: fit-content;
   position: absolute;
 }
 
@@ -12305,6 +12313,11 @@ body.builder .builder-file-list--insert:not(:empty),
   min-width: 0;
   width: 100%;
 }
+@media screen and (min-width: 901px) {
+  .post-article {
+    overflow-x: visible;
+  }
+}
 
 .post-article__header {
   align-items: center;
@@ -12445,6 +12458,15 @@ body.builder .builder-file-list--insert:not(:empty),
   padding: 0;
   width: 100%;
 }
+@media screen and (min-width: 901px) {
+  .post-parts__gallery {
+    gap: max(1.25rem, min(2vw, 1.75rem));
+    margin-left: calc((100% - min(68rem, 92vw)) / 2);
+    margin-right: calc((100% - min(68rem, 92vw)) / 2);
+    max-width: none;
+    width: min(68rem, 92vw);
+  }
+}
 
 .post-parts__frame {
   flex: 1 1 0;
@@ -12480,10 +12502,10 @@ body.builder .builder-file-list--insert:not(:empty),
   }
   .post-parts__image.home-print {
     border-radius: 0;
-    box-shadow: none;
   }
   .post-parts__image .home-print__photo {
     border-radius: 0;
+    box-shadow: none;
   }
   .post-parts__gallery {
     align-items: stretch;
@@ -12498,10 +12520,10 @@ body.builder .builder-file-list--insert:not(:empty),
   }
   .post-parts__frame .home-print {
     border-radius: 0;
-    box-shadow: none;
   }
   .post-parts__frame .home-print__photo {
     border-radius: 0;
+    box-shadow: none;
   }
   .post-parts__caption {
     margin-top: 0.55rem;
