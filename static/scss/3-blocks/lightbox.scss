@@ -8,6 +8,11 @@
 		height: auto;
 		width: 100%;
 	}
+
+	@media screen and (max-width: 700px) {
+		cursor: default;
+		pointer-events: none;
+	}
 }
 
 .lightbox {

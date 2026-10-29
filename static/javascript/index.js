@@ -173,6 +173,10 @@ const initLightboxGalleries = () => {
 		links.forEach((link, linkIndex) => {
 			link.addEventListener("click", (event) => {
 				event.preventDefault();
+				// Full-bleed photos on small screens — no lightbox.
+				if (window.matchMedia("(max-width: 700px)").matches) {
+					return;
+				}
 				open(galleryItems, linkIndex);
 			});
 		});

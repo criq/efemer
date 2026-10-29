@@ -1,9 +1,11 @@
 .post-parts {
+	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
 	gap: clamp(1.5rem, 4vw, 2.5rem);
 	margin-inline: auto;
 	max-width: min(44rem, 100%);
+	min-width: 0;
 	width: 100%;
 }
 
@@ -27,11 +29,6 @@
 	max-width: min(22rem, 72%);
 	transform-origin: center center;
 	width: 100%;
-
-	@media screen and (max-width: 700px) {
-		max-width: none;
-		width: 100%;
-	}
 }
 
 // Match homepage print tilt (≤0.5deg); neighbors lean opposite ways.
@@ -45,14 +42,6 @@
 
 .post-parts__tilt-0 {
 	transform: rotate(-0.3deg);
-}
-
-@media screen and (max-width: 700px) {
-	.post-parts__tilt-0,
-	.post-parts__tilt-1,
-	.post-parts__tilt-2 {
-		transform: none;
-	}
 }
 
 .post-parts__caption {
@@ -73,12 +62,6 @@
 	margin: 0;
 	padding: 0;
 	width: 100%;
-
-	@media screen and (max-width: 700px) {
-		align-items: stretch;
-		flex-direction: column;
-		flex-wrap: nowrap;
-	}
 }
 
 .post-parts__frame {
@@ -98,10 +81,61 @@
 		height: auto;
 		width: 100%;
 	}
+}
 
-	@media screen and (max-width: 700px) {
+// Mobile: edge-to-edge photos, flat (no print shadow / tilt).
+@media screen and (max-width: 700px) {
+	.post-parts__tilt-0,
+	.post-parts__tilt-1,
+	.post-parts__tilt-2 {
+		transform: none;
+	}
+
+	.post-parts__image,
+	.post-parts__gallery {
+		// Break out of .post-article side padding to the viewport edge.
+		border-radius: 0;
+		box-shadow: none;
+		margin-inline: calc(-1 * clamp(1rem, 4vw, 2.5rem));
+		max-width: none;
+		width: calc(100% + 2 * clamp(1rem, 4vw, 2.5rem));
+	}
+
+	.post-parts__image {
+		&.home-print {
+			border-radius: 0;
+			box-shadow: none;
+		}
+
+		.home-print__photo {
+			border-radius: 0;
+		}
+	}
+
+	.post-parts__gallery {
+		align-items: stretch;
+		flex-direction: column;
+		flex-wrap: nowrap;
+		gap: 0;
+	}
+
+	.post-parts__frame {
 		flex: 0 0 auto;
 		max-width: none;
 		width: 100%;
+
+		.home-print {
+			border-radius: 0;
+			box-shadow: none;
+		}
+
+		.home-print__photo {
+			border-radius: 0;
+		}
+	}
+
+	.post-parts__caption {
+		margin-top: .55rem;
+		padding-inline: clamp(1rem, 4vw, 2.5rem);
 	}
 }
