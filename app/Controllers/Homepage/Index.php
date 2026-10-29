@@ -44,9 +44,62 @@ class Index extends \Katu\Controllers\Controller
 		];
 
 		$posts = Post::getPublishedBySection($code);
-		$plot["images"] = $this->imagesFromPosts($posts, 1);
+		$plot["images"] = $this->sectionPlotImages($posts);
 
 		return $plot;
+	}
+
+	/**
+	 * Prefer a landscape, high-rated photo from the section’s posts.
+	 *
+	 * @param list<Post> $posts
+	 * @return list<array{url: string, image: \Katu\Tools\Images\Image}>
+	 */
+	private function sectionPlotImages(array $posts): array
+	{
+		$best = null;
+		$bestScore = -1.0;
+
+		foreach ($posts as $post) {
+			foreach ($post->getFiles() as $file) {
+				if ($file->isDemoted() || $file->getRole() === "skip") {
+					continue;
+				}
+
+				$image = $file->getImage();
+				if (!$image) {
+					continue;
+				}
+
+				try {
+					$width = (float)$image->getWidth();
+					$height = (float)$image->getHeight();
+				} catch (\Throwable) {
+					continue;
+				}
+				if ($height <= 0) {
+					continue;
+				}
+
+				$ratio = $width / $height;
+				$landscape = $ratio >= 1.15 ? 1.0 : ($ratio >= 1.0 ? 0.35 : 0.0);
+				$rating = $file->getRating() ?? 0.55;
+				$score = ($landscape * 2.0) + $rating;
+				if ($score <= $bestScore) {
+					continue;
+				}
+
+				$bestScore = $score;
+				$best = [
+					"url" => $post->getPublicUrl(),
+					"image" => $image,
+					"post" => $post,
+					"file" => $file,
+				];
+			}
+		}
+
+		return $best ? [$best] : [];
 	}
 
 	/**
