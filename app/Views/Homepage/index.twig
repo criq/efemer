@@ -8,8 +8,10 @@
 
 	{% set showHero = true %}
 	{% set leftLead = heroImages[0]|default(null) %}
-	{% set rightAside = heroImages[1]|default(null) %}
+	{% set leftAside = heroImages[1]|default(null) %}
 	{% set rightLead = heroImages[2]|default(null) %}
+	{% set rightAside1 = heroImages[3]|default(null) %}
+	{% set rightAside2 = heroImages[4]|default(null) %}
 
 	{% if showHero %}
 	<section class="home-hero {% if leftLead or rightLead %}home-hero--collage{% else %}home-hero--text{% endif %}" data-reveal>
@@ -21,17 +23,17 @@
 					</span>
 				</a>
 			{% endif %}
-			{% if rightAside %}
-				<a class="home-print home-print--aside home-print--aside-1 home-print--compact-only" href="{{ rightAside.url }}">
+			{% if leftAside %}
+				<a class="home-print home-print--aside home-print--aside-1 home-print--left-aside" href="{{ leftAside.url }}">
 					<span class="home-print__photo">
-						<img src="{{ rightAside.image.getImageVersion("GALLERY").getURL }}" alt="">
+						<img src="{{ leftAside.image.getImageVersion("GALLERY").getURL }}" alt="">
 					</span>
 				</a>
 			{% endif %}
-			{% if rightLead %}
-				<a class="home-print home-print--aside home-print--aside-2 home-print--mobile-only" href="{{ rightLead.url }}">
+			{% if rightAside1 %}
+				<a class="home-print home-print--aside home-print--aside-2 home-print--mobile-only" href="{{ rightAside1.url }}">
 					<span class="home-print__photo">
-						<img src="{{ rightLead.image.getImageVersion("GALLERY").getURL }}" alt="">
+						<img src="{{ rightAside1.image.getImageVersion("GALLERY").getURL }}" alt="">
 					</span>
 				</a>
 			{% endif %}
@@ -73,10 +75,17 @@
 					</span>
 				</a>
 			{% endif %}
-			{% if rightAside %}
-				<a class="home-print home-print--aside home-print--aside-1" href="{{ rightAside.url }}">
+			{% if rightAside1 %}
+				<a class="home-print home-print--aside home-print--aside-1" href="{{ rightAside1.url }}">
 					<span class="home-print__photo">
-						<img src="{{ rightAside.image.getImageVersion("GALLERY").getURL }}" alt="">
+						<img src="{{ rightAside1.image.getImageVersion("GALLERY").getURL }}" alt="">
+					</span>
+				</a>
+			{% endif %}
+			{% if rightAside2 %}
+				<a class="home-print home-print--aside home-print--aside-2 home-print--wide-only" href="{{ rightAside2.url }}">
+					<span class="home-print__photo">
+						<img src="{{ rightAside2.image.getImageVersion("GALLERY").getURL }}" alt="">
 					</span>
 				</a>
 			{% endif %}

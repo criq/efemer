@@ -114,7 +114,7 @@ class Index extends \Katu\Controllers\Controller
 		}
 
 		$images = [];
-		foreach ($featured->getCollageFiles(3) as $file) {
+		foreach ($featured->getCollageFiles(5) as $file) {
 			$image = $file->getImage();
 			if (!$image) {
 				continue;

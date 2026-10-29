@@ -1,5 +1,5 @@
 ---
-description: Public homepage visual — greige sections, three-photo hero
+description: Public homepage visual — greige sections, five-photo hero on wide
 globs: app/Views/Homepage/**,static/scss/3-blocks/home.scss,app/Controllers/Homepage/**
 alwaysApply: false
 ---
@@ -8,12 +8,11 @@ alwaysApply: false
 
 ## Hero photos
 
-One on the left, two on the right. Text sits in the wide center column.
+Text sits in the wide center column. Photos from the **same** featured post (current invitation, else latest work post). Cover/lead is left; the rest are highest LLM `rating` among remaining non-demoted files.
 
 - **Main photo** on each side: vertically centered, the large one, overflowing past the outer edge of the frame. Top and bottom stay in frame.
-- **Secondary photo** (right only): smaller, toward the text, off that vertical center. Not lined up with the main photo.
-- All three photos always come from the **same** featured post (current invitation, else latest work post). Cover/lead is left; the other two are the highest LLM `rating` among remaining non-demoted files.
-- Wide (>1500px): 1 left + 2 right. From 1500px–1200px the small right print drops away (two main photos). From 801px–1199px: two-print collage on the left only, pulled off the left edge; right column hidden. Phones: top collage of three prints (lead + two asides), flush to the top (max 40vh, centered — no left bleed), then text. No photos below the text.
+- **Secondary photos**: smaller, toward the text, off that vertical center. Not lined up with the main photo.
+- Wide (>1500px): **2 left + 3 right**. From 1500px–1200px: **only the two large leads** (asides hidden). From 801px–1199px: two-print collage on the left only, pulled off the left edge; right column hidden. Phones: top collage of three prints (lead + two asides), flush to the top (max 40vh, centered — no left bleed), then text. No photos below the text.
 
 ## Every homepage photo
 

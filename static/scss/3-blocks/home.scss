@@ -116,11 +116,14 @@
 		}
 	}
 
+	// Second left print: smaller, bottom, overlapping the lead toward center.
 	.home-print--aside-1 {
-		right: 0;
-		top: 14%;
-		transform: rotate(0.5deg);
-		width: 46%;
+		bottom: 6%;
+		left: 22%;
+		right: auto;
+		top: auto;
+		transform: rotate(0.45deg);
+		width: 38%;
 		z-index: 2;
 	}
 }
@@ -141,13 +144,22 @@
 		}
 	}
 
-	// Anchor toward the text; keep the aside clearly smaller than the lead.
+	// Anchor toward the text; keep asides clearly smaller than the lead.
 	.home-print--aside-1 {
 		left: 0;
-		top: 16%;
+		top: 12%;
 		transform: translateX(-14%) rotate(-0.5deg);
-		width: 36%;
+		width: 34%;
 		z-index: 2;
+	}
+
+	.home-print--aside-2 {
+		left: 18%;
+		top: auto;
+		bottom: 8%;
+		transform: translateX(-8%) rotate(0.4deg);
+		width: 30%;
+		z-index: 3;
 	}
 }
 
@@ -352,7 +364,6 @@
 }
 
 .section-page,
-.post-page,
 .plain-page {
 	margin: 0 auto;
 	max-width: $layout-wide;
@@ -360,7 +371,6 @@
 }
 
 .section-page__header,
-.post-page__header,
 .plain-page {
 	h1 {
 		font-family: $font-display;
@@ -439,57 +449,6 @@
 	margin-top: .25rem;
 }
 
-.post-page__date,
-.post-page__related,
-.post-page__out {
-	color: $color-faint;
-	font-family: $font-ui;
-	font-size: .75rem;
-}
-
-.post-page__related,
-.post-page__out {
-	margin-top: .4rem;
-}
-
-.post-page__hero {
-	margin: 0 -1rem 2rem;
-
-	img {
-		display: block;
-		width: 100%;
-		height: auto;
-	}
-}
-
-.post-page__body {
-	max-width: 38rem;
-	margin: 0 auto 3rem;
-}
-
-.post-page__gallery {
-	display: grid;
-	gap: 1rem;
-	grid-template-columns: repeat(12, 1fr);
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-.post-page__frame {
-	grid-column: span 6;
-
-	img {
-		display: block;
-		height: auto;
-		width: 100%;
-	}
-
-	&--0 { grid-column: span 7; }
-	&--1 { grid-column: span 5; }
-	&--2 { grid-column: span 12; }
-}
-
 .appearances {
 	list-style: none;
 	margin: 2rem 0 0;
@@ -550,8 +509,7 @@
 	}
 }
 
-// The three-photo collage needs a wide frame. Narrower than that, drop the
-// small print first so the two main photos and the text keep their space.
+// Mid desktop: only the two large leads (no small asides).
 @media screen and (max-width: 1500px) and (min-width: 1200px) {
 	.home-hero .home-print--aside {
 		display: none;
@@ -609,21 +567,29 @@
 	.home-hero__text {
 		padding: 2.25rem 1.25rem 2.75rem;
 	}
-
-	.post-page__frame {
-		grid-column: span 12 !important;
-		transform: none;
-	}
 }
 
-.home-print--mobile-only,
-.home-print--compact-only {
+.home-print--mobile-only {
 	display: none;
 }
 
-// Tablet + phone: second print on the left (phone also adds a third via mobile-only).
-@media screen and (max-width: 1199px) {
-	.home-print--compact-only {
+// Left aside: on at largest desktop; off mid-desktop (see 1500px rule); on again for tablet/phone.
+.home-print--left-aside {
+	display: none;
+
+	@media screen and (min-width: 1501px) {
+		display: block;
+	}
+
+	@media screen and (max-width: 1199px) {
+		display: block;
+	}
+}
+
+.home-print--wide-only {
+	display: none;
+
+	@media screen and (min-width: 1501px) {
 		display: block;
 	}
 }
@@ -717,7 +683,7 @@
 	}
 
 	.home-hero__side--left .home-print--aside-1 {
-		left: 68%;
+		left: 76%;
 		right: auto;
 		top: 42%;
 		transform: rotate(0.45deg);
