@@ -8,10 +8,8 @@
 
 	{% set showHero = true %}
 	{% set leftLead = heroImages[0]|default(null) %}
-	{% set leftAside = heroImages[1]|default(null) %}
-	{% set mobileAside = heroImages[2]|default(null) %}
-	{% set rightAsides = heroImages|slice(2, 2) %}
-	{% set rightLead = heroImages[4]|default(null) %}
+	{% set rightAside = heroImages[1]|default(null) %}
+	{% set rightLead = heroImages[2]|default(null) %}
 
 	{% if showHero %}
 	<section class="home-hero {% if leftLead or rightLead %}home-hero--collage{% else %}home-hero--text{% endif %}" data-reveal>
@@ -23,36 +21,37 @@
 					</span>
 				</a>
 			{% endif %}
-			{% if leftAside %}
-				<a class="home-print home-print--aside home-print--aside-1" href="{{ leftAside.url }}">
+			{% if rightAside %}
+				<a class="home-print home-print--aside home-print--aside-1 home-print--compact-only" href="{{ rightAside.url }}">
 					<span class="home-print__photo">
-						<img src="{{ leftAside.image.getImageVersion("GALLERY").getURL }}" alt="">
+						<img src="{{ rightAside.image.getImageVersion("GALLERY").getURL }}" alt="">
 					</span>
 				</a>
 			{% endif %}
-			{% if mobileAside %}
-				<a class="home-print home-print--aside home-print--aside-2 home-print--mobile-only" href="{{ mobileAside.url }}">
+			{% if rightLead %}
+				<a class="home-print home-print--aside home-print--aside-2 home-print--mobile-only" href="{{ rightLead.url }}">
 					<span class="home-print__photo">
-						<img src="{{ mobileAside.image.getImageVersion("GALLERY").getURL }}" alt="">
+						<img src="{{ rightLead.image.getImageVersion("GALLERY").getURL }}" alt="">
 					</span>
 				</a>
 			{% endif %}
 		</div>
 
 		<div class="home-hero__text">
-			{% if event %}
+			{% if invitation %}
 				<div class="home-hero__copy">
-					<span class="home-hero__kicker">{{ event.isHappening ? "právě probíhá" : "nadcházející" }}</span>
-					<a class="home-hero__title" href="{{ event.getPublicUrl }}">{{ event.getTitle }}</a>
-					{% if event.getPlace or event.getDateLabel %}
+					<span class="home-hero__kicker">{{ invitation.isHappening ? "právě probíhá" : "nadcházející" }}</span>
+					<a class="home-hero__title" href="{{ invitation.getPublicUrl }}">{{ invitation.getTitle }}</a>
+					{% set heroPlace = invitation.getHeroPlaceLabel %}
+					{% if heroPlace or invitation.getDateLabel %}
 						<span class="home-hero__meta">
-							{{ event.getPlace }}{% if event.getPlace and event.getDateLabel %} · {% endif %}{{ event.getDateLabel }}
+							{{ heroPlace }}{% if heroPlace and invitation.getDateLabel %} · {% endif %}{{ invitation.getDateLabel }}
 						</span>
 					{% endif %}
-					{% if event.getSummary %}
-						<p class="home-hero__summary">{{ event.getSummary }}</p>
+					{% if invitation.getSummary %}
+						<p class="home-hero__summary">{{ invitation.getSummary }}</p>
 					{% endif %}
-					<a class="home-hero__cta" href="{{ event.getPublicUrl }}">Připoj se</a>
+					<a class="home-hero__cta" href="{{ invitation.getPublicUrl }}">Připoj se</a>
 				</div>
 			{% elseif latestPost %}
 				<div class="home-hero__copy">
@@ -74,13 +73,13 @@
 					</span>
 				</a>
 			{% endif %}
-			{% for item in rightAsides %}
-				<a class="home-print home-print--aside home-print--aside-{{ loop.index }}" href="{{ item.url }}">
+			{% if rightAside %}
+				<a class="home-print home-print--aside home-print--aside-1" href="{{ rightAside.url }}">
 					<span class="home-print__photo">
-						<img src="{{ item.image.getImageVersion("GALLERY").getURL }}" alt="">
+						<img src="{{ rightAside.image.getImageVersion("GALLERY").getURL }}" alt="">
 					</span>
 				</a>
-			{% endfor %}
+			{% endif %}
 		</div>
 	</section>
 	{% endif %}

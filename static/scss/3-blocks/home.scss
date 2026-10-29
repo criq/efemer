@@ -49,7 +49,7 @@
 	background: $color-greige;
 	display: grid;
 	gap: clamp(1.25rem, 2vw, 2rem);
-	grid-template-columns: minmax(0, .95fr) minmax(22rem, 1.35fr) minmax(0, .9fr);
+	grid-template-columns: minmax(0, .92fr) minmax(20rem, 1.35fr) minmax(0, .82fr);
 	height: auto;
 	overflow: hidden;
 	padding: clamp(2.75rem, 5vw, 4rem) 0;
@@ -130,32 +130,24 @@
 		left: auto;
 		right: 0;
 		top: 50%;
-		transform: translate(26%, -50%) rotate(0.35deg);
+		transform: translate(20%, -50%) rotate(0.35deg);
 		width: auto;
 		z-index: 1;
 
 		.home-print__photo,
 		img {
-			max-width: min(31rem, 40vw);
+			max-height: calc(min(74vh, 42rem) - clamp(3.5rem, 8vw, 6rem));
+			max-width: min(26rem, 32vw);
 		}
 	}
 
-	// Anchor to the left of this column (toward the text), not the lead on the right,
-	// so they do not slide right as the column shrinks.
+	// Anchor toward the text; keep the aside clearly smaller than the lead.
 	.home-print--aside-1 {
 		left: 0;
-		top: 11%;
-		transform: translateX(-18%) rotate(-0.5deg);
-		width: 30%;
+		top: 16%;
+		transform: translateX(-14%) rotate(-0.5deg);
+		width: 36%;
 		z-index: 2;
-	}
-
-	.home-print--aside-2 {
-		left: 0;
-		top: 46%;
-		transform: translateX(-22%) rotate(0.45deg);
-		width: 40%;
-		z-index: 3;
 	}
 }
 
@@ -202,9 +194,11 @@
 .home-hero__meta {
 	color: $color-faint;
 	font-family: $font-ui;
-	font-size: 1rem;
-	letter-spacing: 0.04em;
+	font-size: .92rem;
+	letter-spacing: 0.03em;
 	margin-top: .55rem;
+	max-width: 22rem;
+	text-wrap: balance;
 }
 
 .home-hero__summary {
@@ -556,8 +550,8 @@
 	}
 }
 
-// The five-photo collage needs a wide frame. Narrower than that, drop the
-// small prints first so the two main photos and the text keep their space.
+// The three-photo collage needs a wide frame. Narrower than that, drop the
+// small print first so the two main photos and the text keep their space.
 @media screen and (max-width: 1500px) and (min-width: 1200px) {
 	.home-hero .home-print--aside {
 		display: none;
@@ -573,7 +567,7 @@
 	.home-hero__side--right .home-print--lead {
 		.home-print__photo,
 		img {
-			max-width: min(26rem, 32vw);
+			max-width: min(23rem, 28vw);
 		}
 	}
 }
@@ -622,8 +616,16 @@
 	}
 }
 
-.home-print--mobile-only {
+.home-print--mobile-only,
+.home-print--compact-only {
 	display: none;
+}
+
+// Tablet + phone: second print on the left (phone also adds a third via mobile-only).
+@media screen and (max-width: 1199px) {
+	.home-print--compact-only {
+		display: block;
+	}
 }
 
 // Phone: top collage of three prints, capped at 40vh, sticking past the top.
@@ -688,20 +690,20 @@
 	}
 }
 
-// Tablet: poster and its small print on the left, text on the right.
-// The right-hand photos wait until the collage has room again.
+// Tablet: two-print collage on the left, text on the right.
 @media screen and (max-width: 1199px) and (min-width: 801px) {
 	.home-hero {
 		align-items: center;
 		gap: clamp(1.75rem, 4vw, 3rem);
-		grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+		grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
 		padding: 4rem clamp(1.25rem, 3vw, 2.5rem) 4rem 0;
 	}
 
 	.home-hero__side--left {
 		justify-self: start;
 		margin-left: -3.5rem;
-		width: min(22rem, 48vw);
+		position: relative;
+		width: min(24rem, 52vw);
 	}
 
 	.home-hero__side--left .home-print--lead {
@@ -717,8 +719,10 @@
 	.home-hero__side--left .home-print--aside-1 {
 		left: 68%;
 		right: auto;
-		top: 8%;
-		width: 58%;
+		top: 42%;
+		transform: rotate(0.45deg);
+		width: 36%;
+		z-index: 2;
 	}
 
 	.home-hero__side--right {
