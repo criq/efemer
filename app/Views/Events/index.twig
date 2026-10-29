@@ -17,18 +17,18 @@
 			<section class="section-page__group" data-reveal>
 				<h2 class="section-page__group-title">{{ group.title }}</h2>
 				<ul class="section-index">
-					{% for event in group.events %}
+					{% for post in group.posts %}
 						<li class="section-index__item">
-							<a class="section-index__link" href="{{ event.getPublicUrl }}">
-								{% if event.getHeroImage %}
+							<a class="section-index__link" href="{{ post.getPublicUrl }}">
+								{% if post.getHeroImage %}
 									<span class="section-index__photo">
-										<img src="{{ event.getHeroImage.getImageVersion("GALLERY").getURL }}" alt="">
+										<img src="{{ post.getHeroImage.getImageVersion("GALLERY").getURL }}" alt="">
 									</span>
 								{% endif %}
 								<span class="section-index__copy">
-									<span class="section-index__title">{{ event.getTitle }}</span>
+									<span class="section-index__title">{{ post.getTitle }}</span>
 									<span class="section-index__date">
-										{{ event.getDateLabel }}{% if event.getPlace %} · {{ event.getPlace }}{% endif %}
+										{{ post.getDateLabel }}{% if post.getPlace %} · {{ post.getPlace }}{% endif %}
 									</span>
 								</span>
 							</a>

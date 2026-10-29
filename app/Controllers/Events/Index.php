@@ -2,7 +2,7 @@
 
 namespace App\Controllers\Events;
 
-use App\Classes\Content\Event;
+use App\Classes\Content\Post;
 use App\Classes\Content\Section;
 use App\Classes\Views\HTMLEngine;
 use Psr\Http\Message\ResponseInterface;
@@ -12,19 +12,12 @@ class Index extends \Katu\Controllers\Controller
 {
 	public function getResponse(ServerRequestInterface $request, ResponseInterface $response)
 	{
+		$invitations = Post::getCurrentInvitations();
 		$groups = [];
-		$current = Event::getCurrent();
-		$past = Event::getPast();
-		if ($current) {
+		if ($invitations) {
 			$groups[] = [
 				"title" => "nadcházející",
-				"events" => $current,
-			];
-		}
-		if ($past) {
-			$groups[] = [
-				"title" => "proběhlé",
-				"events" => $past,
+				"posts" => $invitations,
 			];
 		}
 

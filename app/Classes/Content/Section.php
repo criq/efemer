@@ -88,7 +88,7 @@ class Section
 			self::RITUALY => "Bespoke přechodové rituály pro pár a rodinu — ne svatební koordinace, ale obřad na míru místu, rostlinám a lidem.",
 			self::HIMMELHAUS => "Deník kamenného domu v Českém středohoří, kde Lucie žije a otevírá dům slavnostem.",
 			self::UMENI => "Instalace, happeningy, kniha Svátosti a práce s rostlinou jako nositelkou významu.",
-			self::UDALOSTI => "Slavnosti, poutě a otevřený dům — to, co se chystá, i stopy toho, co už se stalo.",
+			self::UDALOSTI => "Slavnosti, poutě a otevřený dům — pozvánky na to, co se právě chystá.",
 			default => "",
 		};
 	}

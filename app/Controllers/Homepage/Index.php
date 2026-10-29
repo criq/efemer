@@ -2,7 +2,6 @@
 
 namespace App\Controllers\Homepage;
 
-use App\Classes\Content\Event;
 use App\Classes\Content\Post;
 use App\Classes\Content\Section;
 use App\Classes\Views\HTMLEngine;
@@ -19,12 +18,13 @@ class Index extends \Katu\Controllers\Controller
 		}
 
 		$latest = Post::getPublished();
-		$event = Event::getUpcoming();
+		$invitation = Post::getUpcomingInvitation();
+		$featured = $invitation ?? ($latest[0] ?? null);
 
 		return $response->withBody((new HTMLEngine($request))->render("Homepage/index.twig", [
-			"event" => $event,
+			"invitation" => $invitation,
 			"latestPost" => $latest[0] ?? null,
-			"heroImages" => $this->heroImages($event, $latest[0] ?? null),
+			"heroImages" => $this->heroImages($featured),
 			"sections" => $sections,
 		]));
 	}
@@ -50,43 +50,32 @@ class Index extends \Katu\Controllers\Controller
 	}
 
 	/**
+	 * Collage slots from one featured post only (cover lead + best-rated rest).
+	 *
 	 * @return list<array{url: string, image: \Katu\Tools\Images\Image}>
 	 */
-	private function heroImages(?Event $event, ?Post $post): array
+	private function heroImages(?Post $featured): array
 	{
-		$images = [];
-		if ($event && $event->getHeroImage()) {
-			$images[] = [
-				"url" => $event->getPublicUrl(),
-				"image" => $event->getHeroImage(),
-			];
+		if (!$featured) {
+			return [];
 		}
 
-		// Mock: small left, two small right, large right.
-		// Čajový dýchánek, Zahrádkářská kolonie, Advent a Vánoce, Svatba Mlhových.
-		foreach ([102, 27, 92, 78] as $postId) {
-			$mock = Post::get($postId);
-			$image = $mock?->getHeroImage();
-			if (!$mock || !$image) {
+		$images = [];
+		foreach ($featured->getCollageFiles(3) as $file) {
+			$image = $file->getImage();
+			if (!$image) {
 				continue;
 			}
 
 			$images[] = [
-				"url" => $mock->getPublicUrl(),
+				"url" => $featured->getPublicUrl(),
 				"image" => $image,
+				"post" => $featured,
+				"file" => $file,
 			];
 		}
 
-		if (count($images) < 5 && $post) {
-			foreach ($this->imagesFromPosts([$post], 5) as $image) {
-				$images[] = $image;
-				if (count($images) >= 5) {
-					break;
-				}
-			}
-		}
-
-		return array_slice($images, 0, 5);
+		return $images;
 	}
 
 	/**

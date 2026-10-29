@@ -29,7 +29,7 @@ class View extends \Katu\Controllers\Controller
 	{
 		$path = Section::pathPrefix($section) . "/" . ltrim($slug, "/");
 		$post = Post::getByPath($path);
-		if (!$post || !$post->isPublished()) {
+		if (!$post || !$post->isPubliclyVisible() || $post->isInvitation()) {
 			throw new \Katu\Exceptions\ModelNotFoundException;
 		}
 
