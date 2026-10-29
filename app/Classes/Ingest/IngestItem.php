@@ -256,6 +256,25 @@ class IngestItem extends \Katu\Models\Model
 		return (bool)(int)$this->isInvitation;
 	}
 
+	public function setEventId(?int $eventId): IngestItem
+	{
+		$this->eventId = $eventId;
+
+		return $this;
+	}
+
+	public function getEventId(): ?int
+	{
+		return $this->eventId !== null ? (int)$this->eventId : null;
+	}
+
+	public function getEvent(): ?\App\Classes\Content\Event
+	{
+		$id = $this->getEventId();
+
+		return $id ? \App\Classes\Content\Event::get($id) : null;
+	}
+
 	public function setBodyHtml(?string $bodyHtml): IngestItem
 	{
 		$this->bodyHtml = $bodyHtml;
@@ -657,9 +676,23 @@ class IngestItem extends \Katu\Models\Model
 		return $link;
 	}
 
+	public function setPostId(?int $postId): IngestItem
+	{
+		$this->postId = $postId;
+
+		return $this;
+	}
+
+	public function getPostId(): ?int
+	{
+		return $this->postId !== null ? (int)$this->postId : null;
+	}
+
 	public function getPost(): ?Post
 	{
-		return $this->postId ? Post::get($this->postId) : null;
+		$id = $this->getPostId();
+
+		return $id ? Post::get($id) : null;
 	}
 
 	public function getSourceLabel(): string
@@ -699,22 +732,30 @@ class IngestItem extends \Katu\Models\Model
 
 	public function getCoverFile(): ?IngestItemFile
 	{
+		$usable = static fn (IngestItemFile $f): bool => !$f->isDemoted() && $f->getRole() !== IngestItemFile::ROLE_SKIP;
+
 		$coverId = $this->getCoverFileId();
 		if ($coverId) {
 			foreach ($this->getFiles() as $file) {
-				if ((int)$file->getId() === $coverId) {
+				if ((int)$file->getId() === $coverId && $usable($file)) {
 					return $file;
 				}
 			}
 		}
 
 		foreach ($this->getFiles() as $file) {
-			if ($file->isCover()) {
+			if ($file->isCover() && $usable($file)) {
 				return $file;
 			}
 		}
 
-		return $this->getFiles()->getFirst();
+		foreach ($this->getFiles() as $file) {
+			if ($usable($file)) {
+				return $file;
+			}
+		}
+
+		return null;
 	}
 
 	public function getHeroImage(): ?\Katu\Tools\Images\Image

@@ -14,6 +14,10 @@ class Post extends \Katu\Models\Model
 	public int|string|null $id = null;
 	public Time|string|null $timeCreated = null;
 	public Time|string|null $publishedAt = null;
+	public Time|string|null $startsAt = null;
+	public Time|string|null $endsAt = null;
+	public ?string $place = null;
+	public int|string|null $isInvitation = 0;
 	public ?string $title = null;
 	public ?string $path = null;
 	public ?string $section = null;
@@ -60,6 +64,193 @@ class Post extends \Katu\Models\Model
 		}
 
 		return null;
+	}
+
+	public function setStartsAt(?Time $time): Post
+	{
+		$this->startsAt = $time;
+
+		return $this;
+	}
+
+	public function getStartsAt(): ?Time
+	{
+		if ($this->startsAt instanceof Time) {
+			return $this->startsAt;
+		}
+
+		if (is_string($this->startsAt) && $this->startsAt !== "") {
+			return new Time($this->startsAt);
+		}
+
+		return null;
+	}
+
+	public function setEndsAt(?Time $time): Post
+	{
+		$this->endsAt = $time;
+
+		return $this;
+	}
+
+	public function getEndsAt(): ?Time
+	{
+		if ($this->endsAt instanceof Time) {
+			return $this->endsAt;
+		}
+
+		if (is_string($this->endsAt) && $this->endsAt !== "") {
+			return new Time($this->endsAt);
+		}
+
+		return null;
+	}
+
+	public function setPlace(?string $place): Post
+	{
+		$this->place = $place !== null && trim($place) !== "" ? trim($place) : null;
+
+		return $this;
+	}
+
+	public function getPlace(): ?string
+	{
+		return $this->place;
+	}
+
+	/**
+	 * Short venue for hero/meta (drop secondary towns after / or long region after comma).
+	 */
+	public function getHeroPlaceLabel(): ?string
+	{
+		$place = trim((string)$this->getPlace());
+		if ($place === "") {
+			return null;
+		}
+
+		if (str_contains($place, "/")) {
+			$place = trim(explode("/", $place, 2)[0]);
+		}
+
+		if (mb_strlen($place) > 28 && str_contains($place, ",")) {
+			$place = trim(explode(",", $place, 2)[0]);
+		}
+
+		return $place !== "" ? $place : null;
+	}
+
+	public function setIsInvitation(bool $isInvitation): Post
+	{
+		$this->isInvitation = $isInvitation ? 1 : 0;
+
+		return $this;
+	}
+
+	public function isInvitation(): bool
+	{
+		return (bool)(int)$this->isInvitation;
+	}
+
+	public function getEffectiveEnd(): ?Time
+	{
+		$end = $this->getEndsAt();
+		if ($end) {
+			return $end;
+		}
+
+		$start = $this->getStartsAt();
+		if (!$start) {
+			return null;
+		}
+
+		return new Time($start->format("Y-m-d") . " 23:59:59");
+	}
+
+	public function isInvitationCurrent(): bool
+	{
+		if (!$this->isInvitation()) {
+			return false;
+		}
+
+		$end = $this->getEffectiveEnd();
+
+		return $end !== null && (int)$end->format("U") >= time();
+	}
+
+	public function isHappening(): bool
+	{
+		if (!$this->isInvitation()) {
+			return false;
+		}
+
+		$start = $this->getStartsAt();
+		if (!$start || (int)$start->format("U") > time()) {
+			return false;
+		}
+
+		return $this->isInvitationCurrent();
+	}
+
+	public function isPubliclyVisible(): bool
+	{
+		if (!$this->isPublished()) {
+			return false;
+		}
+
+		if ($this->isInvitation()) {
+			return $this->isInvitationCurrent();
+		}
+
+		return true;
+	}
+
+	public function getDateLabel(): string
+	{
+		$start = $this->getStartsAt();
+		if (!$start) {
+			$published = $this->getPublishedAt();
+
+			return $published ? $published->format("j. n. Y") : "";
+		}
+
+		$end = $this->getEndsAt();
+		if ($end && $end->format("Y-m-d") !== $start->format("Y-m-d")) {
+			return $start->format("j. n.") . "–" . $end->format("j. n. Y");
+		}
+
+		return $start->format("j. n. Y");
+	}
+
+	public function setIngestItemId(?int $ingestItemId): Post
+	{
+		$this->ingestItemId = $ingestItemId;
+
+		return $this;
+	}
+
+	public function getIngestItemId(): ?int
+	{
+		return $this->ingestItemId !== null ? (int)$this->ingestItemId : null;
+	}
+
+	public function setLayoutJson(?array $layout): Post
+	{
+		$this->layoutJson = $layout === null
+			? null
+			: json_encode($layout, JSON_UNESCAPED_UNICODE);
+
+		return $this;
+	}
+
+	public function getLayoutJson(): ?array
+	{
+		if ($this->layoutJson === null || $this->layoutJson === "") {
+			return null;
+		}
+
+		$decoded = json_decode($this->layoutJson, true);
+
+		return is_array($decoded) ? $decoded : null;
 	}
 
 	public function setTitle(?string $title): Post
@@ -264,6 +455,13 @@ class Post extends \Katu\Models\Model
 		return $file ? $file->getImage() : null;
 	}
 
+	public function clearFiles(): void
+	{
+		foreach ($this->getFiles() as $file) {
+			$file->delete();
+		}
+	}
+
 	public static function getByPath(string $path): ?Post
 	{
 		$slug = Slugger::slugifyPagePath($path);
@@ -287,10 +485,49 @@ class Post extends \Katu\Models\Model
 	 */
 	public static function getPublishedBySection(string $section): array
 	{
-		$posts = static::getBy([
+		$posts = [];
+		foreach (static::getBy([
 			"section" => $section,
 			"status" => self::STATUS_PUBLISHED,
-		])->getItems();
+		])->getItems() as $post) {
+			if ($post->isPubliclyVisible()) {
+				$posts[] = $post;
+			}
+		}
+
+		usort($posts, function (Post $a, Post $b) use ($section) {
+			if ($section === Section::UDALOSTI) {
+				return ((int)($a->getStartsAt()?->format("U") ?? 0)) <=> ((int)($b->getStartsAt()?->format("U") ?? 0));
+			}
+
+			$aTime = (int)($a->getPublishedAt()?->format("U") ?? 0);
+			$bTime = (int)($b->getPublishedAt()?->format("U") ?? 0);
+
+			return $bTime <=> $aTime;
+		});
+
+		return $posts;
+	}
+
+	/**
+	 * Published lasting work posts (excludes invitations).
+	 *
+	 * @return list<Post>
+	 */
+	public static function getPublished(): array
+	{
+		$posts = [];
+		foreach (static::getBy([
+			"status" => self::STATUS_PUBLISHED,
+		])->getItems() as $post) {
+			if ($post->isInvitation() || !$post->isPubliclyVisible()) {
+				continue;
+			}
+			if (!Section::isWork($post->getSection())) {
+				continue;
+			}
+			$posts[] = $post;
+		}
 
 		usort($posts, function (Post $a, Post $b) {
 			$aTime = (int)($a->getPublishedAt()?->format("U") ?? 0);
@@ -303,22 +540,41 @@ class Post extends \Katu\Models\Model
 	}
 
 	/**
+	 * Current invitation posts for /udalosti and homepage hero.
+	 *
 	 * @return list<Post>
 	 */
-	public static function getPublished(): array
+	public static function getCurrentInvitations(): array
 	{
-		$posts = static::getBy([
+		$posts = [];
+		foreach (static::getBy([
+			"isInvitation" => 1,
 			"status" => self::STATUS_PUBLISHED,
-		])->getItems();
+		])->getItems() as $post) {
+			if ($post->isInvitationCurrent()) {
+				$posts[] = $post;
+			}
+		}
 
 		usort($posts, function (Post $a, Post $b) {
-			$aTime = (int)($a->getPublishedAt()?->format("U") ?? 0);
-			$bTime = (int)($b->getPublishedAt()?->format("U") ?? 0);
-
-			return $bTime <=> $aTime;
+			return ((int)($a->getStartsAt()?->format("U") ?? 0)) <=> ((int)($b->getStartsAt()?->format("U") ?? 0));
 		});
 
 		return $posts;
+	}
+
+	public static function getUpcomingInvitation(): ?Post
+	{
+		$current = static::getCurrentInvitations();
+
+		return $current[0] ?? null;
+	}
+
+	public static function getByIngestItemId(int $ingestItemId): ?Post
+	{
+		return static::getOneBy([
+			"ingestItemId" => $ingestItemId,
+		]);
 	}
 
 	public static function pathFor(string $section, string $slug, ?int $ignoreId = null): string
@@ -338,16 +594,77 @@ class Post extends \Katu\Models\Model
 		}
 	}
 
-	public function attachStorageFile(StorageFile $storageFile, int $position, ?string $caption = null): PostFile
-	{
+	public function attachStorageFile(
+		StorageFile $storageFile,
+		int $position,
+		?string $caption = null,
+		?float $rating = null,
+		?string $role = null,
+		bool $demote = false,
+	): PostFile {
 		$link = new PostFile;
 		$link->timeCreated = new Time;
 		$link->setPost($this);
 		$link->setStorageFile($storageFile);
 		$link->setPosition($position);
 		$link->setCaption($caption);
+		$link->setRating($rating);
+		$link->setRole($role);
+		$link->setDemote($demote);
 		$link->persist();
 
 		return $link;
+	}
+
+	/**
+	 * Best photos from this post for the homepage collage (same post only).
+	 * Cover/first stays lead; remaining slots by LLM rating, then role, then position.
+	 *
+	 * @return list<PostFile>
+	 */
+	public function getCollageFiles(int $limit = 3): array
+	{
+		$candidates = [];
+		foreach ($this->getFiles() as $file) {
+			if ($file->isDemoted() || $file->getRole() === "skip") {
+				continue;
+			}
+			if (!$file->getImage()) {
+				continue;
+			}
+			$candidates[] = $file;
+		}
+
+		if ($candidates === []) {
+			return [];
+		}
+
+		$lead = $candidates[0];
+		$rest = array_slice($candidates, 1);
+		$roleRank = [
+			"lead" => 1,
+			"support" => 2,
+			"detail" => 3,
+			"context" => 4,
+		];
+		usort($rest, function (PostFile $a, PostFile $b) use ($roleRank) {
+			$aRating = $a->getRating() ?? -1.0;
+			$bRating = $b->getRating() ?? -1.0;
+			if ($aRating !== $bRating) {
+				return $bRating <=> $aRating;
+			}
+
+			$aRole = $roleRank[$a->getRole() ?? ""] ?? 5;
+			$bRole = $roleRank[$b->getRole() ?? ""] ?? 5;
+			if ($aRole !== $bRole) {
+				return $aRole <=> $bRole;
+			}
+
+			return ($a->getPosition() ?? 0) <=> ($b->getPosition() ?? 0);
+		});
+
+		$picked = array_merge([$lead], $rest);
+
+		return array_slice($picked, 0, max(1, $limit));
 	}
 }

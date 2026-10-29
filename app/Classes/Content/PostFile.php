@@ -14,6 +14,9 @@ class PostFile extends \Katu\Models\Model
 	public int|string|null $storageFileId = null;
 	public ?int $position = null;
 	public ?string $caption = null;
+	public int|float|string|null $rating = null;
+	public ?string $role = null;
+	public int|string|null $demote = 0;
 
 	public function setPost(Post $post): PostFile
 	{
@@ -56,6 +59,42 @@ class PostFile extends \Katu\Models\Model
 	public function getCaption(): ?string
 	{
 		return $this->caption;
+	}
+
+	public function setRating(?float $rating): PostFile
+	{
+		$this->rating = $rating;
+
+		return $this;
+	}
+
+	public function getRating(): ?float
+	{
+		return $this->rating !== null && $this->rating !== "" ? (float)$this->rating : null;
+	}
+
+	public function setRole(?string $role): PostFile
+	{
+		$this->role = $role;
+
+		return $this;
+	}
+
+	public function getRole(): ?string
+	{
+		return $this->role;
+	}
+
+	public function setDemote(bool $demote): PostFile
+	{
+		$this->demote = $demote ? 1 : 0;
+
+		return $this;
+	}
+
+	public function isDemoted(): bool
+	{
+		return (bool)(int)$this->demote;
 	}
 
 	public function getImage(): ?\Katu\Tools\Images\Image

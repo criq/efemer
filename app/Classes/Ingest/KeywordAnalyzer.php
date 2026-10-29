@@ -533,9 +533,9 @@ Rules:
   - Set isInvitation=true when the post invites readers to an upcoming or current event/workshop/walk/slavnost/pop-up ("zveme", "připojte se", "sraz", "vstupenky", poster with future date/time/venue). Set place to the venue/town when known.
 - Role and pattern codes in English as above.
 - sourceSlot=pre_copy ⇒ role=lead (strong). post_copy ⇒ support|detail|context (lead only if truly a second story beat).
-- COVER (critical): if any non-demoted pre_copy file exists, coverFileId MUST be one of those pre_copy ids (prefer the best lead among them). Never pick a post_copy cover when pre_copy exists.
-- demote=true for blurry, duplicate, meme, off-brand, accidental frames ⇒ role=skip. Use demote when warranted; do not rate junk as 0.8+.
-- rating calibration: 0.9–1.0 rare hero; ~0.7 solid; ~0.5 ordinary filler; ≤0.4 weak / demote candidates.
+- COVER (critical): if any non-demoted pre_copy file exists, coverFileId MUST be one of those pre_copy ids (prefer the best lead among them). Never pick a post_copy cover when pre_copy exists. Cover MUST be a photograph of people/place/plants — never a typography poster, title card, or flyer.
+- demote=true ⇒ role=skip for: blurry, duplicate, meme, off-brand, accidental frames, AND any image that is primarily graphic/typography (Instagram title cards, event posters with large overlaid text/dates, flyer slides, solid-color text cards). These must never be cover and never appear in public galleries. Rate them ≤0.3.
+- rating calibration: 0.9–1.0 rare photographic hero; ~0.7 solid photo; ~0.5 ordinary filler; ≤0.4 weak / demote candidates; typography slides ≤0.3 + demote.
 - layout pattern:
   - hero_text_gallery when there is real body text AND a pre_copy lead
   - text_lead_gallery when body opens and lead comes after
