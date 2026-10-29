@@ -120,7 +120,7 @@ class Gemini
 			$status = $response->getStatusCode();
 			$rawBody = (string)$response->getBody();
 
-			if (in_array($status, [429, 503], true) && $attempt < self::MAX_ATTEMPTS) {
+			if ($this->shouldRetry($status, $rawBody) && $attempt < self::MAX_ATTEMPTS) {
 				$delay = min(120, 5 * (2 ** ($attempt - 1)));
 				$this->log("Gemini HTTP {$status} — waiting {$delay}s before retry {$attempt}/" . self::MAX_ATTEMPTS . ".");
 				$this->sleepInterruptible($delay);
@@ -181,6 +181,27 @@ class Gemini
 		}
 
 		return $text;
+	}
+
+	/**
+	 * Retry rate limits / transient backend errors. Also retries the bare multimodal
+	 * INVALID_ARGUMENT ("Request contains an invalid argument.") which Gemini
+	 * sometimes returns once then accepts on the same payload.
+	 */
+	private function shouldRetry(int $status, string $rawBody): bool
+	{
+		if (in_array($status, [429, 503], true)) {
+			return true;
+		}
+
+		if ($status !== 400) {
+			return false;
+		}
+
+		$decoded = json_decode($rawBody, true);
+		$message = is_array($decoded) ? (string)($decoded["error"]["message"] ?? "") : "";
+
+		return $message === "Request contains an invalid argument.";
 	}
 
 	private function sleepInterruptible(int $seconds): void
