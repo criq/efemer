@@ -59,7 +59,7 @@ Eval sets (edit after human review): `app/Resources/Ingest/eval/covers.json`, `r
 | `Ingest.EvaluateKeywords` | score cover/role eval sets |
 | `Ingest.ExportCorpus` | CSV/JSON + keyword co-occurrence |
 | `Ingest.ResetKeywordEnrichment` | clear LLM fields only (`yes:true`); status → `loaded` |
-| `Ingest.MaterializePosts` | keyworded ingest → `posts` (+ layoutJson); invitations ephemeral on `/udalosti` |
+| `Ingest.MaterializePosts` | keyworded ingest → `posts` + selected `post_files` + `layoutJson.parts` (interleaved text/image/gallery); invitations ephemeral on `/udalosti` |
 | `Ingest.ResetImportedContent` | wipe posts/ingest/pages + env GCS shard |
 | `Database.Migrate` | schema migrations |
 | `Pages.ImportEfemerCz` | legacy page-builder import |

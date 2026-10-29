@@ -35,6 +35,22 @@ Visual layout is in `homepage.mdc`. Text is the next **current invitation** post
 
 Materialized as posts with `isInvitation`, `startsAt` / `endsAt` / `place`, section `udalosti`. Public only while current (effective end ≥ now); expired → hidden everywhere including detail **404**. Listing `/udalosti` is current invites only (no archive). Admin legacy **Události** (`events` table) remains until migrated.
 
+## Post parts (`layoutJson.parts`)
+
+Public post/invitation body is an ordered list in `posts.layoutJson.parts`:
+
+| type | fields | Notes |
+|---|---|---|
+| `text` | `html` | Sanitized HTML chunk |
+| `image` | `postFileId` | One selected photo |
+| `gallery` | `postFileIds` | Ordered photos |
+
+- **`post_files`**: only photos included in the post (subset of ingest), ordered; rating/role/demote kept. Demoted/skip never enter.
+- Parts reference **`postFileId`**, not ingest ids.
+- **`bodyHtml` / `excerpt`**: derived — excerpt from first text part; bodyHtml = concat of text parts (search/admin fallback).
+- Built by `PostMaterializer` via Gemini (`PostLayoutPlanner`): `excerpt` is for cards/listings only; body `parts` hold the complete copy (including opening lines). LLM curates photos (not all required), groups related ones into galleries, interleaves short text beats. Invitation detail is one continuous block (header + parts), not a split hero.
+- Edited in admin post form. See `App\Classes\Content\PostParts`.
+
 ## Import
 
 Load into ingest via Katu jobs first (see `ingest.mdc`). Public `posts` come from `MaterializePosts`, not refresh jobs.

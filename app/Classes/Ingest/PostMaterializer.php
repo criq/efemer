@@ -3,23 +3,32 @@
 namespace App\Classes\Ingest;
 
 use App\Classes\Content\Post;
+use App\Classes\Content\PostParts;
 use App\Classes\Content\Section;
-use App\Classes\Html\Excerpt;
-use App\Classes\Html\Sanitizer;
 use App\Classes\Jobs\ConsoleStyle;
 use Katu\Tools\Calendar\Time;
 
 /**
- * Stage 3: materialize keyworded ingest items into public posts.
+ * Stage 3: materialize keyworded ingest items into public posts with LLM-planned parts.
  */
 class PostMaterializer
 {
+	private const MAX_PHOTOS = 16;
+
+	private PostLayoutPlanner $planner;
+
 	/** @var list<callable(string): void> */
 	private array $loggers = [];
+
+	public function __construct(?PostLayoutPlanner $planner = null)
+	{
+		$this->planner = $planner ?? new PostLayoutPlanner;
+	}
 
 	public function onLog(callable $logger): self
 	{
 		$this->loggers[] = $logger;
+		$this->planner->onLog($logger);
 
 		return $this;
 	}
@@ -55,17 +64,22 @@ class PostMaterializer
 			return null;
 		}
 
-		$bodyHtml = Sanitizer::clean($item->getBodyHtml()) ?: null;
-		$excerpt = Excerpt::fromHtml($bodyHtml);
-		$files = $this->orderedFiles($item);
-		$layout = $this->buildLayout($item, $files);
-		$summary = sprintf("#%s → “%s” [%s]", $item->getId(), $title, $section);
+		$candidates = $this->selectOrderedFiles($item);
+		$pattern = $this->resolvePattern($item);
+		$summary = sprintf("#%s → “%s” [%s] (%d photos)", $item->getId(), $title, $section, count($candidates));
 
 		if ($dryRun) {
-			$this->log(ConsoleStyle::step("would materialize " . $summary));
+			$plan = $this->planner->plan($item, $candidates);
+			$this->log(ConsoleStyle::step(sprintf(
+				"would materialize %s — %d planned parts",
+				$summary,
+				count($plan["parts"]),
+			)));
 
 			return new Post;
 		}
+
+		$plan = $this->planner->plan($item, $candidates);
 
 		$post = $item->getPost() ?: Post::getByIngestItemId((int)$item->getId());
 		$isNew = $post === null;
@@ -76,8 +90,6 @@ class PostMaterializer
 
 		$post->setTitle($title);
 		$post->setSection($section);
-		$post->setExcerpt($excerpt !== "" ? $excerpt : null);
-		$post->setBodyHtml($bodyHtml);
 		$post->setStatus(Post::STATUS_PUBLISHED);
 		$post->setPublishedAt($item->getPostedAt() ?: new Time);
 		$post->setSource($this->mapSource($item));
@@ -88,27 +100,31 @@ class PostMaterializer
 		$post->setEndsAt($item->getEndsAt());
 		$post->setPlace($item->getPlace());
 		$post->setIsInvitation($item->isInvitation());
-		$post->setLayoutJson($layout);
 
 		$pathSlug = $this->pathSlug($item, $title);
 		$post->setPath(Post::pathFor($section, $pathSlug, $post->getId() !== null ? (int)$post->getId() : null));
 		$post->persist();
 
-		// Path uniqueness needs id; rewrite once after first persist on create.
 		if ($isNew) {
 			$post->setPath(Post::pathFor($section, $pathSlug, (int)$post->getId()));
 			$post->persist();
 		}
 
+		$usedIndexes = $this->collectFileIndexes($plan["parts"]);
 		$post->clearFiles();
+		$indexToPostFileId = [];
 		$position = 1;
-		foreach ($files as $ingestFile) {
+		foreach ($usedIndexes as $fileIndex) {
+			$ingestFile = $candidates[$fileIndex] ?? null;
+			if (!$ingestFile) {
+				continue;
+			}
 			try {
 				$storage = $ingestFile->getStorageFile();
 			} catch (\Throwable) {
 				continue;
 			}
-			$post->attachStorageFile(
+			$postFile = $post->attachStorageFile(
 				$storage,
 				$position++,
 				$ingestFile->getCaption(),
@@ -116,7 +132,19 @@ class PostMaterializer
 				$ingestFile->getRole(),
 				$ingestFile->isDemoted(),
 			);
+			$indexToPostFileId[$fileIndex] = (int)$postFile->getId();
 		}
+
+		$parts = $this->mapPlanToParts($plan["parts"], $indexToPostFileId);
+		$excerpt = $plan["excerpt"];
+		$post->setLayoutJson([
+			"pattern" => $pattern,
+			"parts" => $parts,
+			"plannedBy" => "gemini",
+		]);
+		$post->setBodyHtml(PostParts::bodyHtmlFromParts($parts));
+		$post->setExcerpt($excerpt);
+		$post->persist();
 
 		$item->setPostId((int)$post->getId());
 		$item->setEventId(null);
@@ -125,14 +153,104 @@ class PostMaterializer
 		$item->persist();
 
 		$this->log(ConsoleStyle::ok(sprintf(
-			"%s post #%s “%s” ← ingest #%s",
+			"%s post #%s “%s” ← ingest #%s (%d parts, %d photos)",
 			$isNew ? "Created" : "Updated",
 			$post->getId(),
 			$title,
 			$item->getId(),
+			count($parts),
+			count($indexToPostFileId),
 		)));
 
 		return $post;
+	}
+
+	/**
+	 * @param list<array{type: string, html?: string, fileIndex?: int, fileIndexes?: list<int>}> $planParts
+	 * @return list<int>
+	 */
+	private function collectFileIndexes(array $planParts): array
+	{
+		$ordered = [];
+		$seen = [];
+		foreach ($planParts as $part) {
+			$type = $part["type"] ?? "";
+			if ($type === PostParts::TYPE_IMAGE) {
+				$idx = (int)($part["fileIndex"] ?? -1);
+				if ($idx >= 0 && !isset($seen[$idx])) {
+					$seen[$idx] = true;
+					$ordered[] = $idx;
+				}
+				continue;
+			}
+			if ($type === PostParts::TYPE_GALLERY) {
+				foreach ((array)($part["fileIndexes"] ?? []) as $idx) {
+					$idx = (int)$idx;
+					if ($idx >= 0 && !isset($seen[$idx])) {
+						$seen[$idx] = true;
+						$ordered[] = $idx;
+					}
+				}
+			}
+		}
+
+		return $ordered;
+	}
+
+	/**
+	 * @param list<array{type: string, html?: string, fileIndex?: int, fileIndexes?: list<int>}> $planParts
+	 * @param array<int, int> $indexToPostFileId
+	 * @return list<array{type: string, html?: string, postFileId?: int, postFileIds?: list<int>}>
+	 */
+	private function mapPlanToParts(array $planParts, array $indexToPostFileId): array
+	{
+		$parts = [];
+		foreach ($planParts as $part) {
+			$type = $part["type"] ?? "";
+			if ($type === PostParts::TYPE_TEXT) {
+				$normalized = PostParts::normalizePart([
+					"type" => PostParts::TYPE_TEXT,
+					"html" => (string)($part["html"] ?? ""),
+				]);
+				if ($normalized) {
+					$plain = trim(html_entity_decode(strip_tags($normalized["html"]), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+					if ($plain !== "") {
+						$parts[] = $normalized;
+					}
+				}
+				continue;
+			}
+			if ($type === PostParts::TYPE_IMAGE) {
+				$idx = (int)($part["fileIndex"] ?? -1);
+				$postFileId = $indexToPostFileId[$idx] ?? 0;
+				$normalized = PostParts::normalizePart([
+					"type" => PostParts::TYPE_IMAGE,
+					"postFileId" => $postFileId,
+				]);
+				if ($normalized) {
+					$parts[] = $normalized;
+				}
+				continue;
+			}
+			if ($type === PostParts::TYPE_GALLERY) {
+				$ids = [];
+				foreach ((array)($part["fileIndexes"] ?? []) as $idx) {
+					$id = $indexToPostFileId[(int)$idx] ?? 0;
+					if ($id > 0) {
+						$ids[] = $id;
+					}
+				}
+				$normalized = PostParts::normalizePart([
+					"type" => PostParts::TYPE_GALLERY,
+					"postFileIds" => $ids,
+				]);
+				if ($normalized) {
+					$parts[] = $normalized;
+				}
+			}
+		}
+
+		return $parts;
 	}
 
 	private function resolveSection(IngestItem $item): ?string
@@ -145,7 +263,6 @@ class PostMaterializer
 			return Section::HIMMELHAUS;
 		}
 
-		// Soft map until taxonomy; efemer.cz diary-like stays out unless kind hints.
 		$kind = $item->getKind();
 		if ($kind === "wedding") {
 			return Section::RITUALY;
@@ -208,9 +325,8 @@ class PostMaterializer
 	/**
 	 * @return list<IngestItemFile>
 	 */
-	private function orderedFiles(IngestItem $item): array
+	private function selectOrderedFiles(IngestItem $item): array
 	{
-		$files = [];
 		$cover = $item->getCoverFile();
 		$coverId = $cover ? (int)$cover->getId() : null;
 
@@ -242,18 +358,24 @@ class PostMaterializer
 				return $aRole <=> $bRole;
 			}
 
+			$aRating = $a->getRating() ?? 0.0;
+			$bRating = $b->getRating() ?? 0.0;
+			if ($aRating !== $bRating) {
+				return $bRating <=> $aRating;
+			}
+
 			return ($a->getPosition() ?? 0) <=> ($b->getPosition() ?? 0);
 		});
 
-		return $candidates;
+		return array_slice($candidates, 0, self::MAX_PHOTOS);
 	}
 
-	/**
-	 * @param list<IngestItemFile> $files
-	 * @return array{pattern: string, blocks: list<array<string, mixed>>}
-	 */
-	private function buildLayout(IngestItem $item, array $files): array
+	private function resolvePattern(IngestItem $item): string
 	{
+		if ($item->isInvitation()) {
+			return "hero_text_gallery";
+		}
+
 		$hints = $item->getLayoutHints() ?? [];
 		$pattern = is_string($hints["pattern"] ?? null) ? $hints["pattern"] : "gallery_essay";
 		$allowed = ["hero_text_gallery", "text_lead_gallery", "gallery_essay", "single"];
@@ -261,42 +383,7 @@ class PostMaterializer
 			$pattern = "gallery_essay";
 		}
 
-		$blocks = [];
-		$leadIds = [];
-		foreach ($files as $index => $file) {
-			if ($index === 0 || $file->getRole() === IngestItemFile::ROLE_LEAD) {
-				$leadIds[] = (int)$file->getId();
-			}
-		}
-		$leadIds = array_values(array_unique($leadIds));
-
-		if ($pattern === "text_lead_gallery") {
-			$blocks[] = ["type" => "body"];
-			foreach ($leadIds as $id) {
-				$blocks[] = ["type" => "image", "ingestFileId" => $id];
-			}
-			$blocks[] = ["type" => "gallery", "excludeIngestFileIds" => $leadIds];
-		} elseif ($pattern === "single") {
-			if ($leadIds) {
-				$blocks[] = ["type" => "image", "ingestFileId" => $leadIds[0]];
-			}
-			$blocks[] = ["type" => "body"];
-		} elseif ($pattern === "gallery_essay") {
-			$blocks[] = ["type" => "gallery"];
-			$blocks[] = ["type" => "body"];
-		} else {
-			// hero_text_gallery
-			if ($leadIds) {
-				$blocks[] = ["type" => "image", "ingestFileId" => $leadIds[0]];
-			}
-			$blocks[] = ["type" => "body"];
-			$blocks[] = ["type" => "gallery", "excludeIngestFileIds" => $leadIds ? [$leadIds[0]] : []];
-		}
-
-		return [
-			"pattern" => $pattern,
-			"blocks" => $blocks,
-		];
+		return $pattern;
 	}
 
 	private function mapSource(IngestItem $item): string

@@ -4,7 +4,7 @@
 
 {% block body %}
 
-	<div class="admin-page">
+	<div class="admin-page admin-page--wide">
 		<div class="admin-page__header">
 			<h1 class="admin-page__title">{{ post.getTitle|default("Příspěvek") }}</h1>
 			{% if post.getPublicPath %}
@@ -12,43 +12,105 @@
 			{% endif %}
 		</div>
 
-		<form class="admin-form" action="" method="POST">
+		<form class="admin-form" action="" method="POST" data-post-parts-form>
 			{% include "Blocks/formHeader.twig" %}
 			{% include "Blocks/formErrors.twig" %}
 
+			<input type="hidden" name="partsJson" value="{{ editorPartsJson|e("html_attr") }}" data-parts-json>
+
 			<section class="admin-section">
+				<h2 class="admin-section__title">Základní údaje</h2>
 				<div class="admin-panel admin-field">
 					<label class="admin-field">
 						<span class="admin-field__label">Název</span>
 						<input type="text" name="title" value="{{ post.getTitle }}" autofocus>
 					</label>
+					<div class="admin-fields-row">
+						<label class="admin-field">
+							<span class="admin-field__label">Sekce</span>
+							<select name="section">
+								{% for code in sections %}
+									<option value="{{ code }}" {% if post.getSection == code %}selected{% endif %}>
+										{% if code == "ritualy" %}Svatební rituály
+										{% elseif code == "himmelhaus" %}Himmelhaus
+										{% elseif code == "umeni" %}Umění
+										{% else %}Události{% endif %}
+									</option>
+								{% endfor %}
+							</select>
+						</label>
+						<label class="admin-field">
+							<span class="admin-field__label">Stav</span>
+							<select name="status">
+								<option value="review" {% if post.getStatus == "review" %}selected{% endif %}>Ke kontrole</option>
+								<option value="published" {% if post.getStatus == "published" %}selected{% endif %}>Veřejný</option>
+								<option value="hidden" {% if post.getStatus == "hidden" %}selected{% endif %}>Skrytý</option>
+							</select>
+						</label>
+					</div>
 					<label class="admin-field">
-						<span class="admin-field__label">Sekce</span>
-						<select name="section">
-							{% for code in sections %}
-								<option value="{{ code }}" {% if post.getSection == code %}selected{% endif %}>
-									{% if code == "ritualy" %}Svatební rituály{% elseif code == "himmelhaus" %}Himmelhaus{% else %}Umění{% endif %}
-								</option>
-							{% endfor %}
-						</select>
+						<span class="admin-field__label">
+							<input type="checkbox" name="isInvitation" value="1" {% if post.isInvitation %}checked{% endif %}>
+							Pozvánka (časově omezená)
+						</span>
 					</label>
+					<div class="admin-fields-row">
+						<label class="admin-field">
+							<span class="admin-field__label">Začátek</span>
+							<input type="datetime-local" name="startsAt" value="{{ post.getStartsAt ? post.getStartsAt|date("Y-m-d\\TH:i") : "" }}">
+						</label>
+						<label class="admin-field">
+							<span class="admin-field__label">Konec</span>
+							<input type="datetime-local" name="endsAt" value="{{ post.getEndsAt ? post.getEndsAt|date("Y-m-d\\TH:i") : "" }}">
+						</label>
+					</div>
 					<label class="admin-field">
-						<span class="admin-field__label">Stav</span>
-						<select name="status">
-							<option value="review" {% if post.getStatus == "review" %}selected{% endif %}>Ke kontrole</option>
-							<option value="published" {% if post.getStatus == "published" %}selected{% endif %}>Veřejný</option>
-							<option value="hidden" {% if post.getStatus == "hidden" %}selected{% endif %}>Skrytý</option>
-						</select>
+						<span class="admin-field__label">Místo</span>
+						<input type="text" name="place" value="{{ post.getPlace }}">
 					</label>
 					<label class="admin-field">
 						<span class="admin-field__label">Perex</span>
-						<textarea name="excerpt" rows="3">{{ post.getExcerpt }}</textarea>
-					</label>
-					<label class="admin-field">
-						<span class="admin-field__label">Text</span>
-						<textarea name="bodyHtml" rows="12">{{ post.getBodyHtml }}</textarea>
+						<textarea name="excerpt" rows="2">{{ post.getExcerpt }}</textarea>
 					</label>
 				</div>
+			</section>
+
+			<section class="admin-section">
+				<h2 class="admin-section__title">Fotky z importu</h2>
+				<p class="admin-page__lede">Zaškrtněte fotky, které mají být v příspěvku. Demoted/skip jsou označené.</p>
+				<div class="admin-parts-photos" data-parts-photos>
+					{% for photo in ingestPhotos %}
+						<label class="admin-parts-photos__item {% if photo.demoted %}is-demoted{% endif %}">
+							<input type="checkbox"
+								name="includedStorageFileIds[]"
+								value="{{ photo.storageFileId }}"
+								{% if photo.included %}checked{% endif %}
+								data-storage-file-id="{{ photo.storageFileId }}"
+								data-thumb="{{ photo.thumb|default("")|e("html_attr") }}"
+								data-caption="{{ photo.caption|default("")|e("html_attr") }}">
+							{% if photo.thumb %}
+								<img src="{{ photo.thumb }}" alt="">
+							{% else %}
+								<span class="admin-parts-photos__empty">?</span>
+							{% endif %}
+							{% if photo.demoted %}<span class="admin-parts-photos__badge">vynechat</span>{% endif %}
+						</label>
+					{% else %}
+						<p class="admin-page__lede">Žádné fotky z importu.</p>
+					{% endfor %}
+				</div>
+			</section>
+
+			<section class="admin-section">
+				<div class="admin-parts-toolbar">
+					<h2 class="admin-section__title">Části stránky</h2>
+					<div class="admin-parts-toolbar__actions">
+						<button type="button" class="admin-button admin-button--ghost" data-add-part="text">+ Text</button>
+						<button type="button" class="admin-button admin-button--ghost" data-add-part="image">+ Fotka</button>
+						<button type="button" class="admin-button admin-button--ghost" data-add-part="gallery">+ Galerie</button>
+					</div>
+				</div>
+				<ul class="admin-parts-list" data-parts-list></ul>
 			</section>
 
 			<p class="admin-form__submit">
@@ -56,5 +118,181 @@
 			</p>
 		</form>
 	</div>
+
+	<template id="admin-part-text">
+		<li class="admin-parts-item" data-part data-type="text">
+			<div class="admin-parts-item__chrome">
+				<span class="admin-parts-item__handle" title="Přesunout">{% include "Blocks/adminIcon.twig" with { name: "drag_indicator" } %}</span>
+				<span class="admin-parts-item__label">Text</span>
+				<button type="button" class="admin-button admin-button--ghost admin-button--small" data-remove-part>Odebrat</button>
+			</div>
+			<textarea class="admin-parts-item__html" rows="6" data-part-html></textarea>
+		</li>
+	</template>
+
+	<template id="admin-part-image">
+		<li class="admin-parts-item" data-part data-type="image">
+			<div class="admin-parts-item__chrome">
+				<span class="admin-parts-item__handle" title="Přesunout">{% include "Blocks/adminIcon.twig" with { name: "drag_indicator" } %}</span>
+				<span class="admin-parts-item__label">Fotka</span>
+				<button type="button" class="admin-button admin-button--ghost admin-button--small" data-remove-part>Odebrat</button>
+			</div>
+			<div class="admin-parts-item__image-row">
+				<img class="admin-parts-item__thumb" data-part-thumb alt="" hidden>
+				<select data-part-storage-id>
+					<option value="">— vyberte fotku —</option>
+				</select>
+			</div>
+		</li>
+	</template>
+
+	<template id="admin-part-gallery">
+		<li class="admin-parts-item" data-part data-type="gallery">
+			<div class="admin-parts-item__chrome">
+				<span class="admin-parts-item__handle" title="Přesunout">{% include "Blocks/adminIcon.twig" with { name: "drag_indicator" } %}</span>
+				<span class="admin-parts-item__label">Galerie</span>
+				<button type="button" class="admin-button admin-button--ghost admin-button--small" data-remove-part>Odebrat</button>
+			</div>
+			<div class="admin-parts-item__gallery" data-part-gallery></div>
+		</li>
+	</template>
+
+	<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+	<script>
+	(() => {
+		const form = document.querySelector("[data-post-parts-form]");
+		if (!form || typeof Sortable === "undefined") return;
+
+		const list = form.querySelector("[data-parts-list]");
+		const jsonInput = form.querySelector("[data-parts-json]");
+		const photosRoot = form.querySelector("[data-parts-photos]");
+		const tplText = document.getElementById("admin-part-text");
+		const tplImage = document.getElementById("admin-part-image");
+		const tplGallery = document.getElementById("admin-part-gallery");
+
+		const includedPhotos = () =>
+			[...photosRoot.querySelectorAll("input[type=checkbox]:checked")].map((el) => ({
+				id: Number(el.value),
+				thumb: el.dataset.thumb || "",
+				caption: el.dataset.caption || "",
+			}));
+
+		const fillImageSelect = (select, selectedId) => {
+			const current = selectedId ? String(selectedId) : select.value;
+			select.innerHTML = '<option value="">— vyberte fotku —</option>';
+			includedPhotos().forEach((p) => {
+				const opt = document.createElement("option");
+				opt.value = String(p.id);
+				opt.textContent = p.caption ? p.caption.slice(0, 40) : ("#" + p.id);
+				select.appendChild(opt);
+			});
+			if (current && [...select.options].some((o) => o.value === current)) {
+				select.value = current;
+			}
+			const item = select.closest("[data-part]");
+			const thumb = item && item.querySelector("[data-part-thumb]");
+			if (thumb) {
+				const photo = includedPhotos().find((p) => String(p.id) === select.value);
+				if (photo && photo.thumb) {
+					thumb.src = photo.thumb;
+					thumb.hidden = false;
+				} else {
+					thumb.removeAttribute("src");
+					thumb.hidden = true;
+				}
+			}
+		};
+
+		const fillGallery = (container, selectedIds) => {
+			const selected = new Set((selectedIds || []).map(String));
+			container.innerHTML = "";
+			includedPhotos().forEach((p) => {
+				const label = document.createElement("label");
+				label.className = "admin-parts-item__gal-pick";
+				const cb = document.createElement("input");
+				cb.type = "checkbox";
+				cb.value = String(p.id);
+				cb.checked = selected.has(String(p.id));
+				cb.dataset.galleryPick = "1";
+				const img = document.createElement("img");
+				if (p.thumb) img.src = p.thumb;
+				img.alt = "";
+				label.appendChild(cb);
+				label.appendChild(img);
+				container.appendChild(label);
+			});
+		};
+
+		const refreshAllPickers = () => {
+			list.querySelectorAll("[data-part]").forEach((item) => {
+				const type = item.dataset.type;
+				if (type === "image") {
+					fillImageSelect(item.querySelector("[data-part-storage-id]"));
+				} else if (type === "gallery") {
+					const ids = [...item.querySelectorAll("[data-gallery-pick]:checked")].map((el) => el.value);
+					fillGallery(item.querySelector("[data-part-gallery]"), ids);
+				}
+			});
+		};
+
+		const addPart = (type, data = {}) => {
+			let node;
+			if (type === "text") {
+				node = tplText.content.firstElementChild.cloneNode(true);
+				node.querySelector("[data-part-html]").value = data.html || "";
+			} else if (type === "image") {
+				node = tplImage.content.firstElementChild.cloneNode(true);
+				const select = node.querySelector("[data-part-storage-id]");
+				fillImageSelect(select, data.storageFileId || "");
+				select.addEventListener("change", () => fillImageSelect(select));
+			} else if (type === "gallery") {
+				node = tplGallery.content.firstElementChild.cloneNode(true);
+				fillGallery(node.querySelector("[data-part-gallery]"), data.storageFileIds || []);
+			} else {
+				return;
+			}
+			node.querySelector("[data-remove-part]").addEventListener("click", () => node.remove());
+			list.appendChild(node);
+		};
+
+		const serialize = () => {
+			const parts = [];
+			list.querySelectorAll("[data-part]").forEach((item) => {
+				const type = item.dataset.type;
+				if (type === "text") {
+					parts.push({ type: "text", html: item.querySelector("[data-part-html]").value });
+				} else if (type === "image") {
+					const sid = Number(item.querySelector("[data-part-storage-id]").value || 0);
+					if (sid > 0) parts.push({ type: "image", storageFileId: sid });
+				} else if (type === "gallery") {
+					const ids = [...item.querySelectorAll("[data-gallery-pick]:checked")].map((el) => Number(el.value)).filter((n) => n > 0);
+					if (ids.length) parts.push({ type: "gallery", storageFileIds: ids });
+				}
+			});
+			jsonInput.value = JSON.stringify(parts);
+		};
+
+		let initial = [];
+		try {
+			initial = JSON.parse(jsonInput.value || "[]");
+		} catch (e) {
+			initial = [];
+		}
+		initial.forEach((part) => addPart(part.type, part));
+
+		form.querySelectorAll("[data-add-part]").forEach((btn) => {
+			btn.addEventListener("click", () => addPart(btn.dataset.addPart));
+		});
+
+		photosRoot.addEventListener("change", () => refreshAllPickers());
+
+		Sortable.create(list, {
+			handle: ".admin-parts-item__handle",
+			animation: 150,
+		});
+
+		form.addEventListener("submit", () => serialize());
+	})();
+	</script>
 
 {% endblock body %}

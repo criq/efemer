@@ -1,0 +1,36 @@
+{# Shared post parts renderer. Pass already-resolved parts (Post::getResolvedParts). #}
+<div class="post-parts">
+	{% for part in parts %}
+		{% if part.type == "image" and part.file and part.file.getImage %}
+			<figure class="post-parts__image home-print" data-reveal>
+				<span class="home-print__photo">
+					<img src="{{ part.file.getImage.getImageVersion("GALLERY").getURL }}" alt="{{ part.file.getCaption }}">
+				</span>
+				{% if part.file.getCaption %}
+					<figcaption class="post-parts__caption">{{ part.file.getCaption }}</figcaption>
+				{% endif %}
+			</figure>
+		{% elseif part.type == "text" and part.html %}
+			<section class="post-parts__text" data-reveal>
+				{{ part.html|raw }}
+			</section>
+		{% elseif part.type == "gallery" and part.files %}
+			<ul class="post-parts__gallery" data-reveal aria-label="Galerie">
+				{% for file in part.files %}
+					{% if file.getImage %}
+						<li class="post-parts__frame post-parts__frame--{{ loop.index0 % 3 }}">
+							<figure class="home-print">
+								<span class="home-print__photo">
+									<img src="{{ file.getImage.getImageVersion("GALLERY").getURL }}" alt="{{ file.getCaption }}">
+								</span>
+								{% if file.getCaption %}
+									<figcaption class="post-parts__caption">{{ file.getCaption }}</figcaption>
+								{% endif %}
+							</figure>
+						</li>
+					{% endif %}
+				{% endfor %}
+			</ul>
+		{% endif %}
+	{% endfor %}
+</div>

@@ -1,0 +1,96 @@
+.site--invitation {
+	background: $color-bg;
+
+	.site-header {
+		border-bottom: none;
+	}
+}
+
+.invite {
+	display: flex;
+	flex-direction: column;
+	gap: clamp(1.5rem, 4vw, 2.5rem);
+	margin: 0 auto;
+	max-width: min(44rem, 100%);
+	padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 4vw, 2.5rem) 4rem;
+	width: 100%;
+
+	.post-parts {
+		margin: 0;
+		max-width: none;
+	}
+}
+
+.invite__header {
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	margin-inline: auto;
+	max-width: 38rem;
+	text-align: center;
+	width: 100%;
+}
+
+.invite__kicker {
+	color: $color-faint;
+	font-family: $font-ui;
+	font-size: .68rem;
+	font-weight: 500;
+	letter-spacing: 0.16em;
+	margin: .35rem 0 .85rem;
+	text-transform: uppercase;
+}
+
+.invite__title {
+	font-family: $font-display;
+	font-size: clamp(2.4rem, 5vw, 3.6rem);
+	font-weight: 400;
+	letter-spacing: -0.03em;
+	line-height: 1.05;
+	margin: 0;
+}
+
+.invite__meta {
+	color: $color-faint;
+	font-family: $font-ui;
+	font-size: .95rem;
+	letter-spacing: 0.02em;
+	line-height: 1.45;
+	margin: .75rem 0 0;
+	text-wrap: balance;
+}
+
+.invite__actions {
+	margin: 1.35rem 0 0;
+}
+
+.invite__cta {
+	border: 1px solid $color-ink;
+	color: $color-ink;
+	display: inline-block;
+	font-family: $font-ui;
+	font-size: .95rem;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+	padding: .85rem 1.55rem .8rem;
+	text-decoration: none;
+
+	&:hover {
+		background: $color-ink;
+		color: $color-bg;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+	}
+}
+
+.invite__out {
+	color: $color-faint;
+	font-family: $font-ui;
+	font-size: .78rem;
+	margin: 0;
+	text-align: center;
+
+	a {
+		color: inherit;
+	}
+}

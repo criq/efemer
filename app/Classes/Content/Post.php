@@ -221,6 +221,30 @@ class Post extends \Katu\Models\Model
 		return $start->format("j. n. Y");
 	}
 
+	public function getTimeLabel(): string
+	{
+		$start = $this->getStartsAt();
+		if (!$start) {
+			return "";
+		}
+
+		$hm = $start->format("H:i");
+		if ($hm === "00:00") {
+			return "";
+		}
+
+		return $start->format("G:i");
+	}
+
+	public function getInviteKicker(): string
+	{
+		if ($this->isHappening()) {
+			return "právě probíhá";
+		}
+
+		return "nadcházející";
+	}
+
 	public function setIngestItemId(?int $ingestItemId): Post
 	{
 		$this->ingestItemId = $ingestItemId;
@@ -251,6 +275,108 @@ class Post extends \Katu\Models\Model
 		$decoded = json_decode($this->layoutJson, true);
 
 		return is_array($decoded) ? $decoded : null;
+	}
+
+	/**
+	 * Raw parts from layoutJson (normalized).
+	 *
+	 * @return list<array{type: string, html?: string, postFileId?: int, postFileIds?: list<int>}>
+	 */
+	public function getParts(): array
+	{
+		return PostParts::fromLayout($this->getLayoutJson());
+	}
+
+	/**
+	 * @param list<array{type: string, html?: string, postFileId?: int, postFileIds?: list<int>}> $parts
+	 */
+	public function setParts(array $parts, ?string $pattern = null): Post
+	{
+		$layout = $this->getLayoutJson() ?? [];
+		if ($pattern !== null) {
+			$layout["pattern"] = $pattern;
+		} elseif (!isset($layout["pattern"])) {
+			$layout["pattern"] = "hero_text_gallery";
+		}
+		$layout["parts"] = $parts;
+		$this->setLayoutJson($layout);
+		$this->setBodyHtml(PostParts::bodyHtmlFromParts($parts));
+		$this->setExcerpt(PostParts::excerptFromParts($parts));
+
+		return $this;
+	}
+
+	/**
+	 * Resolved parts for Twig (with PostFile objects).
+	 *
+	 * @return list<array{type: string, html?: string, file?: PostFile|null, files?: list<PostFile>}>
+	 */
+	public function getResolvedParts(bool $skipFirstImage = false, bool $skipExcerptText = false): array
+	{
+		$parts = PostParts::resolveForRender($this);
+		$excerpt = $skipExcerptText ? trim((string)$this->getExcerpt()) : "";
+		$excerptNorm = $excerpt !== "" ? $this->normalizeComparableText($excerpt) : "";
+
+		$seenImage = false;
+		$skippedExcerpt = false;
+		$out = [];
+		foreach ($parts as $part) {
+			$type = $part["type"] ?? "";
+			if ($skipFirstImage && !$seenImage && $type === PostParts::TYPE_IMAGE) {
+				$seenImage = true;
+				continue;
+			}
+			if (
+				$excerptNorm !== ""
+				&& !$skippedExcerpt
+				&& $type === PostParts::TYPE_TEXT
+				&& isset($part["html"])
+			) {
+				$plain = $this->normalizeComparableText(
+					html_entity_decode(strip_tags((string)$part["html"]), ENT_QUOTES | ENT_HTML5, "UTF-8"),
+				);
+				if (
+					$plain === $excerptNorm
+					|| str_starts_with($plain, $excerptNorm)
+					|| str_starts_with($excerptNorm, mb_substr($plain, 0, min(80, mb_strlen($plain))))
+				) {
+					$skippedExcerpt = true;
+					continue;
+				}
+			}
+			$out[] = $part;
+		}
+
+		return $out;
+	}
+
+	private function normalizeComparableText(string $text): string
+	{
+		$text = mb_strtolower(trim(preg_replace("/\s+/u", " ", $text) ?? $text));
+
+		return $text;
+	}
+
+	public function getFirstImagePartFile(): ?PostFile
+	{
+		foreach ($this->getResolvedParts() as $part) {
+			if (($part["type"] ?? "") === PostParts::TYPE_IMAGE && isset($part["file"])) {
+				return $part["file"];
+			}
+		}
+
+		return $this->getHeroFile();
+	}
+
+	public function getFileById(int $id): ?PostFile
+	{
+		foreach ($this->getFiles() as $file) {
+			if ((int)$file->getId() === $id) {
+				return $file;
+			}
+		}
+
+		return null;
 	}
 
 	public function setTitle(?string $title): Post
