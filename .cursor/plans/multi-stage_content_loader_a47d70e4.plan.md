@@ -1,6 +1,6 @@
 ---
 name: Multi-stage content loader
-overview: "Master plan: efemer.cz keyworded (107) → IG stage-1 done (631) → KeywordIngest IG in progress (~64/631) → export/eval → embeddings → taxonomy → materialize."
+overview: "Master plan: efemer.cz keyworded (107) → IG stage-1 done (631) → KeywordIngest IG in progress (80/631) with LLM timeframe/event fields → finish IG → export/eval → event materialize + embeddings → taxonomy → posts."
 todos:
   - id: schema-ingest
     content: Base ingest schema + stage-1 load tables
@@ -20,6 +20,9 @@ todos:
   - id: migration-enrichment
     content: IngestEnrichmentSchema — cover/role/vision/layoutHints/enrichmentVersion; migrate locally
     status: completed
+  - id: migration-timeframe
+    content: "IngestTimeframeSchema — startsAt/endsAt/place/isInvitation on ingest_items; LLM-filled via KeywordAnalyzer timeframe JSON"
+    status: completed
   - id: models-enrichment
     content: Extend IngestItem / IngestItemFile for enrichment fields + locks
     status: completed
@@ -33,7 +36,7 @@ todos:
     content: Jobs.Ingest.KeywordIngest (limit/rekeyword/id/maxImages/dryRun)
     status: completed
   - id: admin-enrichment-light
-    content: Admin detail — cover/role/rating/alt + enrichmentVersion
+    content: Admin detail — cover/role/rating/alt + enrichmentVersion + timeframe fields
     status: completed
   - id: docs-ingest-stage2
     content: Update ingest.mdc with KeywordIngest + Gemini secret
@@ -51,7 +54,7 @@ todos:
     content: Keyword export CSV/JSON, co-occurrence, admin facets
     status: completed
   - id: qc-prompt-v3
-    content: "kw-v3 prompt: cover prefers pre_copy; layout pattern priors; kind funeral/mourning; keyword normalize; allow demote"
+    content: "kw-v3 prompt: cover prefers pre_copy; layout pattern priors; keyword normalize; allow demote; mourning removed"
     status: completed
   - id: finish-keyword-corpus
     content: "efemer.cz KeywordIngest done (107 kw-v3); eval 100%; export 20261028"
@@ -59,23 +62,29 @@ todos:
   - id: stage1-instagram-dump
     content: "IG stage-1 via Instaloader — 400 efemer_flowers + 231 himmlhaus; ImportInstagramDump idempotent"
     status: completed
+  - id: llm-timeframe-events
+    content: "LLM timeframe block (isInvitation/startsAt/endsAt/place); drop mourning kind; prefer workshop for invites; Gemini sole parser (no regex heuristics)"
+    status: completed
   - id: ig-keyword-corpus
-    content: "KeywordIngest remaining Instagram loaded (~567); same kw-v3 + inline QC"
+    content: "KeywordIngest remaining Instagram loaded (~551); same kw-v3 + timeframe + inline QC"
     status: in_progress
   - id: stage1-body-thin-text
     content: "Investigate empty bodyHtml / thin_text on ~59 efemer posts (blocks hero_text_gallery); fix scraper or accept image-led"
     status: pending
   - id: kw-normalize-typos
-    content: "Expand typo map (florika→floristika done; add košilela→košile); demote now fires on IG text slides"
-    status: pending
+    content: "Typo map florika→floristika + košilela→košile done; keep expanding as leaks appear"
+    status: completed
   - id: keyword-qc-loop
-    content: KeywordQc inline after each LLM apply (typos/cover/roles/pattern); needs_rekeyword re-queued via KeywordIngest
+    content: KeywordQc inline after each LLM apply (typos/cover/roles/pattern only — no kind/date heuristics); needs_rekeyword re-queued via KeywordIngest
     status: completed
   - id: ig-kind-soft-labels
-    content: "Watch himmlhaus diary collapse (38/38 diary so far); after full IG run, decide if kind prompt needs event/workshop priors for @himmlhaus"
-    status: pending
+    content: "himmlhaus mostly diary is OK for house journal; invitations live on @efemer_flowers as workshop+isInvitation. Optional later: soft seriesKey for ritual calendar cycles"
+    status: completed
   - id: corpus-reexport-after-ig
-    content: "After IG KeywordIngest finishes: ExportCorpus + EvaluateKeywords; spot-check demote/text-slide skips"
+    content: "After IG KeywordIngest finishes: ExportCorpus + EvaluateKeywords; spot-check demote/text-slide skips; optional IG invite eval rows"
+    status: pending
+  - id: event-materialize
+    content: "Materialize isInvitation items → events (title/startsAt/endsAt/place/hero/url); homepage hero from next upcoming event"
     status: pending
   - id: embeddings-dedup
     content: Embeddings for clustering/dedup/series; duplicateOfId (seriesKey nearly unused so far — do not lean on it yet)
@@ -84,7 +93,7 @@ todos:
     content: "Pause after full keyworded corpus; multi-label facets (occasion/material/place/medium + event); do not map kind→section 1:1"
     status: pending
   - id: stage3-materialize
-    content: Pilot then materialize; layoutJson from layoutHints; cover/alts/demote
+    content: Pilot then materialize posts; layoutJson from layoutHints; cover/alts/demote
     status: pending
   - id: ingest-admin-rich
     content: Manual cover/role pick (locks), reject visibility, layout preview (list facets already shipped)
@@ -104,13 +113,15 @@ Single source of truth for the ingest → LLM → taxonomy → public posts pipe
 Do **not** lock categories (`ritualy` / `himmelhaus` / `umeni`) during import.
 
 1. **Complete load** of all sources into ingest
-2. **Keyword + vision** — keywords, photo ratings, cover, story roles, reject/demote, alt, crop, palette, series, layoutHints
+2. **Keyword + vision + timeframe** — keywords, photo ratings, cover, roles, demote, alt, crop, palette, series, layoutHints, **and** LLM `timeframe` (`isInvitation` / `startsAt` / `endsAt` / `place`)
 3. **Inspect the corpus** — exports, facets, clusters, embeddings
 4. **Decide final category shape** — may be multi-label; may add emerging categories
 5. **Assign categories** to ingest items
-6. **Pilot materialize**, then full materialize (layout from photo roles)
+6. **Pilot materialize** events (from invitations) + posts, then full materialize
 
 Today’s three site sections remain provisional until taxonomy is settled.
+
+**LLM over regex:** categorization and date/event parsing are Gemini’s job (text + poster OCR). PHP/`KeywordQc` only enforce structural invariants (enums, cover/role locks, typo cleanup). No invitation/kind/date heuristics in PHP.
 
 ## Pipeline
 
@@ -124,21 +135,23 @@ flowchart LR
   IE[ingest_items]
   stage1 --> IE
   IE --> stage2[Stage2 KeywordIngest]
-  stage2 --> KW[keywords cover roles alt]
+  stage2 --> KW[keywords cover roles timeframe]
   KW --> corpus[Export facets embeddings]
   corpus --> review[Taxonomy discovery]
   review --> cats[Assign categories]
-  cats --> pilot[Pilot materialize]
+  KW --> events[Event materialize invites]
+  cats --> pilot[Pilot post materialize]
   pilot --> stage3[Full materialize]
   stage3 --> posts[posts layoutJson]
+  events --> ev[events homepage hero]
 ```
 
 | Layer | Tables | Role |
 |---|---|---|
 | Imported | `ingest_items`, `ingest_item_files` | Source mirror + LLM enrichments |
-| Internal | `posts`, `post_files`, `events` | After taxonomy + stage 3 |
+| Internal | `posts`, `post_files`, `events` | After taxonomy + stage 3 / event materialize |
 
-**Interlink:** `ingest_items.postId` ↔ `posts.ingestItemId` (`ON DELETE SET NULL`).
+**Interlink:** `ingest_items.postId` ↔ `posts.ingestItemId`; `ingest_items.eventId` ↔ `events` (`ON DELETE SET NULL`).
 
 ---
 
@@ -153,6 +166,7 @@ See [`.cursor/rules/ingest.mdc`](.cursor/rules/ingest.mdc) and [`.cursor/rules/j
 - Katu jobs + `./bin/job` (TTY); `jobs:kill`; Ctrl+C watchdog under `-T`
 - Admin list/detail at `/admin/ingest`
 - Unique `(source, sourceKey)` with normalized keys (no leading `/`)
+- Stage-1 stores **IG upload time** as `postedAt` only; content dates come from Stage 2 LLM
 
 ### Corpus note (efemer.cz)
 
@@ -186,21 +200,35 @@ Orthogonal to cover and demote. Cover may also be `lead`; demoted → `role=skip
 
 `ingest_item_files`: storageFileId, position, caption, keywords, contentHash, sourceSlot, galleryIndex.
 
-### Stage 2 enrichment migration (`IngestEnrichmentSchema`)
+### Stage 2 enrichment (`IngestEnrichmentSchema`)
 
 **`ingest_items` add:** `coverFileId`, `coverRationale`, `coverLocked`, `seriesKey`, `palette`, `layoutHints`, `enrichmentVersion`, `enrichedAt`.
 
 **`ingest_item_files` add:** `rating`, `isCover`, `role`, `roleRationale`, `roleLocked`, `altText`, `orientation`, `focalCrop`, `demote`.
 
-On materialize: copy onto `posts` / `post_files`; write `layoutJson`; respect locks.
+### Timeframe / events (`IngestTimeframeSchema`)
+
+**`ingest_items` add:** `startsAt`, `endsAt`, `place`, `isInvitation`.
+
+Filled only by KeywordAnalyzer `timeframe` JSON (Gemini sees caption + poster images + `postedAt` as year reference). Used later to materialize `events` and drive homepage hero.
+
+On materialize: copy onto `posts` / `post_files`; write `layoutJson`; respect locks. Invitations → `events`.
 
 ---
 
-## Stage 2 — KeywordIngest (next to build)
+## Stage 2 — KeywordIngest
 
 ### Goal
 
-`loaded` → `keyworded` with searchable keywords + layout-ready photo metadata. **No taxonomy / materialize.**
+`loaded` → `keyworded` with searchable keywords + layout-ready photo metadata + **event timeframe**. **No taxonomy / post materialize yet.**
+
+### Soft `kind` (no `mourning`)
+
+`diary | wedding | gift | portrait | workshop | installation | bouquet | product | other`
+
+- **workshop** = public gathering / slavnost / pouť / walk / invite (“zveme”, “sraz”, tickets, …) — even cemetery / All Saints walks
+- **gift** = named tribute / farewell / birthday bouquet (e.g. *Poslední květy pro Helenu…*)
+- **diary** = personal journal / house chronicle (`@himmlhaus` dated entries are fine as diary)
 
 ### Architecture
 
@@ -208,109 +236,58 @@ On materialize: copy onto `posts` / `post_files`; write `layoutJson`; respect lo
 flowchart LR
   job[KeywordIngest] --> pick[Pick items]
   pick --> gemini[Gemini Flash multimodal]
-  gemini --> apply[Write enrichment]
-  apply --> admin[Admin detail]
+  gemini --> apply[Write enrichment + timeframe]
+  apply --> qc[KeywordQc structural]
+  qc --> admin[Admin detail]
 ```
 
-- **Model:** `gemini-3.8-flash` via `generativelanguage.googleapis.com` REST (no new Composer package)
-- **Secret:** `Secrets::GEMINI_API_KEY` (`gemini-api-key` in GSM); local fallback `.secret/gemini.api`; fail fast if missing
-- **Per item:** one multimodal call — title + ~4k stripped body + up to **12** images (GCS → GD resize ≤1024 → JPEG ~80 → base64)
-- **Skip** videos / failed downloads; note missing positions in prompt
-- **Priors:** qualityFlags, sourceSlot, galleryIndex, position
-
-### Classes
-
-| Class | Role |
-|---|---|
-| `App\Classes\ThirdParty\Google\Gemini` | `generateContent`, 429/503 backoff |
-| `App\Classes\Ingest\KeywordAnalyzer` | Prompt, images, parse JSON, apply |
-| `App\Classes\Jobs\Ingest\KeywordIngest` | Katu job |
-
-### Prompt / apply
-
-Czech keywords + altText; English enums for roles. Output: item keywords/themes/entities/kind/cover(by position)+rationale/palette/seriesKey/layoutHints; per-file rating/role/alt/orientation/focalCrop/demote.
-
-- demote → `role=skip`; cover among non-skip preferring lead
-- Respect `coverLocked` / `roleLocked`
-- Store raw JSON in `classificationRaw`; set `enrichmentVersion=kw-v1`, `enrichedAt`, `status=keyworded`
-- On error: leave `loaded`, log failure, continue
+- **Model:** `gemini-3.8-flash` via `generativelanguage.googleapis.com` REST
+- **Secret:** `Secrets::GEMINI_API_KEY` (`gemini-api-key` in GSM); local fallback `.secret/gemini.api`
+- **Per item:** one multimodal call — title + body + up to **12** images + **Posted at** reference
+- **Output adds** `timeframe: { isInvitation, startsAt, endsAt, place }`
 
 ### Job CLI
 
 ```bash
 ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest --args='{"limit":5,"rekeyword":true}' -f
-./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest --args='{"dryRun":true,"limit":1}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest --args='{"id":427,"rekeyword":true}' -f
 ```
-
-Args: `limit` (default 20), `rekeyword`, `id`, `maxImages` (12), `dryRun`. Skip `keyworded` + matching `enrichmentVersion` unless rekeyword. `Signals` between items. Log token usage when present.
-
-### Admin (light, with stage 2)
-
-Cover badge; role + rating + alt on photos; keywords/themes; `enrichmentVersion` / `enrichedAt`. Richer pick/lock UI later (`ingest-admin-rich`).
-
-### Smoke
-
-One real item locally; confirm admin detail.
 
 ---
 
 ## LLM quality control
 
-### Round 1 (pre–kw-v3) — addressed
+### Round 1–2 (kw-v3, efemer) — done
 
-Cover sometimes ignored `pre_copy`; `diary`/`product` overused; `gallery_essay` default; typos; rating inflation. Fixed in **kw-v3** prompt + apply rules.
+Eval cover/roles/patterns **100%**. Demote later appeared on IG. Typo map: `florika`→`floristika`, `košilela`→`košile`.
 
-### Round 2 (kw-v3, 21 items, 2026-10-28 afternoon)
+### Round 3 (IG mid-run, morning 2026-10-29)
 
-| Metric | Result |
-|---|---|
-| Status | 21 `keyworded` / `kw-v3`, 86 `loaded` |
-| Eval cover | **100%** (19/19 scored; *Svatba Mlhových* not in batch yet) |
-| Eval roles | **100%** (16/16) |
-| Eval patterns | **5/5** pass |
-| Cover slot | **21/21 pre_copy** (0 post_copy covers) |
-| pre_copy → lead | **21/21** |
-| Demote | still **0** (corpus may simply lack junk frames) |
-| Rating mean | **0.75** (was ~0.81) — improved |
+~64 IG keyworded; demote working on text slides; `@himmlhaus` diary-heavy; invites mis-tagged as mourning/diary until timeframe + kind prompt fix.
 
-**Kinds now useful:** wedding 6, installation 5, bouquet 4, portrait 2, gift 2, workshop 1, mourning 1. Examples look right (*Poslední květy* → mourning, *pro mámu* → gift, *Filip*/*čemeřice* → bouquet). Mild ambiguity: *Barbora* as bouquet vs wedding — acceptable for soft kind.
-
-**Keywords:** mostly clean Czech; one leak `přírodní florika` (typo map should add `florika`→`floristika`). Festival casing normalized to lowercase in v3 runs.
-
-**Layout patterns:** `gallery_essay` 16 / `single` 4 / `hero_text_gallery` 1. **Not a prompt bug** — 20/21 keyworded items are `thin_text` with **empty `bodyHtml`**. Only *masopustní veselky* has body (771 chars) → correctly `hero_text_gallery`. Site-wide: **59/107** efemer items have empty body; **48** have text (mostly older posts not yet keyworded). So pattern diversity will improve as long-copy posts get enriched — and/or after a stage-1 body extraction fix.
-
-### Round 3 (kw-v3 + Instagram mid-run, 2026-10-29)
+### Round 4 (timeframe + invite re-enrich, afternoon 2026-10-29)
 
 | Metric | Result |
 |---|---|
-| Status | **107** efemer + **64** IG `keyworded` / `kw-v3`; **567** IG still `loaded` |
-| Eval cover / roles / patterns | **100%** (20/20, 17/17, 6/6) — golden set still efemer-heavy |
-| Cover | every keyworded item has `coverFileId`; efemer covers **106/107 pre_copy** |
-| Demote | **54** files demoted (was 0) — IG carousel **text slides**, blur, missing thumbs |
-| Rating mean | **~0.71** |
-| Keywords | ~8.7/item; mostly clean Czech; new typo leak `košilela` |
-| seriesKey | almost unused (2/171) — ignore until embeddings |
+| Status | **107** efemer + **80** IG `keyworded`; **551** IG still `loaded` |
+| Soft kinds | diary 73, wedding 37, workshop 31, gift 15, portrait 11, installation 10, bouquet 10 — **no mourning** |
+| Invitations | **28** `isInvitation=1` (almost all `@efemer_flowers` workshops) with LLM `startsAt` / often `endsAt` + `place` |
+| Timeframe JSON | **57** items with Gemini `timeframe` block (re-enriched set); older efemer keyworded still lack it until optional rekeyword |
+| `@himmlhaus` | 46 keyworded — diary house journal with content dates/ranges + places (Himmlhaus, Amtmann, Black Gables, …); **0** invitations (expected) |
+| Cover / demote | still solid; demote on IG carousel text slides |
 
-**Kind split (keyworded):**
+**Examples that work:** Wanderlust `#427` → workshop + invite + `2026-11-01 09:45` + Hraničář/Čermná; Kupalo `#1044`; Patience Gray / Marcel / Po Svaté Sofii series; `@himmlhaus` Weinlese `#621` → diary + `2025-09-19`–`2025-10-10`.
 
-| Source | Notable |
-|---|---|
-| efemer_cz | wedding 35, diary 25, gift 13, installation/bouquet/portrait ~10 each, mourning 3 |
-| `@efemer_flowers` | workshop 12, diary 7, installation 4 — looks usable |
-| `@himmlhaus` | **38/38 diary** so far — soft-label collapse; many are events/rituály by caption |
+**Taxonomy / product implications**
 
-**Layout patterns:** efemer still `gallery_essay`/`hero_text_gallery` (thin_text body gap). IG captions → mostly `text_lead_gallery` (58/65) — expected and useful.
-
-**Taxonomy implications (updated)**
-
-- Soft `kind` is a hint, not a section. Especially do **not** map himmlhaus `diary` → a site section.
-- Emerging facets still: occasion / material / place / medium; IG adds **event/workshop** language in captions (Kupalo, Volání na stromy, …) — consider an event-ish facet when assigning, separate from public `events` entities.
-- Demote on text slides is good for materialize; keep watching false demotes of real photos.
+- Soft `kind` ≠ site section. `@himmlhaus` diary stays journal until taxonomy.
+- **`isInvitation` + timeframe`** is the bridge to public **`events`** and homepage hero — next concrete product step after finishing IG KeywordIngest.
+- Remaining ~551 IG `loaded` should get timeframe in the same KeywordIngest pass (no second job).
 
 ### Ops note
 
-Prod Instagram archive loop remains **off**. Prefer Instaloader dump + Import when private API 429. Stage-1 re-runs are upsert/idempotent (hash skip).
+Prod Instagram archive loop remains **off**. Prefer Instaloader dump + Import when private API 429. Stage-1 re-runs are upsert/idempotent (hash skip). No KeywordIngest prod cron yet.
 
 ---
 
@@ -318,15 +295,12 @@ Prod Instagram archive loop remains **off**. Prefer Instaloader dump + Import wh
 
 ### Next
 
-1. ~~Instagram stage-1 via Instaloader~~ — **400** + **231** in ingest
-2. **Finish KeywordIngest** on remaining IG `loaded` (~567)
-3. Typo map: `košilela`→`košile` (and re-QC / needs_rekeyword if it spreads)
-4. After IG done: **ExportCorpus + EvaluateKeywords**; optional small IG cover/role eval rows
-5. Decide whether himmlhaus kind prompt needs a bump (event/workshop priors) — only if diary collapse holds on full account
-6. Embeddings / dedup → taxonomy pause → materialize
-7. Optional: empty `bodyHtml` / `thin_text` on efemer.cz (still ~59)
-
-No KeywordIngest prod cron yet.
+1. **Finish KeywordIngest** on remaining IG `loaded` (~551) — includes timeframe for free
+2. Optional: rekeyword older efemer.cz items that lack `timeframe` JSON (low priority unless building events from them)
+3. **Event materialize** from `isInvitation` → `events` + homepage hero (next upcoming)
+4. ExportCorpus + EvaluateKeywords; optional IG invite/cover eval rows
+5. Embeddings / dedup → taxonomy pause → post materialize
+6. Optional: empty `bodyHtml` / `thin_text` on efemer.cz (~59)
 
 ---
 
@@ -335,10 +309,11 @@ No KeywordIngest prod cron yet.
 1. ~~Stage 1 + KeywordIngest + light admin~~
 2. ~~Eval sets + corpus export + facets~~
 3. ~~QC prompt bump `kw-v3` + re-eval~~
-4. ~~Finish efemer.cz keywording~~ (107 kw-v3; eval 100%)
+4. ~~Finish efemer.cz keywording~~
 5. ~~IG stage-1 Instaloader~~
-6. **Finish IG KeywordIngest** (in progress) + typo/kind watch items
-7. Re-export / eval → **embeddings / dedup**
-8. Taxonomy pause → assign
-9. Materialize
-10. Rich admin + rules polish; optional efemer bodyHtml fix
+6. ~~LLM timeframe + drop mourning + invite re-enrich~~
+7. **Finish IG KeywordIngest** (in progress)
+8. **Event materialize** (invitations → events / homepage)
+9. Re-export / eval → embeddings / dedup
+10. Taxonomy pause → assign → post materialize
+11. Rich admin + rules polish; optional efemer bodyHtml fix
