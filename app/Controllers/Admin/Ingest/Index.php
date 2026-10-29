@@ -9,6 +9,8 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class Index extends \Katu\Controllers\Controller
 {
+	private const PER_PAGE = 50;
+
 	public function getResponse(ServerRequestInterface $request, ResponseInterface $response)
 	{
 		$params = $request->getQueryParams();
@@ -17,6 +19,7 @@ class Index extends \Katu\Controllers\Controller
 		$accountFilter = (string)($params["account"] ?? "");
 		$kindFilter = (string)($params["kind"] ?? "");
 		$q = trim((string)($params["q"] ?? ""));
+		$page = max(1, (int)($params["page"] ?? 1));
 
 		$allItems = IngestItem::getAll()->getItems();
 		$pipeline = $this->buildPipeline($allItems);
@@ -68,8 +71,16 @@ class Index extends \Katu\Controllers\Controller
 			}));
 		}
 
+		$totalFiltered = count($items);
+		$totalPages = max(1, (int)ceil($totalFiltered / self::PER_PAGE));
+		if ($page > $totalPages) {
+			$page = $totalPages;
+		}
+		$offset = ($page - 1) * self::PER_PAGE;
+		$pageItems = array_slice($items, $offset, self::PER_PAGE);
+
 		$rows = [];
-		foreach ($items as $item) {
+		foreach ($pageItems as $item) {
 			$rows[] = [
 				"item" => $item,
 				"enrichmentVersion" => $item->getEnrichmentVersion(),
@@ -82,6 +93,14 @@ class Index extends \Katu\Controllers\Controller
 			];
 		}
 
+		$filterQuery = $this->buildQuery([
+			"source" => $sourceFilter,
+			"status" => $statusFilter,
+			"account" => $accountFilter,
+			"kind" => $kindFilter,
+			"q" => $q,
+		]);
+
 		return $response->withBody((new HTMLEngine($request))->render("Admin/Ingest/index.twig", [
 			"rows" => $rows,
 			"pipeline" => $pipeline,
@@ -92,7 +111,64 @@ class Index extends \Katu\Controllers\Controller
 			"accountFilter" => $accountFilter,
 			"kindFilter" => $kindFilter,
 			"q" => $q,
+			"filterQuery" => $filterQuery,
+			"pagination" => [
+				"page" => $page,
+				"perPage" => self::PER_PAGE,
+				"total" => $totalFiltered,
+				"totalPages" => $totalPages,
+				"from" => $totalFiltered === 0 ? 0 : $offset + 1,
+				"to" => min($offset + self::PER_PAGE, $totalFiltered),
+				"hasPrev" => $page > 1,
+				"hasNext" => $page < $totalPages,
+				"prevPage" => max(1, $page - 1),
+				"nextPage" => min($totalPages, $page + 1),
+				"pages" => $this->pageWindow($page, $totalPages),
+			],
 		]));
+	}
+
+	/**
+	 * @param array<string, string> $params
+	 */
+	private function buildQuery(array $params): string
+	{
+		$parts = [];
+		foreach ($params as $key => $value) {
+			if ($value === "") {
+				continue;
+			}
+			$parts[] = rawurlencode($key) . "=" . rawurlencode($value);
+		}
+
+		return implode("&", $parts);
+	}
+
+	/**
+	 * @return list<int|null> null = ellipsis gap
+	 */
+	private function pageWindow(int $page, int $totalPages): array
+	{
+		if ($totalPages <= 7) {
+			return range(1, $totalPages);
+		}
+
+		$pages = [1];
+		$start = max(2, $page - 1);
+		$end = min($totalPages - 1, $page + 1);
+
+		if ($start > 2) {
+			$pages[] = null;
+		}
+		for ($i = $start; $i <= $end; $i++) {
+			$pages[] = $i;
+		}
+		if ($end < $totalPages - 1) {
+			$pages[] = null;
+		}
+		$pages[] = $totalPages;
+
+		return $pages;
 	}
 
 	/**

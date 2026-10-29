@@ -20,7 +20,22 @@
 				<dl class="admin-meta">
 					<div><dt>Zdroj</dt><dd>{{ item.getSourceLabel }}</dd></div>
 					<div><dt>Klíč</dt><dd><code>{{ item.getSourceKey }}</code></dd></div>
-					<div><dt>Datum</dt><dd>{% if item.getPostedAt %}{{ item.getPostedAt|date("j. n. Y H:i") }}{% else %}—{% endif %}</dd></div>
+					<div><dt>Datum postu</dt><dd>{% if item.getPostedAt %}{{ item.getPostedAt|date("j. n. Y H:i") }}{% else %}—{% endif %}</dd></div>
+					{% if item.getStartsAt %}
+						<div>
+							<dt>Konání / čas v textu</dt>
+							<dd>
+								{{ item.getStartsAt|date("j. n. Y H:i") }}
+								{% if item.getEndsAt %}– {{ item.getEndsAt|date("j. n. Y H:i") }}{% endif %}
+							</dd>
+						</div>
+					{% endif %}
+					{% if item.getPlace %}
+						<div><dt>Místo</dt><dd>{{ item.getPlace }}</dd></div>
+					{% endif %}
+					{% if item.isInvitation %}
+						<div><dt>Pozvánka</dt><dd><span class="admin-ingest-badge admin-ingest-badge--cover">pozvánka / událost</span></dd></div>
+					{% endif %}
 					<div><dt>Stav</dt><dd>{{ item.getStatusLabel }}</dd></div>
 					<div><dt>Fotky</dt><dd>{{ files|length }}</dd></div>
 					{% if kind %}

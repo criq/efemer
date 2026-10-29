@@ -4,6 +4,8 @@
 
 {% block body %}
 
+	{% set fq = filterQuery ? filterQuery ~ "&" : "" %}
+
 	<div class="admin-page admin-page--wide">
 		<div class="admin-page__header">
 			<h1 class="admin-page__title">Import</h1>
@@ -74,7 +76,11 @@
 		{% endif %}
 
 		<p class="admin-page__lede">
-			Zobrazeno {{ rows|length }}
+			{% if pagination.total %}
+				Zobrazeno {{ pagination.from }}–{{ pagination.to }} z {{ pagination.total }}
+			{% else %}
+				Zobrazeno 0
+			{% endif %}
 			{% if statusFilter %}· filtr stavu <code>{{ statusFilter }}</code>{% endif %}
 			{% if sourceFilter %}· zdroj <code>{{ sourceFilter }}</code>{% endif %}
 			{% if accountFilter %}· účet <code>@{{ accountFilter }}</code>{% endif %}
@@ -141,6 +147,34 @@
 				</tbody>
 			</table>
 		</div>
+
+		{% if pagination.totalPages > 1 %}
+			<nav class="admin-pagination" aria-label="Stránkování">
+				{% if pagination.hasPrev %}
+					<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?{{ fq }}page={{ pagination.prevPage }}">Předchozí</a>
+				{% else %}
+					<span class="admin-button admin-button--ghost is-disabled">Předchozí</span>
+				{% endif %}
+
+				<ol class="admin-pagination__pages">
+					{% for p in pagination.pages %}
+						{% if p is null %}
+							<li class="admin-pagination__gap" aria-hidden="true">…</li>
+						{% elseif p == pagination.page %}
+							<li><span class="admin-button is-active" aria-current="page">{{ p }}</span></li>
+						{% else %}
+							<li><a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?{{ fq }}page={{ p }}">{{ p }}</a></li>
+						{% endif %}
+					{% endfor %}
+				</ol>
+
+				{% if pagination.hasNext %}
+					<a class="admin-button admin-button--ghost" href="{{ url("admin.ingest.index") }}?{{ fq }}page={{ pagination.nextPage }}">Další</a>
+				{% else %}
+					<span class="admin-button admin-button--ghost is-disabled">Další</span>
+				{% endif %}
+			</nav>
+		{% endif %}
 	</div>
 
 {% endblock body %}
