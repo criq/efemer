@@ -12458,16 +12458,35 @@ body.builder .builder-file-list--insert:not(:empty),
   padding: 0;
   width: 100%;
 }
+
 @media screen and (min-width: 901px) {
+  .post-parts__image,
   .post-parts__gallery {
-    gap: max(1.25rem, min(2vw, 1.75rem));
     margin-left: calc((100% - min(68rem, 92vw)) / 2);
     margin-right: calc((100% - min(68rem, 92vw)) / 2);
     max-width: none;
     width: min(68rem, 92vw);
   }
+  .post-parts__image {
+    text-align: center;
+  }
+  .post-parts__image .home-print__photo {
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%;
+    width: auto;
+  }
+  .post-parts__image img {
+    height: auto;
+    max-height: min(78vh, 46rem);
+    max-width: 100%;
+    width: auto;
+  }
+  .post-parts__gallery {
+    gap: max(1.25rem, min(2vw, 1.75rem));
+  }
 }
-
 .post-parts__frame {
   flex: 1 1 0;
   margin: 0;

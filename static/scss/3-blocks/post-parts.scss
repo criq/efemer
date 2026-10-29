@@ -62,13 +62,38 @@
 	margin: 0;
 	padding: 0;
 	width: 100%;
+}
 
-	// Desktop: break out wider than the text column (portraits scale taller with it).
-	@media screen and (min-width: 901px) {
-		gap: clamp(1.25rem, 2vw, 1.75rem);
+// Desktop: singles and galleries share one breakout width so a lone photo
+// isn’t smaller than a two-up row. Portraits are height-capped and centered.
+@media screen and (min-width: 901px) {
+	.post-parts__image,
+	.post-parts__gallery {
 		margin-inline: calc((100% - min(68rem, 92vw)) / 2);
 		max-width: none;
 		width: min(68rem, 92vw);
+	}
+
+	.post-parts__image {
+		text-align: center;
+
+		.home-print__photo {
+			display: inline-block;
+			margin-inline: auto;
+			max-width: 100%;
+			width: auto;
+		}
+
+		img {
+			height: auto;
+			max-height: min(78vh, 46rem);
+			max-width: 100%;
+			width: auto;
+		}
+	}
+
+	.post-parts__gallery {
+		gap: clamp(1.25rem, 2vw, 1.75rem);
 	}
 }
 
