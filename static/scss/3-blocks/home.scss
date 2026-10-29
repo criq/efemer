@@ -103,11 +103,16 @@
 }
 
 .home-hero__side--left {
+	// Shrink-wrap to the lead so aside % / left:100% are relative to the large photo.
+	justify-self: start;
+	transform: translateX(-26%);
+	width: fit-content;
+
 	.home-print--lead {
 		position: relative;
 		left: auto;
 		top: auto;
-		transform: translateX(-26%) rotate(-0.4deg);
+		transform: rotate(-0.4deg);
 		width: fit-content;
 		z-index: 1;
 
@@ -116,26 +121,37 @@
 		}
 	}
 
-	// Second left print: smaller, bottom, overlapping the lead toward center.
+	// Small print: center sits on the lead’s right edge (50% overlap).
 	.home-print--aside-1 {
 		bottom: 6%;
-		left: 22%;
+		left: 100%;
 		right: auto;
 		top: auto;
-		transform: rotate(0.45deg);
+		transform: translateX(-50%) rotate(0.45deg);
 		width: 38%;
 		z-index: 2;
 	}
 }
 
 .home-hero__side--right {
+	// Shrink-wrap to the lead so asides sit on the large photo’s left edge.
+	align-self: center;
+	justify-self: end;
+	transform: translateX(20%);
+	width: fit-content;
+
 	.home-print--lead {
 		left: auto;
-		right: 0;
-		top: 50%;
-		transform: translate(20%, -50%) rotate(0.35deg);
-		width: auto;
+		position: relative;
+		right: auto;
+		top: auto;
+		transform: rotate(0.35deg);
+		width: fit-content;
 		z-index: 1;
+
+		.home-print__photo {
+			width: fit-content;
+		}
 
 		.home-print__photo,
 		img {
@@ -144,20 +160,20 @@
 		}
 	}
 
-	// Anchor toward the text; keep asides clearly smaller than the lead.
+	// Center on the lead’s left edge; top nudged 15% left, bottom 15% right.
 	.home-print--aside-1 {
 		left: 0;
 		top: 12%;
-		transform: translateX(-14%) rotate(-0.5deg);
+		transform: translateX(calc(-50% - 15%)) rotate(-0.5deg);
 		width: 34%;
 		z-index: 2;
 	}
 
 	.home-print--aside-2 {
-		left: 18%;
-		top: auto;
 		bottom: 8%;
-		transform: translateX(-8%) rotate(0.4deg);
+		left: 0;
+		top: auto;
+		transform: translateX(calc(-50% + 15%)) rotate(0.4deg);
 		width: 30%;
 		z-index: 3;
 	}
@@ -605,6 +621,7 @@
 		justify-self: center;
 		max-width: min(82vw, 22rem);
 		position: relative;
+		transform: none;
 		width: max-content;
 	}
 
@@ -627,9 +644,10 @@
 	}
 
 	.home-hero__side--left .home-print--aside-1 {
-		left: auto;
-		right: -14%;
+		left: 100%;
+		right: auto;
 		top: 6%;
+		transform: translateX(-50%) rotate(0.45deg);
 		width: 42%;
 	}
 
@@ -639,10 +657,10 @@
 
 	.home-hero__side--left .home-print--aside-2 {
 		bottom: 4%;
-		left: -12%;
+		left: 100%;
 		right: auto;
 		top: auto;
-		transform: rotate(0.45deg);
+		transform: translateX(-50%) rotate(0.45deg);
 		width: 36%;
 		z-index: 3;
 	}
@@ -669,6 +687,7 @@
 		justify-self: start;
 		margin-left: -3.5rem;
 		position: relative;
+		transform: none;
 		width: min(24rem, 52vw);
 	}
 
@@ -683,10 +702,10 @@
 	}
 
 	.home-hero__side--left .home-print--aside-1 {
-		left: 76%;
+		left: 100%;
 		right: auto;
 		top: 42%;
-		transform: rotate(0.45deg);
+		transform: translateX(-50%) rotate(0.45deg);
 		width: 36%;
 		z-index: 2;
 	}

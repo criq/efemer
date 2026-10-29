@@ -11,7 +11,7 @@ alwaysApply: false
 Text sits in the wide center column. Photos from the **same** featured post (current invitation, else latest work post). Cover/lead is left; the rest are highest LLM `rating` among remaining non-demoted files.
 
 - **Main photo** on each side: vertically centered, the large one, overflowing past the outer edge of the frame. Top and bottom stay in frame.
-- **Secondary photos**: smaller, toward the text, off that vertical center. Not lined up with the main photo.
+- **Secondary photos**: smaller, toward the text; each side shrink-wraps to its lead so aside position is relative to the large photo. Left aside: center on the lead’s right edge. Right asides: center on the lead’s left edge, top nudged 15% left, bottom 15% right. Off the lead’s vertical center; not lined up with each other.
 - Wide (>1500px): **2 left + 3 right**. From 1500px–1200px: **only the two large leads** (asides hidden). From 801px–1199px: two-print collage on the left only, pulled off the left edge; right column hidden. Phones: top collage of three prints (lead + two asides), flush to the top (max 40vh, centered — no left bleed), then text. No photos below the text.
 
 ## Every homepage photo
