@@ -20,6 +20,10 @@ class IngestItem extends \Katu\Models\Model
 	public ?string $instagramShortcode = null;
 	public ?string $title = null;
 	public Time|string|null $postedAt = null;
+	public Time|string|null $startsAt = null;
+	public Time|string|null $endsAt = null;
+	public ?string $place = null;
+	public int|string|null $isInvitation = 0;
 	public ?string $bodyHtml = null;
 	public ?string $contentHash = null;
 	public ?string $status = null;
@@ -188,6 +192,70 @@ class IngestItem extends \Katu\Models\Model
 		return null;
 	}
 
+	public function setStartsAt(?Time $time): IngestItem
+	{
+		$this->startsAt = $time;
+
+		return $this;
+	}
+
+	public function getStartsAt(): ?Time
+	{
+		if ($this->startsAt instanceof Time) {
+			return $this->startsAt;
+		}
+
+		if (is_string($this->startsAt) && $this->startsAt !== "") {
+			return new Time($this->startsAt);
+		}
+
+		return null;
+	}
+
+	public function setEndsAt(?Time $time): IngestItem
+	{
+		$this->endsAt = $time;
+
+		return $this;
+	}
+
+	public function getEndsAt(): ?Time
+	{
+		if ($this->endsAt instanceof Time) {
+			return $this->endsAt;
+		}
+
+		if (is_string($this->endsAt) && $this->endsAt !== "") {
+			return new Time($this->endsAt);
+		}
+
+		return null;
+	}
+
+	public function setPlace(?string $place): IngestItem
+	{
+		$this->place = $place !== null && trim($place) !== "" ? trim($place) : null;
+
+		return $this;
+	}
+
+	public function getPlace(): ?string
+	{
+		return $this->place;
+	}
+
+	public function setIsInvitation(bool $isInvitation): IngestItem
+	{
+		$this->isInvitation = $isInvitation ? 1 : 0;
+
+		return $this;
+	}
+
+	public function isInvitation(): bool
+	{
+		return (bool)(int)$this->isInvitation;
+	}
+
 	public function setBodyHtml(?string $bodyHtml): IngestItem
 	{
 		$this->bodyHtml = $bodyHtml;
@@ -296,6 +364,8 @@ class IngestItem extends \Katu\Models\Model
 		$this->layoutHints = null;
 		$this->enrichmentVersion = null;
 		$this->enrichedAt = null;
+		$this->place = null;
+		$this->isInvitation = 0;
 
 		return $this;
 	}

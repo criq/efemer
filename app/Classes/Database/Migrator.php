@@ -25,6 +25,7 @@ use App\Classes\Database\Migrations\AddEventUrl;
 use App\Classes\Database\Migrations\IngestEnrichmentSchema;
 use App\Classes\Database\Migrations\IngestItemFileSlots;
 use App\Classes\Database\Migrations\IngestSchema;
+use App\Classes\Database\Migrations\IngestTimeframeSchema;
 use App\Classes\Database\Migrations\SeedEventsAppearances;
 use App\Classes\Database\Migrations\StorageFilesSchema;
 use Katu\PDO\Connection;
@@ -89,6 +90,7 @@ class Migrator
 			new IngestSchema,
 			new IngestItemFileSlots,
 			new IngestEnrichmentSchema,
+			new IngestTimeframeSchema,
 		];
 	}
 
