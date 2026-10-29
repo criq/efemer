@@ -436,6 +436,7 @@ class KeywordAnalyzer
 		$lines = [
 			"Analyze this florist / floral-art ingest item.",
 			"Source: " . $item->getSourceLabel(),
+			"Posted at (reference year/date): " . ($item->getPostedAt() ? $item->getPostedAt()->format("Y-m-d H:i") : "(unknown)"),
 			"Title: " . ($item->getTitle() ?: "(none)"),
 			"Quality flags: " . implode(", ", $item->getQualityFlags() ?: ["(none)"]),
 			"Body text (Czech, may be empty):",
@@ -480,11 +481,17 @@ Respond with a single JSON object (no markdown) using this shape:
   "keywords": ["česká klíčová slova"],
   "themes": ["témata"],
   "entities": ["jména lidí, míst, rostlin"],
-  "kind": "diary|wedding|mourning|gift|portrait|workshop|installation|bouquet|product|other",
+  "kind": "diary|wedding|gift|portrait|workshop|installation|bouquet|product|other",
   "coverFileId": 123,
   "coverRationale": "krátky česky důvod",
   "palette": ["#aabbcc"],
   "seriesKey": null,
+  "timeframe": {
+    "isInvitation": false,
+    "startsAt": "YYYY-MM-DD HH:MM:SS or null",
+    "endsAt": "YYYY-MM-DD HH:MM:SS or null",
+    "place": "místo konání nebo null"
+  },
   "layoutHints": {
     "pattern": "hero_text_gallery|text_lead_gallery|gallery_essay|single",
     "blocks": [
@@ -514,13 +521,16 @@ Rules:
 - Each file needs 3–8 specific keywords (plants, objects, people, mood, place) — not only copies of item keywords.
 - kind:
   - wedding = svatba / novomanželé
-  - mourning = smuteční / pietní / rozloučení
-  - gift = dar / kytice pro mámu / named gift bouquet
-  - portrait = person-focused floral portrait without clear wedding/mourning
+  - workshop = ANY public gathering, workshop, slavnost, pouť, vycházka, brigáda, pop-up, or event invitation where people are invited to join (e.g. "zveme", "sraz je", "připojte se", "vstupenky", "poslední místa", Kupalo, Votivní Wanderlust, Volání na stromy, Ciderfest)
+  - gift = dar / kytice pro mámu / named gift or tribute bouquet (including farewell/memorial bouquets for a named person)
+  - portrait = person-focused floral portrait without clear wedding
   - bouquet = standalone authored bouquet / commission (not a shop SKU)
   - product = only shop-like / catalog product shots
-  - workshop / installation / diary / other as appropriate
-  - Prefer mourning|gift|portrait|bouquet over diary when those fit better.
+  - installation / diary / other as appropriate
+  - Prefer workshop whenever the post invites people to an event/happening/walk/gathering (even in a cemetery, church, gallery, or @himmlhaus). Prefer gift|portrait|bouquet over diary when those fit better.
+- timeframe:
+  - Extract any event / happening / diary date or date range mentioned in the text OR visible on poster/flyer images (e.g. "1. 11." on a poster, "19. 9.* 5.-10.10. 2025", "v neděli o Všech svatých v 9:45"). Resolve missing years or Czech holidays (Všech svatých = Nov 1, Dušičky = Nov 2, Filipojakubská noc = Apr 30, Letní slunovrat = Jun 21, Svatá Lucie = Dec 13) using "Posted at" as the reference year.
+  - Set isInvitation=true when the post invites readers to an upcoming or current event/workshop/walk/slavnost/pop-up ("zveme", "připojte se", "sraz", "vstupenky", poster with future date/time/venue). Set place to the venue/town when known.
 - Role and pattern codes in English as above.
 - sourceSlot=pre_copy ⇒ role=lead (strong). post_copy ⇒ support|detail|context (lead only if truly a second story beat).
 - COVER (critical): if any non-demoted pre_copy file exists, coverFileId MUST be one of those pre_copy ids (prefer the best lead among them). Never pick a post_copy cover when pre_copy exists.
@@ -579,6 +589,7 @@ PROMPT;
 			$item,
 			$files,
 		));
+		$this->applyTimeframe($item, isset($payload["timeframe"]) && is_array($payload["timeframe"]) ? $payload["timeframe"] : null);
 		$item->setClassificationRaw($rawText);
 
 		$filePayloads = isset($payload["files"]) && is_array($payload["files"]) ? $payload["files"] : [];
@@ -764,6 +775,45 @@ PROMPT;
 		return $hints;
 	}
 
+	/**
+	 * @param array<string, mixed>|null $timeframe
+	 */
+	private function applyTimeframe(IngestItem $item, ?array $timeframe): void
+	{
+		$startsAt = $this->parseTimeValue($timeframe["startsAt"] ?? null);
+		$endsAt = $this->parseTimeValue($timeframe["endsAt"] ?? null);
+		$place = $this->nullableString($timeframe["place"] ?? null);
+		$isInvitation = !empty($timeframe["isInvitation"]);
+
+		$item->setStartsAt($startsAt);
+		$item->setEndsAt($endsAt);
+		$item->setPlace($place);
+		$item->setIsInvitation($isInvitation);
+	}
+
+	private function parseTimeValue(mixed $value): ?Time
+	{
+		if (!is_string($value)) {
+			return null;
+		}
+		$value = trim($value);
+		if ($value === "" || strtolower($value) === "null") {
+			return null;
+		}
+		if (preg_match("/^\d{4}-\d{2}-\d{2}$/", $value)) {
+			$value .= " 10:00:00";
+		}
+		if (!preg_match("/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/", $value)) {
+			return null;
+		}
+
+		try {
+			return new Time(str_replace("T", " ", $value));
+		} catch (\Throwable) {
+			return null;
+		}
+	}
+
 	private function normalizeKind(mixed $kind): ?string
 	{
 		if (!is_string($kind)) {
@@ -772,17 +822,18 @@ PROMPT;
 
 		$kind = strtolower(trim($kind));
 		$aliases = [
-			"funeral" => "mourning",
-			"smuteční" => "mourning",
-			"smutecni" => "mourning",
-			"memorial" => "mourning",
 			"commission" => "bouquet",
 			"kytice" => "bouquet",
+			"funeral" => "bouquet",
+			"smuteční" => "bouquet",
+			"smutecni" => "bouquet",
+			"memorial" => "diary",
+			"mourning" => "diary",
 		];
 		$kind = $aliases[$kind] ?? $kind;
 
 		$allowed = [
-			"diary", "wedding", "mourning", "gift", "portrait",
+			"diary", "wedding", "gift", "portrait",
 			"workshop", "installation", "bouquet", "product", "other",
 		];
 

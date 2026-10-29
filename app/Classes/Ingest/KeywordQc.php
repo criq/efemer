@@ -11,7 +11,7 @@ class KeywordQc
 	public const FLAG_NEEDS_REKEYWORD = "needs_rekeyword";
 
 	private const ALLOWED_KINDS = [
-		"diary", "wedding", "mourning", "gift", "portrait",
+		"diary", "wedding", "gift", "portrait",
 		"workshop", "installation", "bouquet", "product", "other",
 	];
 

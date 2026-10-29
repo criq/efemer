@@ -78,6 +78,7 @@ class KeywordNormalizer
 			"přírodní florika" => "přírodní floristika",
 			"autorská florisitika" => "autorská floristika",
 			"autorská florika" => "autorská floristika",
+			"košilela" => "košile",
 		];
 		$lower = mb_strtolower($keyword);
 
