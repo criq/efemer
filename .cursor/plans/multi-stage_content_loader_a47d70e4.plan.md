@@ -282,10 +282,8 @@ Prod Instagram archive loop remains **off**.
 
 ### Next
 
-1. **Instagram stage-1 first** (blocked on API 429; `data/instagram` empty) — retry with TTY:
-   `./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f`
-   Or one account / capped: `--args='{"account":"efemer_flowers","full":true,"maxNew":20}'`
-2. KeywordIngest Instagram `loaded` items (same kw-v3 + inline QC)
+1. ~~Instagram stage-1 via Instaloader~~ — **400** `@efemer_flowers` + **231** `@himmlhaus` in ingest (private API still 429)
+2. **KeywordIngest** remaining Instagram `loaded` (~621) with inline QC
 3. Re-export + EvaluateKeywords → embeddings / dedup → taxonomy → materialize
 4. Optional: empty `bodyHtml` / `thin_text` on efemer.cz
 
