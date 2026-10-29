@@ -12229,7 +12229,7 @@ body.builder .builder-file-list--insert:not(:empty),
   .home-hero__side--left .home-print--aside-1 {
     left: 100%;
     right: auto;
-    top: 6%;
+    top: 8%;
     transform: translateX(-50%) rotate(0.45deg);
     width: 42%;
   }
@@ -12237,11 +12237,11 @@ body.builder .builder-file-list--insert:not(:empty),
     display: block;
   }
   .home-hero__side--left .home-print--aside-2 {
-    bottom: 4%;
-    left: 100%;
+    bottom: 6%;
+    left: 0;
     right: auto;
     top: auto;
-    transform: translateX(-50%) rotate(0.45deg);
+    transform: translateX(-50%) rotate(-0.4deg);
     width: 36%;
     z-index: 3;
   }
