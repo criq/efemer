@@ -48,6 +48,9 @@ class RouterConfig extends \Katu\Config\RouterConfig
 			"site.kontakt" => new Route("/kontakt", [\App\Controllers\Site\Kontakt::class, "getResponse"]),
 			"site.vTisku" => new Route("/v-tisku", [\App\Controllers\Site\VTisku::class, "getResponse"]),
 			"site.newsletter" => new Route("/newsletter", [\App\Controllers\Site\Newsletter::class, "getResponse"]),
+			"site.sitemap" => new Route("/sitemap.xml", [\App\Controllers\Site\Sitemap::class, "getResponse"]),
+			"site.robots" => new Route("/robots.txt", [\App\Controllers\Site\Robots::class, "getResponse"]),
+
 			"sections.ritualy" => new Route("/svatebni-ritualy", [\App\Controllers\Sections\Index::class, "ritualy"]),
 			"sections.umeni" => new Route("/umeni", [\App\Controllers\Sections\Index::class, "umeni"]),
 			"sections.denik" => new Route("/denik", [\App\Controllers\Sections\Index::class, "denik"]),
