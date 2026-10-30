@@ -68,6 +68,13 @@
 	width: 100%;
 }
 
+.feed-sentinel {
+	flex: 0 0 auto;
+	height: 1px;
+	pointer-events: none;
+	width: 100%;
+}
+
 .denik__empty {
 	color: $color-muted;
 	margin: 2rem auto;

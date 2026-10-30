@@ -1,0 +1,10 @@
+<article class="ritualy-feed__item" id="post-{{ post.getId }}">
+	<div class="post-article ritualy-feed__article">
+		{% include "Posts/body.twig" with {
+			post: post,
+			linkedTitle: true,
+			showSectionEyebrow: false,
+			headingTag: "h2",
+		} %}
+	</div>
+</article>

@@ -17,21 +17,19 @@
 			<a class="ritualy__cta" href="{{ url("site.kontakt") }}">Napsat o rituálu</a>
 		</header>
 
-		<div class="ritualy__feed">
+		<div
+			class="ritualy__feed"
+			data-feed
+			{% if hasMore %}data-feed-next="{{ url("sections.ritualy") }}?page={{ nextPage }}&amp;partial=1"{% endif %}
+		>
 			{% for post in posts %}
-				<article class="ritualy-feed__item" id="post-{{ post.getId }}">
-					<div class="post-article ritualy-feed__article">
-						{% include "Posts/body.twig" with {
-							post: post,
-							linkedTitle: true,
-							showSectionEyebrow: false,
-							headingTag: "h2",
-						} %}
-					</div>
-				</article>
+				{% include "Sections/ritualy-item.twig" %}
 			{% else %}
 				<p class="ritualy__empty">Zatím tu nic není.</p>
 			{% endfor %}
+			{% if hasMore %}
+				<div class="feed-sentinel" data-feed-sentinel aria-hidden="true"></div>
+			{% endif %}
 		</div>
 	</div>
 

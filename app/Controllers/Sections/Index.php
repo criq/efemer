@@ -10,15 +10,21 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class Index extends \Katu\Controllers\Controller
 {
+	private const FEED_PAGE_SIZE = 4;
+
 	public function ritualy(ServerRequestInterface $request, ResponseInterface $response)
 	{
-		return $response->withBody((new HTMLEngine($request))->render("Sections/ritualy.twig", [
-			"section" => Section::RITUALY,
-			"title" => Section::title(Section::RITUALY),
-			"lead" => Section::lead(Section::RITUALY),
-			"blurb" => Section::blurb(Section::RITUALY),
-			"posts" => Post::getPublishedBySection(Section::RITUALY),
-		]));
+		return $this->renderFeed(
+			$request,
+			$response,
+			Section::RITUALY,
+			"Sections/ritualy.twig",
+			"Sections/ritualy-feed.twig",
+			"sections.ritualy",
+			[
+				"blurb" => Section::blurb(Section::RITUALY),
+			],
+		);
 	}
 
 	public function umeni(ServerRequestInterface $request, ResponseInterface $response)
@@ -33,21 +39,64 @@ class Index extends \Katu\Controllers\Controller
 
 	public function denik(ServerRequestInterface $request, ResponseInterface $response)
 	{
-		return $response->withBody((new HTMLEngine($request))->render("Sections/denik.twig", [
-			"section" => Section::DENIK,
-			"title" => Section::title(Section::DENIK),
-			"lead" => Section::lead(Section::DENIK),
-			"posts" => Post::getPublishedBySection(Section::DENIK),
-		]));
+		return $this->renderFeed(
+			$request,
+			$response,
+			Section::DENIK,
+			"Sections/denik.twig",
+			"Sections/denik-feed.twig",
+			"sections.denik",
+		);
 	}
 
-	private function render(ServerRequestInterface $request, ResponseInterface $response, string $section): ResponseInterface
-	{
-		return $response->withBody((new HTMLEngine($request))->render("Sections/index.twig", [
+	/**
+	 * @param array<string, mixed> $extra
+	 */
+	private function renderFeed(
+		ServerRequestInterface $request,
+		ResponseInterface $response,
+		string $section,
+		string $pageTemplate,
+		string $partialTemplate,
+		string $routeName,
+		array $extra = [],
+	): ResponseInterface {
+		$params = $request->getQueryParams();
+		$page = max(1, (int)($params["page"] ?? 1));
+		$partial = (string)($params["partial"] ?? "") === "1";
+
+		$all = Post::getPublishedBySection($section);
+		$total = count($all);
+		$offset = ($page - 1) * self::FEED_PAGE_SIZE;
+		$posts = array_slice($all, $offset, self::FEED_PAGE_SIZE);
+		$hasMore = ($offset + count($posts)) < $total;
+		$nextPage = $hasMore ? $page + 1 : null;
+
+		$engine = new HTMLEngine($request);
+
+		if ($partial) {
+			$html = $engine->render($partialTemplate, [
+				"posts" => $posts,
+			]);
+			$response = $response
+				->withHeader("Content-Type", "text/html; charset=UTF-8")
+				->withHeader("Cache-Control", "no-store");
+			if ($nextPage !== null) {
+				$nextUrl = (string)\Katu\Tools\Routing\URL::getFor($routeName) . "?page={$nextPage}&partial=1";
+				$response = $response->withHeader("X-Feed-Next", $nextUrl);
+			}
+
+			return $response->withBody($html);
+		}
+
+		return $response->withBody($engine->render($pageTemplate, array_merge([
 			"section" => $section,
 			"title" => Section::title($section),
 			"lead" => Section::lead($section),
-			"posts" => Post::getPublishedBySection($section),
-		]));
+			"posts" => $posts,
+			"hasMore" => $hasMore,
+			"nextPage" => $nextPage,
+			"page" => $page,
+		], $extra)));
 	}
 }

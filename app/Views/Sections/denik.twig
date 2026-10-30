@@ -13,21 +13,19 @@
 			<p class="denik__lead">{{ lead }}</p>
 		</header>
 
-		<div class="denik__feed">
+		<div
+			class="denik__feed"
+			data-feed
+			{% if hasMore %}data-feed-next="{{ url("sections.denik") }}?page={{ nextPage }}&amp;partial=1"{% endif %}
+		>
 			{% for post in posts %}
-				<article class="denik-feed__item" id="post-{{ post.getId }}">
-					<div class="post-article denik-feed__article">
-						{% include "Posts/body.twig" with {
-							post: post,
-							linkedTitle: true,
-							showSectionEyebrow: false,
-							headingTag: "h2",
-						} %}
-					</div>
-				</article>
+				{% include "Sections/denik-item.twig" %}
 			{% else %}
 				<p class="denik__empty">Zatím tu nic není.</p>
 			{% endfor %}
+			{% if hasMore %}
+				<div class="feed-sentinel" data-feed-sentinel aria-hidden="true"></div>
+			{% endif %}
 		</div>
 	</div>
 

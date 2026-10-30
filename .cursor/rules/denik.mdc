@@ -15,5 +15,5 @@ alwaysApply: false
 - Full-bleed greige shells (`.denik-feed__item`) with a centered `.post-article` inside; `.75rem` white gaps between bands
 - Title is the explicit diary date (e.g. “6. 6. 2026”) — **no** publishedAt meta under it; sort by `Post::getExplicitAt()` (startsAt / title date / publishedAt)
 - Title links to the standalone post URL (`linkedTitle`); no section eyebrow in the feed
-- All published deník posts in one response (no AJAX pager yet)
+- Infinite scroll: first **4** posts, then `?page=N&partial=1` HTML fragments (`X-Feed-Next` header); JS in `static/javascript/index.js`
 - No scroll / entrance animations on the index
