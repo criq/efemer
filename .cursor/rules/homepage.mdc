@@ -37,9 +37,9 @@ Three lasting plots: deník → rituály → umění. Prefer high-rated LLM orie
 
 ## About + Principy (below plots)
 
-Two greige bands (`.75rem` white gap):
+Two greige bands (`.75rem` white gap), after the plots:
 
-1. **`.home-about`** — portrait (gentle top peek from 801px) | body stack: kontakt (name + details list), já, dopisy with inline email+button
-2. **`.home-principy`** — stacked header (eyebrow + title + lead) | story prose + tenets list
+1. **`.home-principy`** — stacked header (eyebrow + title + lead) | story prose + tenets list
+2. **`.home-about`** — portrait (gentle top peek from 801px) | body stack: kontakt (name + details list), já, dopisy with inline email+button
 
 Leadhub: see `leadhub.mdc`.
