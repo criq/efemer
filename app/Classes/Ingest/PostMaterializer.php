@@ -35,16 +35,6 @@ class PostMaterializer
 
 	public function materialize(IngestItem $item, bool $dryRun = false): ?Post
 	{
-		$title = $this->deriveTitle($item);
-		if ($title === "") {
-			$this->log(ConsoleStyle::skipped(
-				$item->getSource() . "/" . $item->getSourceKey(),
-				"empty title",
-			));
-
-			return null;
-		}
-
 		$section = $this->resolveSection($item);
 		if ($section === null) {
 			$this->log(ConsoleStyle::skipped(
@@ -66,10 +56,20 @@ class PostMaterializer
 
 		$candidates = $this->selectOrderedFiles($item);
 		$pattern = $this->resolvePattern($item);
+		$plan = $this->planner->plan($item, $candidates);
+		$title = $this->resolveTitle($item, $plan);
+		if ($title === "") {
+			$this->log(ConsoleStyle::skipped(
+				$item->getSource() . "/" . $item->getSourceKey(),
+				"empty title",
+			));
+
+			return null;
+		}
+
 		$summary = sprintf("#%s → “%s” [%s] (%d photos)", $item->getId(), $title, $section, count($candidates));
 
 		if ($dryRun) {
-			$plan = $this->planner->plan($item, $candidates);
 			$this->log(ConsoleStyle::step(sprintf(
 				"would materialize %s — %d planned parts",
 				$summary,
@@ -78,8 +78,6 @@ class PostMaterializer
 
 			return new Post;
 		}
-
-		$plan = $this->planner->plan($item, $candidates);
 
 		$post = $item->getPost() ?: Post::getByIngestItemId((int)$item->getId());
 		$isNew = $post === null;
@@ -272,6 +270,45 @@ class PostMaterializer
 
 		// Workshops, reports, diary, and the rest → dated journal.
 		return Section::DENIK;
+	}
+
+	/**
+	 * @param array{title: ?string, excerpt: ?string, parts: list<array<string, mixed>>} $plan
+	 */
+	private function resolveTitle(IngestItem $item, array $plan): string
+	{
+		if ($item->getKind() === "wedding") {
+			foreach ([
+				$plan["title"] ?? null,
+				$item->getCouple(),
+			] as $candidate) {
+				$normalized = $this->normalizeCoupleTitle((string)($candidate ?? ""));
+				if ($normalized !== "") {
+					return $normalized;
+				}
+			}
+		}
+
+		return $this->deriveTitle($item);
+	}
+
+	private function normalizeCoupleTitle(string $raw): string
+	{
+		$title = trim(html_entity_decode(strip_tags($raw), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+		$title = preg_replace("/\s+/u", " ", $title) ?? $title;
+		$title = trim($title, " \t\n\r\0\x0B\"'«»");
+		// Drop Instagram handles — names only.
+		$title = preg_replace("/@[\\p{L}\\p{N}._]+/u", "", $title) ?? $title;
+		$title = preg_replace("/\s+/u", " ", $title) ?? $title;
+		$title = trim($title, " \t\n\r\0\x0B,&");
+		if ($title === "" || strtolower($title) === "null") {
+			return "";
+		}
+		if (mb_strlen($title) > 80) {
+			$title = rtrim(mb_substr($title, 0, 77)) . "…";
+		}
+
+		return $title;
 	}
 
 	private function deriveTitle(IngestItem $item): string

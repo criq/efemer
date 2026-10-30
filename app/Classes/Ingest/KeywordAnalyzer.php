@@ -483,6 +483,7 @@ Respond with a single JSON object (no markdown) using this shape:
   "themes": ["témata"],
   "entities": ["jména lidí, míst, rostlin"],
   "kind": "diary|wedding|gift|portrait|workshop|installation|bouquet|product|other",
+  "couple": "Jana a Petr",
   "coverFileId": 123,
   "coverRationale": "krátky česky důvod",
   "palette": ["#aabbcc"],
@@ -529,6 +530,9 @@ Rules:
   - product = only shop-like / catalog product shots
   - installation / diary / other as appropriate
   - Prefer workshop for masopust / slavnost / seasonal feast write-ups. Prefer gift|portrait|bouquet over diary when those fit better. Never use wedding for carnival or non-bridal veselky.
+- couple:
+  - When kind=wedding, set couple to the newlyweds' names in Czech form ("Veru a Jindra", "Marie a Tomáš") when identifiable from body, captions, @mentions, or photos. Prefer first names; use "a" between them. One known name alone is OK. Never put raw Instagram handles in couple — resolve to a real name if stated. Also include those names in entities.
+  - For every other kind, couple must be null.
 - tags (controlled; empty array when neither fits; never invent free keywords here):
   - "invitation" — the post invites readers to an upcoming or current event/workshop/walk/slavnost/pop-up ("zveme", "připojte se", "sraz", "vstupenky", poster with future date/time/venue). Mutually exclusive with "report".
   - "report" — a lasting write-up / photo essay about an event that already happened (workshop recap, slavnost reportáž, after the gathering). Not an open call to attend. Prefer report over invitation when the text is past-tense storytelling rather than a call to join.
@@ -584,8 +588,19 @@ PROMPT;
 
 		$item->setKeywordsList(KeywordNormalizer::normalizeList($payload["keywords"] ?? null));
 		$item->setThemesList(KeywordNormalizer::normalizeList($payload["themes"] ?? null));
-		$item->setEntitiesList(KeywordNormalizer::normalizeList($payload["entities"] ?? null, preserveCase: true));
-		$item->setKind($this->normalizeKind($payload["kind"] ?? null));
+		$entities = KeywordNormalizer::normalizeList($payload["entities"] ?? null, preserveCase: true);
+		$kind = $this->normalizeKind($payload["kind"] ?? null);
+		$couple = $this->normalizeCouple($payload["couple"] ?? null, $kind);
+		if ($couple !== null) {
+			foreach (preg_split("/\s+a\s+/ui", $couple) ?: [] as $name) {
+				$name = trim((string)$name);
+				if ($name !== "" && !in_array($name, $entities, true)) {
+					$entities[] = $name;
+				}
+			}
+		}
+		$item->setEntitiesList($entities);
+		$item->setKind($kind);
 		$item->setPalette($this->stringList($payload["palette"] ?? null));
 		$seriesKey = isset($payload["seriesKey"]) && is_string($payload["seriesKey"]) ? trim($payload["seriesKey"]) : null;
 		$item->setSeriesKey($seriesKey !== "" ? $seriesKey : null);
@@ -596,7 +611,9 @@ PROMPT;
 		));
 		$this->applyTimeframe($item, isset($payload["timeframe"]) && is_array($payload["timeframe"]) ? $payload["timeframe"] : null);
 		$this->applyTags($item, $payload);
-		$item->setClassificationRaw($rawText);
+		$payload["couple"] = $couple;
+		$encoded = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		$item->setClassificationRaw(is_string($encoded) && $encoded !== "" ? $encoded : $rawText);
 
 		$filePayloads = isset($payload["files"]) && is_array($payload["files"]) ? $payload["files"] : [];
 		foreach ($files as $file) {
@@ -861,6 +878,26 @@ PROMPT;
 		];
 
 		return in_array($kind, $allowed, true) ? $kind : "other";
+	}
+
+	private function normalizeCouple(mixed $couple, ?string $kind): ?string
+	{
+		if ($kind !== "wedding" || !is_string($couple)) {
+			return null;
+		}
+
+		$couple = trim(html_entity_decode(strip_tags($couple), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+		$couple = preg_replace("/@[\\p{L}\\p{N}._]+/u", "", $couple) ?? $couple;
+		$couple = preg_replace("/\s+/u", " ", $couple) ?? $couple;
+		$couple = trim($couple, " \t\n\r\0\x0B,\"'«»");
+		if ($couple === "" || strtolower($couple) === "null") {
+			return null;
+		}
+		if (mb_strlen($couple) > 80) {
+			$couple = rtrim(mb_substr($couple, 0, 77)) . "…";
+		}
+
+		return $couple;
 	}
 
 	private function normalizeRole(mixed $role, bool $demote): string

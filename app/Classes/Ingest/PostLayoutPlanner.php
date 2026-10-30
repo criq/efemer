@@ -37,7 +37,7 @@ class PostLayoutPlanner
 
 	/**
 	 * @param list<IngestItemFile> $candidates ordered photo candidates
-	 * @return array{excerpt: ?string, parts: list<array{type: string, html?: string, fileIndex?: int, fileIndexes?: list<int>}>}
+	 * @return array{title: ?string, excerpt: ?string, parts: list<array{type: string, html?: string, fileIndex?: int, fileIndexes?: list<int>}>}
 	 */
 	public function plan(IngestItem $item, array $candidates): array
 	{
@@ -47,7 +47,8 @@ class PostLayoutPlanner
 		try {
 			$planned = $this->planWithGemini($item, $candidates, $bodyHtml);
 			$this->log(ConsoleStyle::step(sprintf(
-				"LLM layout: excerpt %s, %d parts",
+				"LLM layout: title %s, excerpt %s, %d parts",
+				$planned["title"] !== null ? "“{$planned["title"]}”" : "no",
 				$planned["excerpt"] !== null ? "yes" : "no",
 				count($planned["parts"]),
 			)));
@@ -62,7 +63,7 @@ class PostLayoutPlanner
 
 	/**
 	 * @param list<IngestItemFile> $candidates
-	 * @return array{excerpt: ?string, parts: list<array{type: string, html?: string, fileIndex?: int, fileIndexes?: list<int>}>}
+	 * @return array{title: ?string, excerpt: ?string, parts: list<array{type: string, html?: string, fileIndex?: int, fileIndexes?: list<int>}>}
 	 */
 	private function planWithGemini(IngestItem $item, array $candidates, string $bodyHtml): array
 	{
@@ -79,20 +80,21 @@ class PostLayoutPlanner
 			$userParts[] = ["text" => "[fileIndex={$image["index"]}]"];
 		}
 
-		$result = $this->gemini->generateContent($userParts, $this->systemInstruction());
+		$result = $this->gemini->generateContent($userParts, $this->systemInstruction($item));
 		$payload = $this->decodeJson($result["text"]);
 
 		return $this->normalizePlan($payload, $candidates, $bodyHtml);
 	}
 
-	private function systemInstruction(): string
+	private function systemInstruction(IngestItem $item): string
 	{
-		return <<<'PROMPT'
+		$prompt = <<<'PROMPT'
 You layout a public florist / cultural website page (Efemer, Czech).
 
 Return JSON only:
 {
-  "excerpt": "short plain-text teaser for cards/listings, 1–2 sentences, Czech, no HTML",
+  "title": "public title override or null",
+  "excerpt": "short plain-text perex/teaser for cards/listings, 1–2 sentences, Czech, no HTML",
   "parts": [
     { "type": "image", "fileIndex": 0 },
     { "type": "text", "html": "<p>…</p>" },
@@ -102,7 +104,8 @@ Return JSON only:
 
 Rules:
 - parts must contain the COMPLETE body copy from the source (including the opening lines). Do not omit text just because it also appears in excerpt.
-- excerpt is a short teaser for homepage/cards only — usually the opening idea, plain text. It is NOT shown as a separate block on the post page.
+- excerpt is a short teaser (perex) for homepage/cards/section listings only — plain text. It is NOT shown as a separate block on the post page. Write a polished 1–2 sentence Czech perex: concrete mood, place, plants, or ritual — not a raw first-line paste, no hashtags, no @handles. About 120–220 characters; never over 280.
+- title: leave null unless the WEDDING rules below apply.
 - Split body into several short text parts (roughly 1–3 sentences / ~60–180 words each). Prefer more shorter beats over one long wall.
 - Keep Czech wording faithful; you may re-paragraph and wrap in <p> (optional <em>). Do not invent facts, dates, or places.
 - Interleave photos with text: image, text, image|gallery, text… Do not dump all photos after one text blob.
@@ -113,6 +116,18 @@ Rules:
 - fileIndex / fileIndexes must reference only provided indexes. Never invent indexes.
 - Omit empty text.
 PROMPT;
+
+		if ($item->getKind() === "wedding") {
+			$prompt .= <<<'PROMPT'
+
+
+WEDDING (kind=wedding) — required:
+- title MUST be the newlyweds' names when you can find them in the body, captions, @mentions, or photos (e.g. "Veru a Jindra", "Marie a Tomáš"). Prefer first names; Czech "a" between them. One known name alone is OK. Never use Instagram handles (@…) as the title — resolve to a real name if the text gives one, otherwise omit that person. If names are truly unknown, set title to null.
+- excerpt (perex) should feel ceremonial and specific to this wedding (flowers, place, gesture) — still 1–2 sentences, no handles/hashtags.
+PROMPT;
+		}
+
+		return $prompt;
 	}
 
 	/**
@@ -127,7 +142,12 @@ PROMPT;
 		}
 
 		$lines = [];
-		$lines[] = "Title: " . trim((string)$item->getTitle());
+		$lines[] = "Source title: " . trim((string)$item->getTitle());
+		$lines[] = "Kind: " . (trim((string)$item->getKind()) !== "" ? $item->getKind() : "unknown");
+		$couple = $item->getCouple();
+		if ($couple) {
+			$lines[] = "Couple (from enrichment): " . $couple;
+		}
 		$tags = $item->getTagsList();
 		$lines[] = "Tags: " . ($tags !== [] ? implode(", ", $tags) : "none");
 		$lines[] = "Invitation: " . ($item->isInvitation() ? "yes" : "no");
@@ -166,11 +186,20 @@ PROMPT;
 	/**
 	 * @param array<string, mixed> $payload
 	 * @param list<IngestItemFile> $candidates
-	 * @return array{excerpt: ?string, parts: list<array{type: string, html?: string, fileIndex?: int, fileIndexes?: list<int>}>}
+	 * @return array{title: ?string, excerpt: ?string, parts: list<array{type: string, html?: string, fileIndex?: int, fileIndexes?: list<int>}>}
 	 */
 	private function normalizePlan(array $payload, array $candidates, string $bodyHtml): array
 	{
 		$maxIndex = count($candidates) - 1;
+		$title = trim(html_entity_decode(strip_tags((string)($payload["title"] ?? "")), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+		$title = preg_replace("/\s+/u", " ", $title) ?? $title;
+		$title = trim($title, " \t\n\r\0\x0B\"'«»");
+		if ($title === "" || strtolower($title) === "null") {
+			$title = null;
+		} elseif (mb_strlen($title) > 80) {
+			$title = rtrim(mb_substr($title, 0, 77)) . "…";
+		}
+
 		$excerpt = trim(html_entity_decode(strip_tags((string)($payload["excerpt"] ?? "")), ENT_QUOTES | ENT_HTML5, "UTF-8"));
 		if ($excerpt === "") {
 			$excerpt = null;
@@ -239,16 +268,16 @@ PROMPT;
 			$excerpt = $this->fallbackExcerpt($bodyHtml);
 		}
 
-		return ["excerpt" => $excerpt, "parts" => $parts];
+		return ["title" => $title, "excerpt" => $excerpt, "parts" => $parts];
 	}
 
 	/**
 	 * @param list<IngestItemFile> $candidates
-	 * @return array{excerpt: ?string, parts: list<array{type: string, html?: string, fileIndex?: int, fileIndexes?: list<int>}>}
+	 * @return array{title: ?string, excerpt: ?string, parts: list<array{type: string, html?: string, fileIndex?: int, fileIndexes?: list<int>}>}
 	 */
 	private function planHeuristic(IngestItem $item, array $candidates, string $bodyHtml): array
 	{
-		unset($item);
+		$title = $item->getKind() === "wedding" ? $item->getCouple() : null;
 		$paras = $this->paragraphs($bodyHtml);
 		$excerpt = null;
 		if ($paras !== []) {
@@ -315,7 +344,7 @@ PROMPT;
 			$excerpt = $this->fallbackExcerpt($bodyHtml);
 		}
 
-		return ["excerpt" => $excerpt, "parts" => $parts];
+		return ["title" => $title, "excerpt" => $excerpt, "parts" => $parts];
 	}
 
 	/**

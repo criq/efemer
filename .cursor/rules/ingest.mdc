@@ -52,7 +52,10 @@ cd ~/Sites/efemer
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"id":427}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"invitationsOnly":true}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"existingOnly":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"kind":"wedding","existingOnly":true}' -f
 ```
+
+Weddings (`kind=wedding`): KeywordAnalyzer fills `couple` (“Jana a Petr”); MaterializePosts / PostLayoutPlanner set the public **title** to those names and write a short ceremonial **perex** (`posts.excerpt`). Rematerialize with `kind=wedding` after prompt changes.
 
 Uploads go to GCS `gs://efemer/files/{DEV|PROD}/…`. Reset/purge only touches the current env shard. Admin: `/admin/ingest` (pipeline + kind facets + keyword search).
 
@@ -70,7 +73,7 @@ Eval sets: `app/Resources/Ingest/eval/covers.json`, `roles.json`. Exports: `tmp/
 | `Ingest.EvaluateKeywords` | score cover/role eval sets |
 | `Ingest.ExportCorpus` | CSV/JSON + keyword co-occurrence |
 | `Ingest.ResetKeywordEnrichment` | clear LLM fields only (`yes:true`); status → `loaded` |
-| `Ingest.MaterializePosts` | → `posts` + selected `post_files` + `layoutJson.parts`; invites ephemeral on `/udalosti` |
+| `Ingest.MaterializePosts` | → `posts` + selected `post_files` + `layoutJson.parts`; invites ephemeral on `/udalosti`; weddings titled by couple names + perex |
 | `Ingest.ResetImportedContent` | wipe posts/ingest/pages + env GCS shard |
 | `Database.Migrate` | schema migrations |
 | `Pages.ImportEfemerCz` | legacy page-builder import |

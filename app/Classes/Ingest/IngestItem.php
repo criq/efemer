@@ -521,6 +521,34 @@ class IngestItem extends \Katu\Models\Model
 		return $this->classificationRaw;
 	}
 
+	/**
+	 * Newlyweds' names from KeywordAnalyzer JSON (`couple`), when kind=wedding.
+	 */
+	public function getCouple(): ?string
+	{
+		$raw = trim((string)$this->classificationRaw);
+		if ($raw === "") {
+			return null;
+		}
+		if (str_starts_with($raw, "```")) {
+			$raw = preg_replace("/^```(?:json)?\s*/i", "", $raw) ?? $raw;
+			$raw = preg_replace("/\s*```$/", "", $raw) ?? $raw;
+			$raw = trim($raw);
+		}
+		$decoded = json_decode($raw, true);
+		if (!is_array($decoded)) {
+			return null;
+		}
+		$couple = isset($decoded["couple"]) && is_string($decoded["couple"])
+			? trim($decoded["couple"])
+			: "";
+		if ($couple === "" || strtolower($couple) === "null") {
+			return null;
+		}
+
+		return preg_replace("/\s+/u", " ", $couple) ?: $couple;
+	}
+
 	public function setCoverFileId(?int $coverFileId): IngestItem
 	{
 		$this->coverFileId = $coverFileId;

@@ -16,6 +16,7 @@ use Katu\Tools\Calendar\Timeout;
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"id":427}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"invitationsOnly":true}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"existingOnly":true}' -f
+ * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"kind":"wedding","existingOnly":true}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"dryRun":true,"limit":5}' -f
  */
 class MaterializePosts extends Job
@@ -37,18 +38,22 @@ class MaterializePosts extends Job
 			$dryRun = !empty($args["dryRun"]);
 			$invitationsOnly = !empty($args["invitationsOnly"]);
 			$existingOnly = !empty($args["existingOnly"]);
+			$kind = isset($args["kind"]) && is_string($args["kind"]) && $args["kind"] !== ""
+				? $args["kind"]
+				: null;
 			$id = isset($args["id"]) ? (int)$args["id"] : null;
 			$limit = isset($args["limit"]) ? max(1, (int)$args["limit"]) : null;
 			if ($this->getLimit()) {
 				$limit = $this->getLimit();
 			}
 
-			$items = $this->selectItems($id, $invitationsOnly, $existingOnly, $limit);
+			$items = $this->selectItems($id, $invitationsOnly, $existingOnly, $kind, $limit);
 			$this->outputLine(ConsoleStyle::step(sprintf(
-				"MaterializePosts: %s item(s)%s%s%s.",
+				"MaterializePosts: %s item(s)%s%s%s%s.",
 				count($items),
 				$invitationsOnly ? ", invitationsOnly" : "",
 				$existingOnly ? ", existingOnly" : "",
+				$kind !== null ? ", kind={$kind}" : "",
 				$dryRun ? ", dryRun" : "",
 			)));
 
@@ -85,7 +90,7 @@ class MaterializePosts extends Job
 	/**
 	 * @return list<IngestItem>
 	 */
-	private function selectItems(?int $id, bool $invitationsOnly, bool $existingOnly, ?int $limit): array
+	private function selectItems(?int $id, bool $invitationsOnly, bool $existingOnly, ?string $kind, ?int $limit): array
 	{
 		if ($id) {
 			$item = IngestItem::get($id);
@@ -111,6 +116,9 @@ class MaterializePosts extends Job
 				continue;
 			}
 			if ($invitationsOnly && !$item->isInvitation()) {
+				continue;
+			}
+			if ($kind !== null && $item->getKind() !== $kind) {
 				continue;
 			}
 			$selected[] = $item;
