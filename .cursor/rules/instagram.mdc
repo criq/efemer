@@ -1,11 +1,13 @@
 ---
-description: Instagram session and stage-1 ingest refresh for @efemer_flowers and @himmlhaus
+description: Instagram session and stage-1 ingest for @efemer_flowers and @himmlhaus
 alwaysApply: true
 ---
 
 # Instagram
 
-Stage 1 loads `@efemer_flowers` and `@himmlhaus` into **`ingest_items`** (idempotent on `account:shortcode`). Categorization and public posts come later.
+Stage 1 loads `@efemer_flowers` and `@himmlhaus` into **`ingest_items`** (idempotent on `account:shortcode`). Then `KeywordIngest` → optional `MaterializePosts` (see `ingest.mdc`). Soft `kind` and invitations come from Gemini, not PHP heuristics.
+
+**Prefer Instaloader dump + `ImportInstagramDump` when the archive API is 429.** Production `instagram-archive` loop stays **off**.
 
 ## Session
 
@@ -62,7 +64,5 @@ tmp/instagram-venv/bin/instaloader \
   efemer_flowers himmlhaus
 
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
-# then: KeywordIngest on status=loaded Instagram items
+./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest -f
 ```
-
-Production `instagram-archive` loop is **off** (stopped on deploy). Prefer Instaloader dump + Import when RefreshInstagram stays 429.

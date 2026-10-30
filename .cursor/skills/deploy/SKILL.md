@@ -110,7 +110,7 @@ gcloud compute ssh curios-vm --zone=europe-west3-c --project=aukce-496911 \
   --command="curl -s -o /dev/null -w '%{http_code}' -H 'Host: efemer.jabli.cz' http://127.0.0.1:52184/admin"
 ```
 
-**Success:** HTTP `302` from `/admin` (redirect to login). Homepage may be `404` if no public page exists — that is OK.
+**Success:** HTTP `302` from `/admin` (redirect to login). Homepage should be `200` when pilots/posts exist; `404` only if the public homepage has no content yet.
 
 **If the site is down or unhealthy:** investigate and fix until it responds again. Do not report deploy as done while production is broken. Common fixes:
 

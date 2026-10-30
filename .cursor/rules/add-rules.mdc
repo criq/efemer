@@ -1,29 +1,38 @@
 ---
-description: Add Cursor rules as project conventions emerge during work
+description: Keep project docs current as conventions emerge during work
 alwaysApply: true
 ---
 
-# Growing Project Rules
+# Growing Project Docs
 
-Capture durable project knowledge in `.cursor/rules/` as you learn it — do not wait for the user to ask.
+Capture durable project knowledge as you learn it — **do not wait for the user to ask**. Prefer updating docs in the same turn as the discovery, not as a later cleanup.
 
-## When to add a rule
+## Where knowledge goes
 
-Add or update a rule when you discover something that should persist across sessions:
+| Kind | Location |
+|---|---|
+| Standing conventions / constraints / commands | `.cursor/rules/*.mdc` |
+| Multi-step agent workflows (deploy, commit, …) | `.cursor/skills/*/SKILL.md` |
+| In-progress roadmap / pipeline state | `.cursor/plans/*.plan.md` (todos + body stay accurate) |
+
+Rules are the default. Skills when a procedure is multi-step and reused. Plans when the master pipeline or todo status changed.
+
+## When to add or update
 
 - Repeated conventions (naming, paths, UI copy, stack choices)
-- Required workflows (migrations, builds, deploy steps)
-- Project-specific constraints (GCP project, Docker setup, Czech admin copy)
-- Patterns worth reusing (Slugger for paths, Material Symbols in admin)
+- Required workflows (migrations, builds, deploy, jobs)
+- Project-specific constraints (GCP, Docker, Czech admin copy)
+- Patterns worth reusing; corrections that invalidate older docs
+- After shipping a pipeline stage: sync `ingest.mdc` / `content-model.mdc` / plan todos
 
-**Do not** add a rule for one-off task details, temporary debugging notes, or preferences already covered elsewhere.
+**Do not** document one-off task details, temporary debugging notes, or preferences already covered elsewhere.
 
 ## How to add a rule
 
-1. Create a focused `.mdc` file in `.cursor/rules/` — **one concern per file**
-2. Use YAML frontmatter with `description` and `alwaysApply` or `globs`
-3. Keep it concise (aim for under 50 lines), actionable, with examples/commands where helpful
-4. Match the style of existing rules (`git-commits.mdc`, `migrations.mdc`)
+1. Focused `.mdc` in `.cursor/rules/` — **one concern per file**
+2. YAML frontmatter with `description` and `alwaysApply` or `globs`
+3. Concise (aim under 50 lines), actionable, with examples/commands
+4. Match existing rule style (`git-commits.mdc`, `migrations.mdc`)
 
 ```markdown
 ---
@@ -38,9 +47,10 @@ Concrete instructions...
 
 ## When to update vs create
 
-- **Update** an existing rule when the convention extends or clarifies the same topic
+- **Update** an existing rule/skill/plan when the same topic extends or is corrected
 - **Create** a new rule when the topic is distinct (e.g. admin UI vs database vs git)
+- Prefer fixing stale docs over leaving contradictory “legacy” notes
 
 ## Propose to the user
 
-When adding a rule mid-task, mention it briefly in your response (e.g. "Added `.cursor/rules/admin-ui.mdc` for Czech copy conventions"). Do not commit rules unless the user asks to commit.
+When adding or updating docs mid-task, mention briefly (e.g. "Updated `.cursor/rules/ingest.mdc` for MaterializePosts"). Do not commit docs unless the user asks to commit.

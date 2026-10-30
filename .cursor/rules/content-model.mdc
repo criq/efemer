@@ -1,5 +1,5 @@
 ---
-description: Public content model — four sections, events, ingest pipeline
+description: Public content model — posts, four sections, invitation ephemerality
 alwaysApply: true
 ---
 
@@ -23,17 +23,17 @@ Public site is **not** assembled from the page-component tree. Typed entities:
 | `umeni` | Umění | `/umeni` | lasting posts |
 | `udalosti` | Události | `/udalosti` | invitation posts (`isInvitation`) |
 
-Himmelhaus is the house; Instagram handle is `@himmlhaus`.
+Himmelhaus is the house; Instagram handle is `@himmlhaus`. Soft ingest `kind` (diary/workshop/…) is **not** a 1:1 map to these sections.
 
 `Section::work()` is the three lasting sections. `Section::all()` includes Události.
 
 ## Homepage
 
-Visual layout is in `homepage.mdc`. Text is the next **current invitation** post, else the latest lasting work post. The five hero photos are still partly mock (invitation cover as lead). Then three work-section plots (not Události).
+Visual layout is in `homepage.mdc`. Text is the next **current invitation** post, else the latest lasting work post. Hero photos come from that same featured post (cover/lead + highest-rated non-demoted). Then three work-section plots (not Události).
 
 ## Invitations
 
-Materialized as posts with `isInvitation`, `startsAt` / `endsAt` / `place`, section `udalosti`. Public only while current (effective end ≥ now); expired → hidden everywhere including detail **404**. Listing `/udalosti` is current invites only (no archive). Admin legacy **Události** (`events` table) remains until migrated.
+Materialized as posts with `isInvitation`, `startsAt` / `endsAt` / `place`, section `udalosti`. Public only while current (effective end ≥ now); expired → hidden everywhere including detail **404**. Listing `/udalosti` is current invites only (no archive). Admin legacy **Události** (`events` table) remains until removed.
 
 ## Post parts (`layoutJson.parts`)
 

@@ -1,6 +1,6 @@
 ---
 name: Multi-stage content loader
-overview: "Master plan: efemer.cz keyworded → IG stage-1 done → KeywordIngest IG in progress → MaterializePosts (invitations ephemeral on /udalosti; Wanderlust + diary pilots) → finish IG → export/eval → embeddings → taxonomy → broader posts."
+overview: "Master plan: stage-1 + KeywordIngest done (kw-v3, 0 loaded) → MaterializePosts pilots shipped (5 posts) → next: corpus re-export/eval → embeddings → taxonomy → broader materialize."
 todos:
   - id: schema-ingest
     content: Base ingest schema + stage-1 load tables
@@ -66,10 +66,10 @@ todos:
     content: "LLM timeframe block (isInvitation/startsAt/endsAt/place); drop mourning kind; prefer workshop for invites; Gemini sole parser (no regex heuristics)"
     status: completed
   - id: ig-keyword-corpus
-    content: "KeywordIngest remaining Instagram loaded (~551); same kw-v3 + timeframe + inline QC"
-    status: in_progress
+    content: "IG KeywordIngest done — 631 IG items kw-v3 (0 loaded); 126 invitations"
+    status: completed
   - id: stage1-body-thin-text
-    content: "Investigate empty bodyHtml / thin_text on ~59 efemer posts (blocks hero_text_gallery); fix scraper or accept image-led"
+    content: "Investigate empty bodyHtml / thin_text on ~65 efemer posts (blocks hero_text_gallery); fix scraper or accept image-led"
     status: pending
   - id: kw-normalize-typos
     content: "Typo map florika→floristika + košilela→košile done; keep expanding as leaks appear"
@@ -93,20 +93,20 @@ todos:
     content: "Pause after full keyworded corpus; multi-label facets (occasion/material/place/medium + event); do not map kind→section 1:1"
     status: pending
   - id: stage3-materialize
-    content: "PostMaterializer: title/perex/files/layoutJson; invitations → udalosti (ephemeral); pilot Wanderlust #427 + diary #621"
+    content: "PostMaterializer + layoutJson.parts; invitations → udalosti (ephemeral); pilots Wanderlust + diary + 3 work posts (5 total)"
     status: completed
   - id: ingest-admin-rich
     content: Manual cover/role pick (locks), reject visibility, layout preview (list facets already shipped)
     status: pending
   - id: rules-wire-archive
-    content: Rules polish; keywords as search index; Prefer Instaloader dump when API 429; archive loop stays off
-    status: pending
+    content: Rules + plan synced to invitation-posts model; Prefer Instaloader dump when API 429; archive loop stays off
+    status: completed
 isProject: false
 ---
 
 # Multi-stage content loader (master)
 
-Single source of truth for the ingest → LLM → taxonomy → public posts pipeline. (Former “Stage 2 LLM analysis” plan is merged here.)
+Single source of truth for the ingest → LLM → taxonomy → public posts pipeline. Standing ops live in [`.cursor/rules/ingest.mdc`](.cursor/rules/ingest.mdc) and [`.cursor/rules/content-model.mdc`](.cursor/rules/content-model.mdc).
 
 ## Guiding principle: keywords first, taxonomy later
 
@@ -117,9 +117,9 @@ Do **not** lock categories (`ritualy` / `himmelhaus` / `umeni`) during import.
 3. **Inspect the corpus** — exports, facets, clusters, embeddings
 4. **Decide final category shape** — may be multi-label; may add emerging categories
 5. **Assign categories** to ingest items
-6. **Pilot materialize** events (from invitations) + posts, then full materialize
+6. **Materialize** keyworded items → public `posts` (invitations = ephemeral `udalosti` posts)
 
-Today’s three site sections remain provisional until taxonomy is settled.
+Today’s four site sections remain provisional until taxonomy is settled.
 
 **LLM over regex:** categorization and date/event parsing are Gemini’s job (text + poster OCR). PHP/`KeywordQc` only enforce structural invariants (enums, cover/role locks, typo cleanup). No invitation/kind/date heuristics in PHP.
 
@@ -139,19 +139,21 @@ flowchart LR
   KW --> corpus[Export facets embeddings]
   corpus --> review[Taxonomy discovery]
   review --> cats[Assign categories]
-  KW --> events[Event materialize invites]
-  cats --> pilot[Pilot post materialize]
-  pilot --> stage3[Full materialize]
-  stage3 --> posts[posts layoutJson]
-  events --> ev[events homepage hero]
+  KW --> mat[MaterializePosts]
+  cats --> mat
+  mat --> posts[posts layoutJson.parts]
+  posts --> pub[Public site + /udalosti]
 ```
 
 | Layer | Tables | Role |
 |---|---|---|
 | Imported | `ingest_items`, `ingest_item_files` | Source mirror + LLM enrichments |
-| Internal | `posts`, `post_files`, `events` | After taxonomy + stage 3 / event materialize |
+| Public | `posts`, `post_files` | After `MaterializePosts` (work + invitations) |
+| Legacy | `events` | Admin-only leftover; public invites are posts |
 
-**Interlink:** `ingest_items.postId` ↔ `posts.ingestItemId`; `ingest_items.eventId` ↔ `events` (`ON DELETE SET NULL`).
+**Interlink:** `ingest_items.postId` ↔ `posts.ingestItemId`. Legacy `ingest_items.eventId` → `events` remains in schema but is unused by the public path (`ON DELETE SET NULL`).
+
+**Statuses:** `loaded` → `keyworded` → (`categorized`) → `materialized` (or `skipped`).
 
 ---
 
@@ -188,7 +190,7 @@ Orthogonal to cover and demote. Cover may also be `lead`; demoted → `role=skip
 
 **Classifier signals:** (1) `sourceSlot`, (2) vision + body, (3) rating ≠ automatic lead, (4) near-dup demote, (5) Instagram order as weak prior.
 
-**`layoutHints` / later `posts.layoutJson` patterns:** `hero_text_gallery`, `text_lead_gallery`, `gallery_essay`, `single`.
+**`layoutHints` patterns** (ingest hint) vs **`posts.layoutJson.parts`** (public body: `text` / `image` / `gallery` interleaved by `PostLayoutPlanner`). Hint enums: `hero_text_gallery`, `text_lead_gallery`, `gallery_essay`, `single`.
 
 ---
 
@@ -196,7 +198,7 @@ Orthogonal to cover and demote. Cover may also be `lead`; demoted → `role=skip
 
 ### Already present
 
-`ingest_items`: source keys, title, postedAt, bodyHtml, contentHash, status, kind, keywords, themes, entities, qualityFlags, categories, classificationRaw, embedding, duplicateOfId, postId, eventId.
+`ingest_items`: source keys, title, postedAt, bodyHtml, contentHash, status, kind, keywords, themes, entities, qualityFlags, categories, classificationRaw, embedding, duplicateOfId, postId, eventId (legacy).
 
 `ingest_item_files`: storageFileId, position, caption, keywords, contentHash, sourceSlot, galleryIndex.
 
@@ -206,21 +208,21 @@ Orthogonal to cover and demote. Cover may also be `lead`; demoted → `role=skip
 
 **`ingest_item_files` add:** `rating`, `isCover`, `role`, `roleRationale`, `roleLocked`, `altText`, `orientation`, `focalCrop`, `demote`.
 
-### Timeframe / events (`IngestTimeframeSchema`)
+### Timeframe (`IngestTimeframeSchema`)
 
 **`ingest_items` add:** `startsAt`, `endsAt`, `place`, `isInvitation`.
 
-Filled only by KeywordAnalyzer `timeframe` JSON (Gemini sees caption + poster images + `postedAt` as year reference). Used later to materialize `events` and drive homepage hero.
+Filled only by KeywordAnalyzer `timeframe` JSON (Gemini sees caption + poster images + `postedAt` as year reference). Copied onto invitation `posts` on materialize; drives `/udalosti` and homepage hero (current invite else latest work).
 
-On materialize: copy onto `posts` / `post_files`; write `layoutJson`; respect locks. Invitations → `events`.
+On materialize: copy onto `posts` / `post_files`; write `layoutJson.parts`; respect locks. Invitations → section `udalosti` (ephemeral).
 
 ---
 
-## Stage 2 — KeywordIngest
+## Stage 2 — KeywordIngest (done locally)
 
 ### Goal
 
-`loaded` → `keyworded` with searchable keywords + layout-ready photo metadata + **event timeframe**. **No taxonomy / post materialize yet.**
+`loaded` → `keyworded` with searchable keywords + layout-ready photo metadata + **invitation timeframe**. Soft `kind` is **not** a site section.
 
 ### Soft `kind` (no `mourning`)
 
@@ -262,28 +264,29 @@ flowchart LR
 
 Eval cover/roles/patterns **100%**. Demote later appeared on IG. Typo map: `florika`→`floristika`, `košilela`→`košile`.
 
-### Round 3 (IG mid-run, morning 2026-10-29)
+### Round 3–4 (IG + timeframe, 2026-10-29) — done
 
-~64 IG keyworded; demote working on text slides; `@himmlhaus` diary-heavy; invites mis-tagged as mourning/diary until timeframe + kind prompt fix.
+Mid-run notes: demote on text slides; invites mis-tagged until timeframe + kind prompt fix; then re-enrich.
 
-### Round 4 (timeframe + invite re-enrich, afternoon 2026-10-29)
+### Corpus snapshot (local, 2026-10-30)
 
 | Metric | Result |
 |---|---|
-| Status | **107** efemer + **80** IG `keyworded`; **551** IG still `loaded` |
-| Soft kinds | diary 73, wedding 37, workshop 31, gift 15, portrait 11, installation 10, bouquet 10 — **no mourning** |
-| Invitations | **28** `isInvitation=1` (almost all `@efemer_flowers` workshops) with LLM `startsAt` / often `endsAt` + `place` |
-| Timeframe JSON | **57** items with Gemini `timeframe` block (re-enriched set); older efemer keyworded still lack it until optional rekeyword |
-| `@himmlhaus` | 46 keyworded — diary house journal with content dates/ranges + places (Himmlhaus, Amtmann, Black Gables, …); **0** invitations (expected) |
-| Cover / demote | still solid; demote on IG carousel text slides |
+| Status | **733** `keyworded` + **5** `materialized`; **0** `loaded` |
+| Enrichment | all **`kw-v3`** (738) |
+| Sources | efemer_cz 107 · instagram 631 |
+| Soft kinds | diary 348, workshop 148, wedding 95, installation 75, gift 30, portrait 24, bouquet 16, product 2 — **no mourning** |
+| Invitations | **127** `isInvitation` (121 with `startsAt`); mostly IG workshops |
+| Timeframe JSON | **608** items with Gemini `timeframe` block in classificationRaw |
+| Public posts | **5** pilots (Wanderlust invite + 4 lasting) |
 
-**Examples that work:** Wanderlust `#427` → workshop + invite + `2026-11-01 09:45` + Hraničář/Čermná; Kupalo `#1044`; Patience Gray / Marcel / Po Svaté Sofii series; `@himmlhaus` Weinlese `#621` → diary + `2025-09-19`–`2025-10-10`.
+**Examples:** Wanderlust `#427` → workshop + invite → post `#154` `/udalosti`; `@himmlhaus` Weinlese → himmelhaus diary posts.
 
 **Taxonomy / product implications**
 
-- Soft `kind` ≠ site section. `@himmlhaus` diary stays journal until taxonomy.
-- **`isInvitation` + timeframe`** is the bridge to public **`events`** and homepage hero — next concrete product step after finishing IG KeywordIngest.
-- Remaining ~551 IG `loaded` should get timeframe in the same KeywordIngest pass (no second job).
+- Soft `kind` ≠ site section. `@himmlhaus` diary stays journal until taxonomy assigns `himmelhaus` / etc.
+- **`isInvitation` + timeframe** → ephemeral invitation **posts** (not `events` table).
+- Broader materialize waits on taxonomy (or deliberate pilot picks).
 
 ### Ops note
 
@@ -295,12 +298,22 @@ Prod Instagram archive loop remains **off**. Prefer Instaloader dump + Import wh
 
 ### Next
 
-1. **Finish KeywordIngest** on remaining IG `loaded` (~551) — includes timeframe for free
-2. **Post materialize** (`MaterializePosts`) — universal; invitations as ephemeral `udalosti` posts; Wanderlust pilot
-3. Optional: rekeyword older efemer.cz items that lack `timeframe` JSON
-4. ExportCorpus + EvaluateKeywords; optional IG invite/cover eval rows
-5. Embeddings / dedup → taxonomy pause → broader post materialize
-6. Optional: empty `bodyHtml` / `thin_text` on efemer.cz (~59)
+1. **ExportCorpus + EvaluateKeywords** (full corpus after IG finish); optional IG invite/cover eval rows
+2. Optional: rekeyword older items that still lack `timeframe` JSON (~130)
+3. Embeddings / dedup → **taxonomy pause** → assign categories
+4. **Broader MaterializePosts** (beyond the 5 pilots)
+5. Rich ingest admin (manual cover/role locks, layout preview)
+6. Optional: empty `bodyHtml` / `thin_text` (~65) — fix scraper or accept image-led
+7. Drop legacy admin `events` UI when ready
+
+### Materialize CLI (already shipped)
+
+```bash
+./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"id":427}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"invitationsOnly":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"existingOnly":true}' -f
+```
 
 ---
 
@@ -312,8 +325,8 @@ Prod Instagram archive loop remains **off**. Prefer Instaloader dump + Import wh
 4. ~~Finish efemer.cz keywording~~
 5. ~~IG stage-1 Instaloader~~
 6. ~~LLM timeframe + drop mourning + invite re-enrich~~
-7. **Finish IG KeywordIngest** (in progress)
-8. **Post materialize** (unified posts; invitations ephemeral on `/udalosti`)
-9. Re-export / eval → embeddings / dedup
+7. ~~Finish IG KeywordIngest~~
+8. ~~Post materialize pilots (unified posts; invitations ephemeral on `/udalosti`)~~
+9. **Re-export / eval** → embeddings / dedup
 10. Taxonomy pause → assign → broader materialize
-11. Rich admin + rules polish; drop legacy `events` UI; optional efemer bodyHtml fix
+11. Rich admin; drop legacy `events` UI; optional efemer bodyHtml fix
