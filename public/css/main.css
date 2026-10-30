@@ -12100,6 +12100,9 @@ body.builder .builder-file-list--insert:not(:empty),
     padding: 2rem 1.75rem 2.25rem;
     padding: var(--plot-pad-top) 1.75rem var(--plot-pad-bottom);
   }
+  .home-plot--ritualy {
+    grid-column: 1/-1;
+  }
   .home-plot__photo img {
     margin-top: calc(var(--plot-photo-over) * -1);
   }
@@ -12110,6 +12113,9 @@ body.builder .builder-file-list--insert:not(:empty),
 @media screen and (min-width: 1200px) {
   .home-plots {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .home-plot--ritualy {
+    grid-column: auto;
   }
 }
 @media screen and (min-width: 1280px) {

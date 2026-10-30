@@ -479,7 +479,7 @@
 	}
 }
 
-// Tablet: two plots; wide desktop: rituály + události + deník in one row.
+// Tablet / mid desktop: two-column grid; rituály spans full width on top.
 @media screen and (min-width: 801px) {
 	.home-plots {
 		align-items: stretch;
@@ -495,6 +495,10 @@
 		padding: var(--plot-pad-top) 1.75rem var(--plot-pad-bottom);
 	}
 
+	.home-plot--ritualy {
+		grid-column: 1 / -1;
+	}
+
 	.home-plot__photo img {
 		margin-top: calc(var(--plot-photo-over) * -1);
 	}
@@ -504,9 +508,14 @@
 	}
 }
 
+// Wide: three equal plots in one row (rituály no longer spans).
 @media screen and (min-width: 1200px) {
 	.home-plots {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.home-plot--ritualy {
+		grid-column: auto;
 	}
 }
 
