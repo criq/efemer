@@ -23,9 +23,9 @@ Public site is **not** assembled from the page-component tree. Typed entities:
 | `denik` | Deník | `/denik` | Dated journal — diary, workshops, reports, the rest |
 | `udalosti` | Události | `/udalosti` | Current **invitations** only (ephemeral detail URLs) |
 
-Invitations are primarily the **homepage hero** (“Připoj se”). Nav is rituály · umění · deník · kontakt. Legacy `himmelhaus` / `workshopy` redirect to `/denik`.
+Invitations are primarily the **homepage hero** (“Připoj se”). Nav is rituály · deník · umění · kontakt. Legacy `himmelhaus` / `workshopy` redirect to `/denik`.
 
-`Section::work()` (homepage plots) = rituály → umění → deník.
+`Section::work()` (homepage plots) = rituály → deník → umění.
 
 ## Controlled tags
 

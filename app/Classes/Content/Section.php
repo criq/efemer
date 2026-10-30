@@ -24,8 +24,8 @@ class Section
 	{
 		return [
 			self::RITUALY,
-			self::UMENI,
 			self::DENIK,
+			self::UMENI,
 			self::UDALOSTI,
 		];
 	}
@@ -39,8 +39,8 @@ class Section
 	{
 		return [
 			self::RITUALY,
-			self::UMENI,
 			self::DENIK,
+			self::UMENI,
 		];
 	}
 
