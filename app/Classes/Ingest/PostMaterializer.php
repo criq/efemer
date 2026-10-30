@@ -263,8 +263,8 @@ class PostMaterializer
 			return Section::RITUALY;
 		}
 
-		// Umění = installations, floral portraits, art-led work.
-		if (in_array($item->getKind(), ["installation", "portrait"], true)) {
+		// Umění = discrete art objects / commissions only (not portraits or seasonal diary).
+		if ($item->getKind() === "installation") {
 			return Section::UMENI;
 		}
 
@@ -289,7 +289,7 @@ class PostMaterializer
 			}
 		}
 
-		if (in_array($item->getKind(), ["installation", "portrait"], true)) {
+		if ($item->getKind() === "installation") {
 			$normalized = $this->normalizeArtTitle((string)($plan["title"] ?? ""));
 			if ($normalized !== "") {
 				return $normalized;

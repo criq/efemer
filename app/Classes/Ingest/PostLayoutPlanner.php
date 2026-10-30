@@ -127,12 +127,12 @@ WEDDING (kind=wedding) — required:
 PROMPT;
 		}
 
-		if (in_array($item->getKind(), ["installation", "portrait"], true)) {
+		if ($item->getKind() === "installation") {
 			$prompt .= <<<'PROMPT'
 
 
-ART (kind=installation|portrait) — required:
-- title MUST be a short public work title (Czech preferred; keep a clear existing proper name in its language). Aim for about 2–8 words / under ~50 characters: motif, place, season, or piece name (e.g. "Madre Tierra", "Obloha", "Filipojakubská noc", "Studánky", "Efemér pro sklárnu Rückl").
+ART (kind=installation) — required:
+- title MUST be a short public work title (Czech preferred; keep a clear existing proper name in its language). Aim for about 2–8 words / under ~50 characters: the piece / commission / collaboration name (e.g. "Madre Tierra", "Efemér pro sklárnu Rückl").
 - Never use a full opening sentence, Instagram caption paste, hashtags, @handles, or a bare calendar date as the title.
 - If Source title is already a short proper name, refine/keep it rather than inventing something new. If Source title is a long sentence or only a date, invent a fitting short title from the body and photos.
 - excerpt (perex) should feel artful and specific to this piece (plants, place, gesture, light) — still 1–2 sentences, no handles/hashtags.

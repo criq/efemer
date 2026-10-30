@@ -8,6 +8,10 @@ alwaysApply: false
 
 `/umeni` uses `Sections/umeni.twig`. Same feed pattern as deník and rituály.
 
+## What belongs here
+
+Only **discrete art objects** — commissions, gallery/institutional installations, named collaborations (e.g. Efemér pro sklárnu Rückl). Seasonal diary, folk-calendar days, place visits, and floral portraits go to **deník** (`kind=diary|portrait|…`).
+
 ## Layout
 
 - Intro hero: flat greige on phones; from 801px white→greige gradient (same as homepage hero)

@@ -54,12 +54,11 @@ cd ~/Sites/efemer
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"existingOnly":true}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"kind":"wedding","existingOnly":true}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"kind":"installation","existingOnly":true}' -f
-./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"kind":"portrait","existingOnly":true}' -f
 ```
 
 Weddings (`kind=wedding`): KeywordAnalyzer fills `couple` (“Jana a Petr”); MaterializePosts / PostLayoutPlanner set the public **title** to those names and write a short ceremonial **perex** (`posts.excerpt`). Rematerialize with `kind=wedding` after prompt changes.
 
-Art (`kind=installation|portrait` → umění): PostLayoutPlanner invents/keeps a short **work title** (not a caption sentence or bare date) plus perex. Rematerialize with `kind=installation` / `kind=portrait` after prompt changes.
+Art (`kind=installation` → umění): only discrete authored objects / commissions / gallery installations. Portraits and seasonal journal notes stay `denik` even when plants are sculptural. PostLayoutPlanner invents/keeps a short **work title** plus perex. Rematerialize with `kind=installation` after prompt changes; rekeyword former false positives so they become `diary`/`portrait` first.
 
 Uploads go to GCS `gs://efemer/files/{DEV|PROD}/…`. Reset/purge only touches the current env shard. Admin: `/admin/ingest` (pipeline + kind facets + keyword search).
 
@@ -77,7 +76,7 @@ Eval sets: `app/Resources/Ingest/eval/covers.json`, `roles.json`. Exports: `tmp/
 | `Ingest.EvaluateKeywords` | score cover/role eval sets |
 | `Ingest.ExportCorpus` | CSV/JSON + keyword co-occurrence |
 | `Ingest.ResetKeywordEnrichment` | clear LLM fields only (`yes:true`); status → `loaded` |
-| `Ingest.MaterializePosts` | → `posts` + selected `post_files` + `layoutJson.parts`; invites ephemeral on `/udalosti`; weddings titled by couple names + perex; art by short work titles |
+| `Ingest.MaterializePosts` | → `posts` + selected `post_files` + `layoutJson.parts`; invites ephemeral on `/udalosti`; weddings titled by couple names + perex; `installation` → umění with short work titles |
 | `Ingest.ResetImportedContent` | wipe posts/ingest/pages + env GCS shard |
 | `Database.Migrate` | schema migrations |
 | `Pages.ImportEfemerCz` | legacy page-builder import |

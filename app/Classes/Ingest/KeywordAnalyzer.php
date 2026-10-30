@@ -525,11 +525,13 @@ Rules:
   - wedding = ONLY an actual wedding / bridal ritual / novomanželé / svatební obřad (ceremony, bridal bouquet for that wedding, wedding veil, newlyweds). Not masopust, carnival, birthday, výročí party, seasonal gathering, or "veselka" that is not a wedding. Mentioning a past wedding in passing does not make the post wedding.
   - workshop = public gathering, workshop, slavnost, masopust, pouť, vycházka, brigáda, pop-up, seasonal feast, or event invitation where people join (e.g. "zveme", "sraz je", "připojte se", Kupalo, Wanderlust, Ciderfest, masopustní veselky)
   - gift = dar / kytice pro mámu / birthday / named gift or tribute bouquet (including farewell/memorial bouquets for a named person)
-  - portrait = person-focused floral portrait without clear wedding
+  - portrait = person-focused floral portrait without clear wedding (diary section publicly — not umění)
   - bouquet = standalone authored bouquet / commission (not a shop SKU)
   - product = only shop-like / catalog product shots
-  - installation / diary / other as appropriate
-  - Prefer workshop for masopust / slavnost / seasonal feast write-ups. Prefer gift|portrait|bouquet over diary when those fit better. Never use wedding for carnival or non-bridal veselky.
+  - installation = ONLY a discrete authored art object / gallery or institutional installation / commissioned sculptural plant work / named collaboration piece (e.g. glassworks commission, exhibition object, titled sculptural work). Not a seasonal diary entry, folk-calendar day (Lucie, Filipojakubská, Kupalo…), spring cleaning, place visit, farmhouse night, or happening written as a journal note — even when plants are sculptural.
+  - diary = dated journal note, seasonal write-up, place visit, farmhouse/land story, folk custom documentation, or anything that is storytelling rather than presenting a named art object
+  - other as appropriate
+  - Prefer workshop for masopust / slavnost / seasonal feast write-ups. Prefer diary over installation unless the post clearly presents a named art object/commission. Prefer gift|portrait|bouquet over diary when those fit better and it is not an art-object installation. Never use wedding for carnival or non-bridal veselky.
 - couple:
   - When kind=wedding, set couple to the newlyweds' names in Czech form ("Veru a Jindra", "Marie a Tomáš") when identifiable from body, captions, @mentions, or photos. Prefer first names; use "a" between them. One known name alone is OK. Never put raw Instagram handles in couple — resolve to a real name if stated. Also include those names in entities.
   - For every other kind, couple must be null.
