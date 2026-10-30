@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Rituály listing
 
-`/svatebni-ritualy` uses `Sections/ritualy.twig`. Deník has its own journal layout; umění stays on the shared grid for now.
+`/svatebni-ritualy` uses `Sections/ritualy.twig`. Deník has a journal layout; umění a gallery wall.
 
 ## Layout
 

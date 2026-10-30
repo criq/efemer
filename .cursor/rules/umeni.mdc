@@ -1,0 +1,16 @@
+---
+description: Umění section listing — gallery wall layout
+globs: app/Views/Sections/umeni.twig,static/scss/3-blocks/umeni.scss,app/Controllers/Sections/**
+alwaysApply: false
+---
+
+# Umění listing
+
+`/umeni` uses `Sections/umeni.twig`. Distinct from deník (journal) and rituály (ceremonial chapters).
+
+## Layout
+
+- Greige page ground; white header wash
+- Photo-forward gallery wall: featured first piece large, then asymmetric wide/narrow spans on a 12-col grid
+- Print shadows + light tilts; native aspect ratios; captions under photos (title + year; summary only on featured)
+- Scroll reveal via `data-reveal` + `.is-in` (scoped with other section pages; respects reduced motion)

@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Deník listing
 
-`/denik` uses `Sections/denik.twig` (not the shared section grid). Rituály has its own portfolio layout; umění stays on `Sections/index.twig`.
+`/denik` uses `Sections/denik.twig`. Rituály and umění have their own listing layouts (`ritualy.twig`, `umeni.twig`).
 
 ## Layout
 

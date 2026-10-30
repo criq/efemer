@@ -22,7 +22,12 @@ class Index extends \Katu\Controllers\Controller
 
 	public function umeni(ServerRequestInterface $request, ResponseInterface $response)
 	{
-		return $this->render($request, $response, Section::UMENI);
+		return $response->withBody((new HTMLEngine($request))->render("Sections/umeni.twig", [
+			"section" => Section::UMENI,
+			"title" => Section::title(Section::UMENI),
+			"lead" => Section::lead(Section::UMENI),
+			"posts" => Post::getPublishedBySection(Section::UMENI),
+		]));
 	}
 
 	public function denik(ServerRequestInterface $request, ResponseInterface $response)
