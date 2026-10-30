@@ -43,11 +43,105 @@
 	text-align: center;
 }
 
+// Side-by-side wedding panels: portrait peeks from the left, copy on the right.
+.ritualy__plots .home-plot {
+	--plot-pad-y: clamp(1.35rem, 3.5vw, 2.25rem);
+	--plot-pad-x: clamp(1rem, 3vw, 1.75rem);
+	--plot-photo-over: 1.35rem;
+	--plot-edge: .85rem;
+	align-items: center;
+	display: grid;
+	gap: clamp(1rem, 2.5vw, 1.75rem);
+	grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.15fr);
+	padding: var(--plot-pad-y) var(--plot-pad-x) var(--plot-pad-y) 0;
+}
+
+.ritualy__plots .home-plot__photo {
+	align-self: stretch;
+	justify-self: stretch;
+	margin-left: calc(var(--plot-edge) * -1);
+	margin-top: 0;
+	max-width: none;
+	width: auto;
+
+	img {
+		aspect-ratio: 3 / 4;
+		height: 100%;
+		margin-left: calc(var(--plot-photo-over) * -1);
+		margin-top: 0;
+		max-width: none;
+		min-height: 14rem;
+		object-fit: cover;
+		object-position: center;
+		width: calc(100% + var(--plot-photo-over));
+	}
+}
+
+.ritualy__plots .home-plot__copy {
+	padding: .35rem var(--plot-pad-x) .35rem 0;
+	text-align: left;
+}
+
+.ritualy__plots .home-plot__title {
+	font-size: clamp(1.55rem, 2.8vw, 2.15rem);
+}
+
+.ritualy__plots .home-plot__lead {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 4;
+	overflow: hidden;
+}
+
+@media screen and (max-width: 800px) {
+	.ritualy__plots .home-plot {
+		--plot-pad-top: clamp(1.5rem, 4vw, 2.5rem);
+		--plot-pad-bottom: 1.5rem;
+		--plot-photo-over: 1.15rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		padding: var(--plot-pad-top) clamp(1rem, 4vw, 2rem) var(--plot-pad-bottom);
+	}
+
+	.ritualy__plots .home-plot__photo {
+		align-self: center;
+		margin-left: 0;
+		margin-top: calc((var(--plot-pad-top) + var(--plot-edge)) * -1);
+		width: min(72%, 16rem);
+
+		img {
+			aspect-ratio: 3 / 4;
+			height: auto;
+			margin-left: 0;
+			margin-top: calc(var(--plot-photo-over) * -0.65);
+			min-height: 0;
+			width: 100%;
+		}
+	}
+
+	.ritualy__plots .home-plot__copy {
+		padding: 1.35rem 0 0;
+		text-align: center;
+	}
+}
+
 @media screen and (min-width: 801px) {
 	.ritualy__plots {
 		align-items: stretch;
 		display: grid;
 		gap: .75rem;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.ritualy__plots .home-plot {
+		--plot-photo-over: 2rem;
+	}
+}
+
+@media screen and (min-width: 1200px) {
+	.ritualy__plots .home-plot {
+		--plot-photo-over: 2.75rem;
+		--plot-pad-x: 2rem;
 	}
 }

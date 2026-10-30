@@ -11,8 +11,8 @@ alwaysApply: false
 ## Layout
 
 - Intro reuses homepage text hero (`.home-hero.home-hero--text`): kicker, title, longer lead, blurb, CTA → kontakt (“Napsat o rituálu”)
-- Wedding cards reuse `.home-plot` peeking photos (3:2 cover, outer-edge crop, print shadow, ≤0.5° tilt)
-- Panels in a greige grid: **max 2 columns** from 801px (never 3); `.75rem` white gaps
-- Prefer landscape listing images via `Post::getPreferredImage("landscape")`
+- Wedding cards: greige panels, **portrait photo peeking from the left**, text on the right (from 801px). Phones stack portrait on top.
+- Prefer portrait listing images via `Post::getPreferredImage("portrait")`
+- Grid: **max 2 columns** from 801px; `.75rem` white gaps
 - Title = newlywed names from materialize; summary = crafted perex
 - No scroll / entrance animations

@@ -24,7 +24,7 @@
 		<div class="ritualy__plots">
 			{% for post in posts %}
 				<article class="home-plot home-plot--{{ loop.index }}">
-					{% set image = post.getPreferredImage("landscape") %}
+					{% set image = post.getPreferredImage("portrait") %}
 					{% if image %}
 						<a class="home-print home-plot__photo" href="{{ post.getPublicUrl }}">
 							<span class="home-print__photo">
