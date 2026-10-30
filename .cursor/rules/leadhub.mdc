@@ -6,12 +6,12 @@ alwaysApply: false
 
 # Leadhub
 
-Site-wide pixel in `Templates/default.twig` (pageview). Newsletter forms call `lhi('subscribe', { email, interests: ['newsletters'] })`.
+Site-wide pixel in `Templates/default.twig` (pageview). Newsletter forms call `lhi('identify', { email, subscribe: ['newsletters'] })` — identifies the browser and joins the list in one event (Leadhub onboarding expects Identify).
 
 | Item | Value |
 |---|---|
 | Tracking ID | `bQVrGwsJSGSpLS5` (override with `LEADHUB_TRACKING_ID` in `.env`) |
-| Interest list code | `newsletters` (case-sensitive) |
+| Interest list code | `newsletters` (case-sensitive; key is `subscribe` on identify, not `interests`) |
 | Form partial | `Partials/newsletter-form.twig` |
 | Surfaces | homepage `.home-newsletter`, `/newsletter` |
 

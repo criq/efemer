@@ -328,9 +328,11 @@ const initNewsletterForms = () => {
 			setStatus("Přihlašuji…", null);
 
 			try {
-				window.lhi("subscribe", {
+				// identify links the browser to the contact and can subscribe in one call
+				// (Leadhub onboarding watches for Identify; list codes go in `subscribe`).
+				window.lhi("identify", {
 					email,
-					interests: ["newsletters"],
+					subscribe: ["newsletters"],
 				});
 				setStatus("Děkujeme — jste přihlášeni.", "ok");
 				form.reset();

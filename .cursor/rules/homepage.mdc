@@ -45,4 +45,4 @@ Greige band `.home-about` after the three plots (same `.75rem` white gap):
 
 ## Newsletter (below about)
 
-Greige band `.home-newsletter`: Dopisy intro + shared `Partials/newsletter-form.twig`. Leadhub pixel (`lhi('subscribe')`, list `newsletters`) — see `leadhub.mdc`.
+Greige band `.home-newsletter`: Dopisy intro + shared `Partials/newsletter-form.twig`. Leadhub pixel (`lhi('identify')` + `subscribe: ['newsletters']`) — see `leadhub.mdc`.
