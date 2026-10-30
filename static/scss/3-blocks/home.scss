@@ -496,7 +496,45 @@
 	}
 
 	.home-plot--ritualy {
+		--plot-pad-x: 2rem;
+		--plot-photo-over: 2.25rem;
+		--plot-edge: .85rem;
+		align-items: center;
+		display: grid;
+		gap: clamp(1.25rem, 3vw, 2.25rem);
 		grid-column: 1 / -1;
+		grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr);
+		padding: 2rem 0 2rem var(--plot-pad-x);
+
+		.home-plot__photo {
+			justify-self: stretch;
+			margin-top: 0;
+			order: 2;
+			width: auto;
+
+			img {
+				aspect-ratio: 3 / 4;
+				height: auto;
+				margin-right: calc(var(--plot-photo-over) * -1);
+				margin-top: 0;
+				min-height: 16rem;
+				width: calc(100% + var(--plot-photo-over));
+			}
+		}
+
+		.home-plot__copy {
+			order: 1;
+			padding: .5rem var(--plot-pad-x) .5rem 0;
+			text-align: left;
+		}
+
+		.home-plot__title {
+			font-size: clamp(2rem, 4vw, 3rem);
+		}
+
+		.home-plot__lead {
+			max-width: 28rem;
+		}
 	}
 
 	.home-plot__photo img {
@@ -508,14 +546,46 @@
 	}
 }
 
-// Wide: three equal plots in one row (rituály no longer spans).
+// Wide: three equal plots in one row (rituály no longer spans / side-by-side).
 @media screen and (min-width: 1200px) {
 	.home-plots {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 
 	.home-plot--ritualy {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
 		grid-column: auto;
+		padding: var(--plot-pad-top) 1.75rem var(--plot-pad-bottom);
+
+		.home-plot__photo {
+			margin-top: calc((var(--plot-pad-top) + var(--plot-edge)) * -1);
+			order: 0;
+			width: 100%;
+
+			img {
+				aspect-ratio: 3 / 2;
+				margin-right: 0;
+				margin-top: calc(var(--plot-photo-over) * -1);
+				min-height: 0;
+				width: 100%;
+			}
+		}
+
+		.home-plot__copy {
+			order: 0;
+			padding: 1.5rem 0 0;
+			text-align: center;
+		}
+
+		.home-plot__title {
+			font-size: clamp(1.6rem, 2.4vw, 2.35rem);
+		}
+
+		.home-plot__lead {
+			max-width: none;
+		}
 	}
 }
 

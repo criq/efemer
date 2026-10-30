@@ -12101,7 +12101,42 @@ body.builder .builder-file-list--insert:not(:empty),
     padding: var(--plot-pad-top) 1.75rem var(--plot-pad-bottom);
   }
   .home-plot--ritualy {
+    --plot-pad-x: 2rem;
+    --plot-photo-over: 2.25rem;
+    --plot-edge: .85rem;
+    align-items: center;
+    display: grid;
+    grid-gap: max(1.25rem, min(3vw, 2.25rem));
+    gap: max(1.25rem, min(3vw, 2.25rem));
     grid-column: 1/-1;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr);
+    padding: 2rem 0 2rem 2rem;
+    padding: 2rem 0 2rem var(--plot-pad-x);
+  }
+  .home-plot--ritualy .home-plot__photo {
+    justify-self: stretch;
+    margin-top: 0;
+    order: 2;
+    width: auto;
+  }
+  .home-plot--ritualy .home-plot__photo img {
+    aspect-ratio: 3/4;
+    height: auto;
+    margin-right: calc(var(--plot-photo-over) * -1);
+    margin-top: 0;
+    min-height: 16rem;
+    width: calc(100% + var(--plot-photo-over));
+  }
+  .home-plot--ritualy .home-plot__copy {
+    order: 1;
+    padding: 0.5rem var(--plot-pad-x) 0.5rem 0;
+    text-align: left;
+  }
+  .home-plot--ritualy .home-plot__title {
+    font-size: max(2rem, min(4vw, 3rem));
+  }
+  .home-plot--ritualy .home-plot__lead {
+    max-width: 28rem;
   }
   .home-plot__photo img {
     margin-top: calc(var(--plot-photo-over) * -1);
@@ -12115,7 +12150,34 @@ body.builder .builder-file-list--insert:not(:empty),
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .home-plot--ritualy {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
     grid-column: auto;
+    padding: var(--plot-pad-top) 1.75rem var(--plot-pad-bottom);
+  }
+  .home-plot--ritualy .home-plot__photo {
+    margin-top: calc((var(--plot-pad-top) + var(--plot-edge)) * -1);
+    order: 0;
+    width: 100%;
+  }
+  .home-plot--ritualy .home-plot__photo img {
+    aspect-ratio: 3/2;
+    margin-right: 0;
+    margin-top: calc(var(--plot-photo-over) * -1);
+    min-height: 0;
+    width: 100%;
+  }
+  .home-plot--ritualy .home-plot__copy {
+    order: 0;
+    padding: 1.5rem 0 0;
+    text-align: center;
+  }
+  .home-plot--ritualy .home-plot__title {
+    font-size: max(1.6rem, min(2.4vw, 2.35rem));
+  }
+  .home-plot--ritualy .home-plot__lead {
+    max-width: none;
   }
 }
 @media screen and (min-width: 1280px) {

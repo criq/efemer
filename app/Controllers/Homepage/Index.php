@@ -45,23 +45,25 @@ class Index extends \Katu\Controllers\Controller
 		];
 
 		$posts = Post::getPublishedBySection($code);
-		$plot["images"] = $this->sectionPlotImages($posts);
+		$prefer = $code === Section::RITUALY ? "portrait" : "landscape";
+		$plot["images"] = $this->sectionPlotImages($posts, $prefer);
 
 		return $plot;
 	}
 
 	/**
-	 * Prefer a landscape, high-rated photo from the section’s posts.
+	 * Prefer a high-rated photo with the given LLM orientation from the section’s posts.
 	 *
 	 * @param list<Post> $posts
 	 * @return list<array{url: string, image: \Katu\Tools\Images\Image}>
 	 */
-	private function sectionPlotImages(array $posts): array
+	private function sectionPlotImages(array $posts, string $preferOrientation = "landscape"): array
 	{
-		// Prefer LLM orientation=landscape, then rating. Avoid getWidth/getHeight —
+		// Prefer LLM orientation, then rating. Avoid getWidth/getHeight —
 		// each call can download from GCS and made the homepage time out on production.
-		$bestLandscape = null;
-		$bestLandscapeRating = -1.0;
+		$preferOrientation = strtolower($preferOrientation);
+		$bestPreferred = null;
+		$bestPreferredRating = -1.0;
 		$bestAny = null;
 		$bestAnyRating = -1.0;
 
@@ -89,14 +91,14 @@ class Index extends \Katu\Controllers\Controller
 					$bestAny = $candidate;
 				}
 
-				if ($this->fileOrientation($file) === "landscape" && $rating > $bestLandscapeRating) {
-					$bestLandscapeRating = $rating;
-					$bestLandscape = $candidate;
+				if ($this->fileOrientation($file) === $preferOrientation && $rating > $bestPreferredRating) {
+					$bestPreferredRating = $rating;
+					$bestPreferred = $candidate;
 				}
 			}
 		}
 
-		$best = $bestLandscape ?? $bestAny;
+		$best = $bestPreferred ?? $bestAny;
 
 		return $best ? [$best] : [];
 	}
