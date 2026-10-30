@@ -495,48 +495,68 @@
 		padding: var(--plot-pad-top) 1.75rem var(--plot-pad-bottom);
 	}
 
+	// Mirror the mid-width hero: centered text + lead/aside collage on the right.
 	.home-plot--ritualy {
-		--plot-pad-x: 2rem;
-		--plot-photo-over: 2.25rem;
-		--plot-edge: .85rem;
 		align-items: center;
 		display: grid;
-		gap: clamp(1.25rem, 3vw, 2.25rem);
+		gap: clamp(1.75rem, 4vw, 3rem);
 		grid-column: 1 / -1;
-		grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr);
-		padding: 2rem 0 2rem var(--plot-pad-x);
-
-		.home-plot__photo {
-			justify-self: stretch;
-			margin-top: 0;
-			order: 2;
-			width: auto;
-
-			img {
-				aspect-ratio: 3 / 4;
-				height: auto;
-				margin-right: calc(var(--plot-photo-over) * -1);
-				margin-top: 0;
-				min-height: 16rem;
-				width: calc(100% + var(--plot-photo-over));
-			}
-		}
+		grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+		overflow: hidden;
+		padding: 4rem 0 4rem clamp(1.25rem, 3vw, 2.5rem);
 
 		.home-plot__copy {
 			justify-self: center;
-			order: 1;
-			padding: .5rem var(--plot-pad-x) .5rem 0;
+			padding: .5rem .25rem .5rem 0;
 			text-align: center;
-			width: min(100%, 28rem);
+			width: min(100%, 34rem);
 		}
 
 		.home-plot__title {
-			font-size: clamp(2rem, 4vw, 3rem);
+			font-size: clamp(2rem, 4vw, 3.2rem);
 		}
 
 		.home-plot__lead {
 			margin-inline: auto;
 			max-width: 28rem;
+		}
+
+		.home-plot__side {
+			justify-self: end;
+			margin-right: -3.5rem;
+			position: relative;
+			width: min(24rem, 52vw);
+		}
+
+		.home-plot__print--lead {
+			display: block;
+			position: relative;
+			transform: rotate(0.4deg);
+			width: 100%;
+			z-index: 1;
+
+			.home-print__photo {
+				width: 100%;
+			}
+
+			img {
+				aspect-ratio: auto;
+				display: block;
+				height: auto;
+				margin: 0;
+				max-width: 100%;
+				object-fit: contain;
+				width: 100%;
+			}
+		}
+
+		.home-plot__print--aside {
+			left: 0;
+			position: absolute;
+			top: 42%;
+			transform: translateX(-50%) rotate(-0.45deg);
+			width: 36%;
+			z-index: 2;
 		}
 	}
 
@@ -562,24 +582,33 @@
 		grid-column: auto;
 		padding: var(--plot-pad-top) 1.75rem var(--plot-pad-bottom);
 
-		.home-plot__photo {
+		.home-plot__side {
+			margin-right: 0;
+			order: -1;
+			width: 100%;
+		}
+
+		.home-plot__print--lead {
 			margin-top: calc((var(--plot-pad-top) + var(--plot-edge)) * -1);
-			order: 0;
+			transform: rotate(-0.3deg);
 			width: 100%;
 
 			img {
 				aspect-ratio: 3 / 2;
-				margin-right: 0;
 				margin-top: calc(var(--plot-photo-over) * -1);
-				min-height: 0;
+				object-fit: cover;
 				width: 100%;
 			}
 		}
 
+		.home-plot__print--aside {
+			display: none;
+		}
+
 		.home-plot__copy {
-			order: 0;
 			padding: 1.5rem 0 0;
 			text-align: center;
+			width: auto;
 		}
 
 		.home-plot__title {
@@ -588,6 +617,39 @@
 
 		.home-plot__lead {
 			max-width: none;
+		}
+	}
+}
+
+// Phones: ritualy collage stacks like other plots (lead peeks from top).
+@media screen and (max-width: 800px) {
+	.home-plot--ritualy {
+		.home-plot__side {
+			align-self: center;
+			margin-right: 0;
+			order: -1;
+			width: min(72%, 16rem);
+		}
+
+		.home-plot__print--lead {
+			margin-top: calc((var(--plot-pad-top) + var(--plot-edge)) * -1);
+			transform: rotate(-0.3deg);
+
+			img {
+				aspect-ratio: 3 / 4;
+				margin-top: calc(var(--plot-photo-over) * -0.65);
+				object-fit: cover;
+				width: 100%;
+			}
+		}
+
+		.home-plot__print--aside {
+			display: none;
+		}
+
+		.home-plot__copy {
+			padding: 1.5rem 0 0;
+			width: auto;
 		}
 	}
 }

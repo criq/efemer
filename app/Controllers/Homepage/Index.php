@@ -46,26 +46,25 @@ class Index extends \Katu\Controllers\Controller
 
 		$posts = Post::getPublishedBySection($code);
 		$prefer = $code === Section::RITUALY ? "portrait" : "landscape";
-		$plot["images"] = $this->sectionPlotImages($posts, $prefer);
+		$limit = $code === Section::RITUALY ? 2 : 1;
+		$plot["images"] = $this->sectionPlotImages($posts, $prefer, $limit);
 
 		return $plot;
 	}
 
 	/**
-	 * Prefer a high-rated photo with the given LLM orientation from the section’s posts.
+	 * Prefer high-rated photos with the given LLM orientation from the section’s posts.
 	 *
 	 * @param list<Post> $posts
 	 * @return list<array{url: string, image: \Katu\Tools\Images\Image}>
 	 */
-	private function sectionPlotImages(array $posts, string $preferOrientation = "landscape"): array
+	private function sectionPlotImages(array $posts, string $preferOrientation = "landscape", int $limit = 1): array
 	{
 		// Prefer LLM orientation, then rating. Avoid getWidth/getHeight —
 		// each call can download from GCS and made the homepage time out on production.
 		$preferOrientation = strtolower($preferOrientation);
-		$bestPreferred = null;
-		$bestPreferredRating = -1.0;
-		$bestAny = null;
-		$bestAnyRating = -1.0;
+		$limit = max(1, $limit);
+		$candidates = [];
 
 		foreach ($posts as $post) {
 			foreach ($post->getFiles() as $file) {
@@ -73,34 +72,52 @@ class Index extends \Katu\Controllers\Controller
 					continue;
 				}
 
-				$rating = $file->getRating() ?? 0.55;
 				$image = $file->getImage();
 				if (!$image) {
 					continue;
 				}
 
-				$candidate = [
+				$candidates[] = [
 					"url" => $post->getPublicUrl(),
 					"image" => $image,
 					"post" => $post,
 					"file" => $file,
+					"rating" => $file->getRating() ?? 0.55,
+					"preferred" => $this->fileOrientation($file) === $preferOrientation,
 				];
-
-				if ($rating > $bestAnyRating) {
-					$bestAnyRating = $rating;
-					$bestAny = $candidate;
-				}
-
-				if ($this->fileOrientation($file) === $preferOrientation && $rating > $bestPreferredRating) {
-					$bestPreferredRating = $rating;
-					$bestPreferred = $candidate;
-				}
 			}
 		}
 
-		$best = $bestPreferred ?? $bestAny;
+		if ($candidates === []) {
+			return [];
+		}
 
-		return $best ? [$best] : [];
+		usort($candidates, function (array $a, array $b) {
+			if ($a["preferred"] !== $b["preferred"]) {
+				return $a["preferred"] ? -1 : 1;
+			}
+
+			return $b["rating"] <=> $a["rating"];
+		});
+
+		$picked = [];
+		$seen = [];
+		foreach ($candidates as $candidate) {
+			$key = (int)$candidate["file"]->storageFileId;
+			if ($key < 1 || isset($seen[$key])) {
+				continue;
+			}
+			$seen[$key] = true;
+			$picked[] = [
+				"url" => $candidate["url"],
+				"image" => $candidate["image"],
+			];
+			if (count($picked) >= $limit) {
+				break;
+			}
+		}
+
+		return $picked;
 	}
 
 	private function fileOrientation(\App\Classes\Content\PostFile $file): ?string

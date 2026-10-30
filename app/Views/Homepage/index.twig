@@ -96,19 +96,36 @@
 	<div class="home-plots">
 		{% for section in sections %}
 			<section class="home-plot home-plot--{{ section.code }} home-plot--{{ loop.index }}" data-reveal>
-				{% set photo = section.images|first %}
-				{% if photo %}
-					<a class="home-print home-plot__photo" href="{{ photo.url }}">
-						<span class="home-print__photo">
-							<img src="{{ photo.image.getImageVersion("GALLERY").getURL }}" alt="">
-						</span>
-					</a>
+				{% if section.code == "ritualy" and section.images|length %}
+					<div class="home-plot__copy">
+						<p class="home-plot__kicker">{{ section.navLabel }}</p>
+						<h2 class="home-plot__title"><a href="{{ section.url }}">{{ section.title }}</a></h2>
+						<p class="home-plot__lead">{{ section.lead }}</p>
+					</div>
+					<div class="home-plot__side">
+						{% for photo in section.images %}
+							<a class="home-print home-plot__print {% if loop.first %}home-plot__print--lead{% else %}home-plot__print--aside{% endif %}" href="{{ photo.url }}">
+								<span class="home-print__photo">
+									<img src="{{ photo.image.getImageVersion("GALLERY").getURL }}" alt="">
+								</span>
+							</a>
+						{% endfor %}
+					</div>
+				{% else %}
+					{% set photo = section.images|first %}
+					{% if photo %}
+						<a class="home-print home-plot__photo" href="{{ photo.url }}">
+							<span class="home-print__photo">
+								<img src="{{ photo.image.getImageVersion("GALLERY").getURL }}" alt="">
+							</span>
+						</a>
+					{% endif %}
+					<div class="home-plot__copy">
+						<p class="home-plot__kicker">{{ section.navLabel }}</p>
+						<h2 class="home-plot__title"><a href="{{ section.url }}">{{ section.title }}</a></h2>
+						<p class="home-plot__lead">{{ section.lead }}</p>
+					</div>
 				{% endif %}
-				<div class="home-plot__copy">
-					<p class="home-plot__kicker">{{ section.navLabel }}</p>
-					<h2 class="home-plot__title"><a href="{{ section.url }}">{{ section.title }}</a></h2>
-					<p class="home-plot__lead">{{ section.lead }}</p>
-				</div>
 			</section>
 		{% endfor %}
 	</div>
