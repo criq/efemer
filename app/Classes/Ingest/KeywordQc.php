@@ -2,6 +2,8 @@
 
 namespace App\Classes\Ingest;
 
+use App\Classes\Content\Tags;
+
 /**
  * Deterministic QC run by KeywordAnalyzer right after each LLM apply.
  * Auto-fixes typos/cover/roles/pattern; flags needs_rekeyword for a later KeywordIngest pass.
@@ -67,6 +69,19 @@ class KeywordQc
 			$issues[] = "missing kind";
 		} elseif (!in_array($kind, self::ALLOWED_KINDS, true)) {
 			$issues[] = "invalid kind={$kind}";
+		}
+
+		$tagsBefore = $item->getTagsList();
+		$tags = Tags::normalize($tagsBefore);
+		if ($tags !== $tagsBefore) {
+			$fixed[] = "normalized tags";
+			if ($fix) {
+				$item->setTagsList($tags);
+				$changed = true;
+			}
+		}
+		if ($item->isInvitation() && !$item->getStartsAt()) {
+			$issues[] = "invitation missing startsAt";
 		}
 
 		if ($keywords === []) {

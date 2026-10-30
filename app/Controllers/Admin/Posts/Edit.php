@@ -5,6 +5,7 @@ namespace App\Controllers\Admin\Posts;
 use App\Classes\Content\Post;
 use App\Classes\Content\PostParts;
 use App\Classes\Content\Section;
+use App\Classes\Content\Tags;
 use App\Classes\Ingest\IngestItem;
 use App\Classes\Ingest\IngestItemFile;
 use App\Classes\Views\HTMLEngine;
@@ -66,7 +67,15 @@ class Edit extends \Katu\Controllers\Controller
 			$post->setTitle($title !== "" ? $title : null);
 			$post->setSection(in_array($section, $allowedSections, true) ? $section : $post->getSection());
 			$post->setStatus($status);
-			$post->setIsInvitation($isInvitation || $section === Section::UDALOSTI);
+			$wantInvitation = $isInvitation || $section === Section::UDALOSTI;
+			$tags = array_values(array_filter(
+				$post->getTagsList(),
+				fn (string $tag) => $tag !== Tags::INVITATION && $tag !== Tags::REPORT,
+			));
+			if ($wantInvitation) {
+				$tags[] = Tags::INVITATION;
+			}
+			$post->setTagsList($tags);
 			$post->setPlace($place !== "" ? $place : null);
 			$post->setStartsAt($startsAtRaw !== "" ? new Time($startsAtRaw) : null);
 			$post->setEndsAt($endsAtRaw !== "" ? new Time($endsAtRaw) : null);

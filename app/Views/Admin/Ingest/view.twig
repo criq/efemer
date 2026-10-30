@@ -33,7 +33,18 @@
 					{% if item.getPlace %}
 						<div><dt>Místo</dt><dd>{{ item.getPlace }}</dd></div>
 					{% endif %}
-					{% if item.isInvitation %}
+					{% if item.getTagsList %}
+						<div>
+							<dt>Štítky</dt>
+							<dd>
+								{% for tag in item.getTagsList %}
+									<span class="admin-ingest-badge admin-ingest-badge--cover">
+										{% if tag == "invitation" %}pozvánka{% elseif tag == "report" %}reportáž{% else %}{{ tag }}{% endif %}
+									</span>
+								{% endfor %}
+							</dd>
+						</div>
+					{% elseif item.isInvitation %}
 						<div><dt>Pozvánka</dt><dd><span class="admin-ingest-badge admin-ingest-badge--cover">pozvánka / událost</span></dd></div>
 					{% endif %}
 					<div><dt>Stav</dt><dd>{{ item.getStatusLabel }}</dd></div>

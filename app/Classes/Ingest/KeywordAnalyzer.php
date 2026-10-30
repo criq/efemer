@@ -2,6 +2,7 @@
 
 namespace App\Classes\Ingest;
 
+use App\Classes\Content\Tags;
 use App\Classes\Jobs\ConsoleStyle;
 use App\Classes\Jobs\Signals;
 use App\Classes\ThirdParty\Google\Gemini;
@@ -486,8 +487,8 @@ Respond with a single JSON object (no markdown) using this shape:
   "coverRationale": "krátky česky důvod",
   "palette": ["#aabbcc"],
   "seriesKey": null,
+  "tags": [],
   "timeframe": {
-    "isInvitation": false,
     "startsAt": "YYYY-MM-DD HH:MM:SS or null",
     "endsAt": "YYYY-MM-DD HH:MM:SS or null",
     "place": "místo konání nebo null"
@@ -528,9 +529,13 @@ Rules:
   - product = only shop-like / catalog product shots
   - installation / diary / other as appropriate
   - Prefer workshop whenever the post invites people to an event/happening/walk/gathering (even in a cemetery, church, gallery, or @himmlhaus). Prefer gift|portrait|bouquet over diary when those fit better.
+- tags (controlled; empty array when neither fits; never invent free keywords here):
+  - "invitation" — the post invites readers to an upcoming or current event/workshop/walk/slavnost/pop-up ("zveme", "připojte se", "sraz", "vstupenky", poster with future date/time/venue). Mutually exclusive with "report".
+  - "report" — a lasting write-up / photo essay about an event that already happened (workshop recap, slavnost reportáž, after the gathering). Not an open call to attend. Prefer report over invitation when the text is past-tense storytelling rather than a call to join.
+  - Do not put both invitation and report. Leave tags=[] for ordinary diary/work posts with no event framing.
 - timeframe:
   - Extract any event / happening / diary date or date range mentioned in the text OR visible on poster/flyer images (e.g. "1. 11." on a poster, "19. 9.* 5.-10.10. 2025", "v neděli o Všech svatých v 9:45"). Resolve missing years or Czech holidays (Všech svatých = Nov 1, Dušičky = Nov 2, Filipojakubská noc = Apr 30, Letní slunovrat = Jun 21, Svatá Lucie = Dec 13) using "Posted at" as the reference year.
-  - Set isInvitation=true when the post invites readers to an upcoming or current event/workshop/walk/slavnost/pop-up ("zveme", "připojte se", "sraz", "vstupenky", poster with future date/time/venue). Set place to the venue/town when known.
+  - Set place to the venue/town when known (especially for invitation or report).
 - Role and pattern codes in English as above.
 - sourceSlot=pre_copy ⇒ role=lead (strong). post_copy ⇒ support|detail|context (lead only if truly a second story beat).
 - COVER (critical): if any non-demoted pre_copy file exists, coverFileId MUST be one of those pre_copy ids (prefer the best lead among them). Never pick a post_copy cover when pre_copy exists. Cover MUST be a photograph of people/place/plants — never a typography poster, title card, or flyer.
@@ -590,6 +595,7 @@ PROMPT;
 			$files,
 		));
 		$this->applyTimeframe($item, isset($payload["timeframe"]) && is_array($payload["timeframe"]) ? $payload["timeframe"] : null);
+		$this->applyTags($item, $payload);
 		$item->setClassificationRaw($rawText);
 
 		$filePayloads = isset($payload["files"]) && is_array($payload["files"]) ? $payload["files"] : [];
@@ -783,12 +789,29 @@ PROMPT;
 		$startsAt = $this->parseTimeValue($timeframe["startsAt"] ?? null);
 		$endsAt = $this->parseTimeValue($timeframe["endsAt"] ?? null);
 		$place = $this->nullableString($timeframe["place"] ?? null);
-		$isInvitation = !empty($timeframe["isInvitation"]);
 
 		$item->setStartsAt($startsAt);
 		$item->setEndsAt($endsAt);
 		$item->setPlace($place);
-		$item->setIsInvitation($isInvitation);
+	}
+
+	/**
+	 * Controlled tags are source of truth; isInvitation is synced from the invitation tag.
+	 * Legacy timeframe.isInvitation still maps to invitation when tags are omitted.
+	 *
+	 * @param array<string, mixed> $payload
+	 */
+	private function applyTags(IngestItem $item, array $payload): void
+	{
+		$rawTags = $payload["tags"] ?? null;
+		$tags = is_array($rawTags) ? $rawTags : [];
+
+		$timeframe = isset($payload["timeframe"]) && is_array($payload["timeframe"]) ? $payload["timeframe"] : [];
+		if ($tags === [] && !empty($timeframe["isInvitation"])) {
+			$tags = [Tags::INVITATION];
+		}
+
+		$item->setTagsList($tags);
 	}
 
 	private function parseTimeValue(mixed $value): ?Time

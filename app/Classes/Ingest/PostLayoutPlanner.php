@@ -128,6 +128,8 @@ PROMPT;
 
 		$lines = [];
 		$lines[] = "Title: " . trim((string)$item->getTitle());
+		$tags = $item->getTagsList();
+		$lines[] = "Tags: " . ($tags !== [] ? implode(", ", $tags) : "none");
 		$lines[] = "Invitation: " . ($item->isInvitation() ? "yes" : "no");
 		if ($item->getPlace()) {
 			$lines[] = "Place: " . $item->getPlace();

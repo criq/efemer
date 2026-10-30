@@ -99,7 +99,7 @@ class PostMaterializer
 		$post->setStartsAt($item->getStartsAt());
 		$post->setEndsAt($item->getEndsAt());
 		$post->setPlace($item->getPlace());
-		$post->setIsInvitation($item->isInvitation());
+		$post->setTagsList($item->getTagsList());
 
 		$pathSlug = $this->pathSlug($item, $title);
 		$post->setPath(Post::pathFor($section, $pathSlug, $post->getId() !== null ? (int)$post->getId() : null));
@@ -271,6 +271,10 @@ class PostMaterializer
 			return Section::UMENI;
 		}
 		if ($kind === "diary" && $item->getSource() === IngestItem::SOURCE_EFEMER_CZ) {
+			return Section::HIMMELHAUS;
+		}
+		// Event reportáž (workshop recap etc.) — lasting Himmelhaus until taxonomy settles.
+		if ($kind === "workshop" && $item->isReport()) {
 			return Section::HIMMELHAUS;
 		}
 

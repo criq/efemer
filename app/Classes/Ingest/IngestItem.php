@@ -3,6 +3,7 @@
 namespace App\Classes\Ingest;
 
 use App\Classes\Content\Post;
+use App\Classes\Content\Tags;
 use App\Classes\Storage\StorageFile;
 use Katu\Tools\Calendar\Time;
 
@@ -24,6 +25,7 @@ class IngestItem extends \Katu\Models\Model
 	public Time|string|null $endsAt = null;
 	public ?string $place = null;
 	public int|string|null $isInvitation = 0;
+	public ?string $tags = null;
 	public ?string $bodyHtml = null;
 	public ?string $contentHash = null;
 	public ?string $status = null;
@@ -253,7 +255,37 @@ class IngestItem extends \Katu\Models\Model
 
 	public function isInvitation(): bool
 	{
-		return (bool)(int)$this->isInvitation;
+		return Tags::has($this->getTagsList(), Tags::INVITATION) || (bool)(int)$this->isInvitation;
+	}
+
+	public function isReport(): bool
+	{
+		return Tags::has($this->getTagsList(), Tags::REPORT);
+	}
+
+	/**
+	 * @param list<string>|null $tags
+	 */
+	public function setTagsList(?array $tags): IngestItem
+	{
+		$normalized = Tags::normalize($tags ?? []);
+		$this->tags = Tags::encode($normalized);
+		$this->isInvitation = Tags::has($normalized, Tags::INVITATION) ? 1 : 0;
+
+		return $this;
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	public function getTagsList(): array
+	{
+		return Tags::decode($this->tags);
+	}
+
+	public function hasTag(string $tag): bool
+	{
+		return Tags::has($this->getTagsList(), $tag);
 	}
 
 	public function setEventId(?int $eventId): IngestItem
@@ -385,6 +417,7 @@ class IngestItem extends \Katu\Models\Model
 		$this->enrichedAt = null;
 		$this->place = null;
 		$this->isInvitation = 0;
+		$this->tags = null;
 
 		return $this;
 	}

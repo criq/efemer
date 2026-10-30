@@ -18,6 +18,7 @@ class Post extends \Katu\Models\Model
 	public Time|string|null $endsAt = null;
 	public ?string $place = null;
 	public int|string|null $isInvitation = 0;
+	public ?string $tags = null;
 	public ?string $title = null;
 	public ?string $path = null;
 	public ?string $section = null;
@@ -148,7 +149,37 @@ class Post extends \Katu\Models\Model
 
 	public function isInvitation(): bool
 	{
-		return (bool)(int)$this->isInvitation;
+		return Tags::has($this->getTagsList(), Tags::INVITATION) || (bool)(int)$this->isInvitation;
+	}
+
+	public function isReport(): bool
+	{
+		return Tags::has($this->getTagsList(), Tags::REPORT);
+	}
+
+	/**
+	 * @param list<string>|null $tags
+	 */
+	public function setTagsList(?array $tags): Post
+	{
+		$normalized = Tags::normalize($tags ?? []);
+		$this->tags = Tags::encode($normalized);
+		$this->isInvitation = Tags::has($normalized, Tags::INVITATION) ? 1 : 0;
+
+		return $this;
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	public function getTagsList(): array
+	{
+		return Tags::decode($this->tags);
+	}
+
+	public function hasTag(string $tag): bool
+	{
+		return Tags::has($this->getTagsList(), $tag);
 	}
 
 	public function getEffectiveEnd(): ?Time
