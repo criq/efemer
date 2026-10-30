@@ -12128,14 +12128,18 @@ body.builder .builder-file-list--insert:not(:empty),
     width: calc(100% + var(--plot-photo-over));
   }
   .home-plot--ritualy .home-plot__copy {
+    justify-self: center;
     order: 1;
     padding: 0.5rem var(--plot-pad-x) 0.5rem 0;
-    text-align: left;
+    text-align: center;
+    width: min(100%, 28rem);
   }
   .home-plot--ritualy .home-plot__title {
     font-size: max(2rem, min(4vw, 3rem));
   }
   .home-plot--ritualy .home-plot__lead {
+    margin-left: auto;
+    margin-right: auto;
     max-width: 28rem;
   }
   .home-plot__photo img {

@@ -523,9 +523,11 @@
 		}
 
 		.home-plot__copy {
+			justify-self: center;
 			order: 1;
 			padding: .5rem var(--plot-pad-x) .5rem 0;
-			text-align: left;
+			text-align: center;
+			width: min(100%, 28rem);
 		}
 
 		.home-plot__title {
@@ -533,6 +535,7 @@
 		}
 
 		.home-plot__lead {
+			margin-inline: auto;
 			max-width: 28rem;
 		}
 	}
