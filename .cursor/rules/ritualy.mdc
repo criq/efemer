@@ -12,7 +12,7 @@ alwaysApply: false
 
 - Intro hero: flat greige on phones; from 801px white→greige gradient (same as homepage hero); CTA → kontakt (“Napsat o rituálu”)
 - Continuous **feed of whole wedding posts** (same body as detail via `Posts/body.twig` + `Posts/parts.twig`)
-- Full-width greige bands separated by `.75rem` white gaps; slightly tighter padding than standalone `/svatebni-ritualy/{slug}`
+- Full-bleed greige shells (`.ritualy-feed__item`) with a centered `.post-article` inside; `.75rem` white gaps between bands
 - Title links to the standalone post URL (`linkedTitle`); no section eyebrow in the feed
 - All published rituály posts in one response (~small corpus; no AJAX pager yet)
 - No scroll / entrance animations on the index

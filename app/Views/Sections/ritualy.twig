@@ -19,13 +19,15 @@
 
 		<div class="ritualy__feed">
 			{% for post in posts %}
-				<article class="post-article ritualy-feed__item" id="post-{{ post.getId }}">
-					{% include "Posts/body.twig" with {
-						post: post,
-						linkedTitle: true,
-						showSectionEyebrow: false,
-						headingTag: "h2",
-					} %}
+				<article class="ritualy-feed__item" id="post-{{ post.getId }}">
+					<div class="post-article ritualy-feed__article">
+						{% include "Posts/body.twig" with {
+							post: post,
+							linkedTitle: true,
+							showSectionEyebrow: false,
+							headingTag: "h2",
+						} %}
+					</div>
 				</article>
 			{% else %}
 				<p class="ritualy__empty">Zatím tu nic není.</p>

@@ -12,7 +12,7 @@ alwaysApply: false
 
 - Intro hero: flat greige on phones; from 801px white→greige gradient (same as homepage hero)
 - Continuous **feed of whole diary posts** (same body as detail via `Posts/body.twig` + `Posts/parts.twig`)
-- Full-width greige bands separated by `.75rem` white gaps; slightly tighter padding than standalone `/denik/{slug}`
+- Full-bleed greige shells (`.denik-feed__item`) with a centered `.post-article` inside; `.75rem` white gaps between bands
 - Title is the explicit diary date (e.g. “6. 6. 2026”) — **no** publishedAt meta under it; sort by `Post::getExplicitAt()` (startsAt / title date / publishedAt)
 - Title links to the standalone post URL (`linkedTitle`); no section eyebrow in the feed
 - All published deník posts in one response (no AJAX pager yet)

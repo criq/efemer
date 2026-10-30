@@ -15,13 +15,15 @@
 
 		<div class="denik__feed">
 			{% for post in posts %}
-				<article class="post-article denik-feed__item" id="post-{{ post.getId }}">
-					{% include "Posts/body.twig" with {
-						post: post,
-						linkedTitle: true,
-						showSectionEyebrow: false,
-						headingTag: "h2",
-					} %}
+				<article class="denik-feed__item" id="post-{{ post.getId }}">
+					<div class="post-article denik-feed__article">
+						{% include "Posts/body.twig" with {
+							post: post,
+							linkedTitle: true,
+							showSectionEyebrow: false,
+							headingTag: "h2",
+						} %}
+					</div>
 				</article>
 			{% else %}
 				<p class="denik__empty">Zatím tu nic není.</p>
