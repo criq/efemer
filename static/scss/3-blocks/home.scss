@@ -55,7 +55,8 @@
 	background: $color-greige;
 	display: grid;
 	gap: clamp(1.25rem, 2vw, 2rem);
-	grid-template-columns: minmax(0, .92fr) minmax(20rem, 1.35fr) minmax(0, .82fr);
+	// Equal side tracks so the copy column (and rituály below) share the same page center.
+	grid-template-columns: minmax(0, 1fr) minmax(20rem, 1.2fr) minmax(0, 1fr);
 	height: auto;
 	overflow: hidden;
 	padding: clamp(2.75rem, 5vw, 4rem) 0;
@@ -112,7 +113,7 @@
 .home-hero__side--left {
 	// Shrink-wrap to the lead so aside % / left:100% are relative to the large photo.
 	justify-self: start;
-	transform: translateX(-26%);
+	transform: translateX(-22%);
 	width: fit-content;
 
 	.home-print--lead {
@@ -144,7 +145,7 @@
 	// Shrink-wrap to the lead so asides sit on the large photo’s left edge.
 	align-self: center;
 	justify-self: end;
-	transform: translateX(20%);
+	transform: translateX(22%);
 	width: fit-content;
 
 	.home-print--lead {
@@ -162,8 +163,8 @@
 
 		.home-print__photo,
 		img {
-			max-height: calc(min(74vh, 42rem) - clamp(3.5rem, 8vw, 6rem));
-			max-width: min(26rem, 32vw);
+			max-height: calc(min(78vh, 46rem) - clamp(3.5rem, 8vw, 6rem));
+			max-width: min(28rem, 36vw);
 		}
 	}
 
@@ -496,12 +497,14 @@
 	}
 
 	// Mirror the mid-width hero: centered text + lead/aside collage on the right.
+	// DOM order is deník → rituály → umění; order keeps rituály full-width on top here.
 	.home-plot--ritualy {
 		align-items: center;
 		display: grid;
 		gap: clamp(1.75rem, 4vw, 3rem);
 		grid-column: 1 / -1;
 		grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+		order: -1;
 		overflow: hidden;
 		padding: 4rem 0 4rem clamp(1.25rem, 3vw, 2.5rem);
 
@@ -569,7 +572,7 @@
 	}
 }
 
-// Wide: three equal plots in one row (rituály no longer spans / side-by-side).
+// Wide: three equal plots — deník | rituály | umění; rituály text on top, photo peeks bottom.
 @media screen and (min-width: 1200px) {
 	.home-plots {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -580,22 +583,26 @@
 		flex-direction: column;
 		gap: 0;
 		grid-column: auto;
+		justify-content: space-between;
+		order: 0;
 		padding: var(--plot-pad-top) 1.75rem var(--plot-pad-bottom);
 
 		.home-plot__side {
 			margin-right: 0;
-			order: -1;
+			order: 0;
 			width: 100%;
 		}
 
 		.home-plot__print--lead {
-			margin-top: calc((var(--plot-pad-top) + var(--plot-edge)) * -1);
+			margin-bottom: calc((var(--plot-pad-bottom) + var(--plot-edge)) * -1);
+			margin-top: 0;
 			transform: rotate(-0.3deg);
 			width: 100%;
 
 			img {
 				aspect-ratio: 3 / 2;
-				margin-top: calc(var(--plot-photo-over) * -1);
+				margin-bottom: calc(var(--plot-photo-over) * -1);
+				margin-top: 0;
 				object-fit: cover;
 				width: 100%;
 			}
@@ -606,7 +613,7 @@
 		}
 
 		.home-plot__copy {
-			padding: 1.5rem 0 0;
+			padding: 0 0 1.5rem;
 			text-align: center;
 			width: auto;
 		}
@@ -621,9 +628,11 @@
 	}
 }
 
-// Phones: ritualy collage stacks like other plots (lead peeks from top).
+// Phones: ritualy collage stacks like other plots (lead peeks from top); keep first in stack.
 @media screen and (max-width: 800px) {
 	.home-plot--ritualy {
+		order: -1;
+
 		.home-plot__side {
 			align-self: center;
 			margin-right: 0;

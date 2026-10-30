@@ -25,7 +25,7 @@ Public site is **not** assembled from the page-component tree. Typed entities:
 
 Invitations are primarily the **homepage hero** (“Připoj se”). Nav is rituály · deník · umění · kontakt. Legacy `himmelhaus` / `workshopy` redirect to `/denik`.
 
-`Section::work()` (homepage plots) = rituály → deník → umění.
+`Section::work()` (homepage plots) = deník → rituály → umění (rituály centered in the three-column row).
 
 ## Controlled tags
 

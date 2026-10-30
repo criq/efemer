@@ -38,8 +38,8 @@ class Section
 	public static function work(): array
 	{
 		return [
-			self::RITUALY,
 			self::DENIK,
+			self::RITUALY,
 			self::UMENI,
 		];
 	}
