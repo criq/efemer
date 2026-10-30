@@ -1,0 +1,17 @@
+---
+description: Rituály section listing — ceremonial portfolio layout
+globs: app/Views/Sections/ritualy.twig,static/scss/3-blocks/ritualy.scss,app/Controllers/Sections/**
+alwaysApply: false
+---
+
+# Rituály listing
+
+`/svatebni-ritualy` uses `Sections/ritualy.twig`. Deník has its own journal layout; umění stays on the shared grid for now.
+
+## Layout
+
+- White page; each ritual sits on a greige band (`.75rem` white gap)
+- Featured first entry larger; then alternating photo + copy chapters
+- Photos reuse `.home-print` shadow + ≤0.5° tilt; native aspect ratio
+- Year eyebrow, Fraunces title, summary, quiet “prohlédnout” cue
+- Scroll reveal via `data-reveal` + `.is-in` (scoped with deník; respects reduced motion)

@@ -12,7 +12,12 @@ class Index extends \Katu\Controllers\Controller
 {
 	public function ritualy(ServerRequestInterface $request, ResponseInterface $response)
 	{
-		return $this->render($request, $response, Section::RITUALY);
+		return $response->withBody((new HTMLEngine($request))->render("Sections/ritualy.twig", [
+			"section" => Section::RITUALY,
+			"title" => Section::title(Section::RITUALY),
+			"lead" => Section::lead(Section::RITUALY),
+			"posts" => Post::getPublishedBySection(Section::RITUALY),
+		]));
 	}
 
 	public function umeni(ServerRequestInterface $request, ResponseInterface $response)

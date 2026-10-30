@@ -12511,6 +12511,246 @@ body.builder .builder-file-list--insert:not(:empty),
     transform: rotate(0.45deg) translateX(1.25rem);
   }
 }
+.site--ritualy {
+  background: #fff;
+}
+.site--ritualy .site-header {
+  background: #fff;
+  border-bottom: none;
+}
+.site--ritualy .site-main {
+  margin-top: 0;
+  padding: 0;
+}
+.site--ritualy .site-footer {
+  border-top: none;
+  margin-top: 0.75rem;
+}
+.site--ritualy [data-reveal] {
+  opacity: 0;
+  transform: translateY(1.25rem);
+  transition: opacity 0.85s ease, transform 0.85s ease;
+}
+.site--ritualy [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site--ritualy [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+.ritualy {
+  padding-bottom: 3rem;
+}
+
+.ritualy__header {
+  margin: 0 auto;
+  max-width: 40rem;
+  padding: max(2.75rem, min(8vw, 5rem)) max(1.25rem, min(5vw, 3rem)) max(2.5rem, min(6vw, 4rem));
+  text-align: center;
+}
+.ritualy__header .text-eyebrow {
+  margin-bottom: 0.9rem;
+}
+
+.ritualy__heading {
+  font-family: "Fraunces", "Times New Roman", Times, serif;
+  font-size: max(2.35rem, min(6.5vw, 4rem));
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.ritualy__lead {
+  color: #5e675c;
+  font-size: max(1.02rem, min(2vw, 1.18rem));
+  line-height: 1.6;
+  margin: 1.15rem auto 0;
+  max-width: 34rem;
+  text-wrap: balance;
+}
+
+.ritualy__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ritualy__item {
+  background: #faf9f7;
+  overflow: hidden;
+  padding: max(2rem, min(5vw, 3.5rem)) max(1rem, min(4vw, 3rem));
+}
+
+.ritualy__item--featured {
+  background: linear-gradient(180deg, #fff 0%, #faf9f7 42%, #faf9f7 100%);
+  padding-top: max(1.5rem, min(4vw, 2.5rem));
+}
+
+.ritualy__link {
+  align-items: center;
+  color: inherit;
+  display: grid;
+  grid-gap: max(1.5rem, min(3.5vw, 2.75rem));
+  gap: max(1.5rem, min(3.5vw, 2.75rem));
+  grid-template-columns: 1fr;
+  margin: 0 auto;
+  max-width: 72rem;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+.ritualy__link:hover {
+  color: inherit;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+.ritualy__link:hover .ritualy__more {
+  border-color: #1c211c;
+  color: #1c211c;
+}
+.ritualy__link:hover .home-print__photo {
+  box-shadow: 0 3px 12px rgba(48, 40, 32, 0.18), 0 20px 44px rgba(48, 40, 32, 0.2), 0 36px 70px rgba(48, 40, 32, 0.12);
+}
+
+.ritualy__photo {
+  justify-self: center;
+  max-width: min(100%, 36rem);
+  width: 100%;
+}
+.ritualy__photo .home-print__photo {
+  transition: box-shadow 0.4s ease;
+}
+.ritualy__photo img {
+  height: auto;
+  width: 100%;
+}
+
+.ritualy__item--left .ritualy__photo {
+  transform: rotate(-0.35deg);
+}
+
+.ritualy__item--right .ritualy__photo {
+  transform: rotate(0.35deg);
+}
+
+.ritualy__item--featured .ritualy__photo {
+  max-width: min(100%, 44rem);
+}
+
+.ritualy__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  max-width: 26rem;
+  text-align: center;
+}
+
+.ritualy__year {
+  color: #8b9488;
+  font-family: "Outfit", "Helvetica Neue", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.ritualy__title {
+  font-family: "Fraunces", "Times New Roman", Times, serif;
+  font-size: max(1.65rem, min(3.6vw, 2.35rem));
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.ritualy__item--featured .ritualy__title {
+  font-size: max(1.9rem, min(4vw, 2.85rem));
+}
+
+.ritualy__summary {
+  color: #5e675c;
+  display: -webkit-box;
+  font-size: 1.05rem;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-height: 1.55;
+  overflow: hidden;
+}
+
+.ritualy__more {
+  border-bottom: 1px solid #c5cebf;
+  color: #6f7d68;
+  font-family: "Outfit", "Helvetica Neue", sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  margin-top: 0.55rem;
+  padding-bottom: 0.15rem;
+  text-transform: lowercase;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+
+.ritualy__empty {
+  color: #5e675c;
+  margin: 3rem auto;
+  text-align: center;
+}
+
+@media screen and (min-width: 901px) {
+  .ritualy__link {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    text-align: left;
+  }
+  .ritualy__copy {
+    align-items: flex-start;
+    justify-self: start;
+    text-align: left;
+  }
+  .ritualy__photo {
+    justify-self: end;
+    max-width: min(100%, 38rem);
+  }
+  .ritualy__item--right .ritualy__link {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+  }
+  .ritualy__item--right .ritualy__photo {
+    justify-self: start;
+    order: 2;
+  }
+  .ritualy__item--right .ritualy__copy {
+    align-items: flex-end;
+    justify-self: end;
+    order: 1;
+    text-align: right;
+  }
+  .ritualy__item--featured .ritualy__link {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.95fr);
+  }
+  .ritualy__item--featured .ritualy__photo {
+    max-width: min(100%, 46rem);
+  }
+}
+@media screen and (min-width: 1200px) {
+  .ritualy__item {
+    padding-left: max(2rem, min(7vw, 5.5rem));
+    padding-right: max(2rem, min(7vw, 5.5rem));
+  }
+  .ritualy__item--left .ritualy__photo {
+    transform: rotate(-0.35deg) translateX(-1.5rem);
+  }
+  .ritualy__item--right .ritualy__photo {
+    transform: rotate(0.35deg) translateX(1.5rem);
+  }
+}
 .site--post {
   background: #fff;
 }

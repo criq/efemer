@@ -1,0 +1,46 @@
+{% extends "Templates/default.twig" %}
+
+{% block title %}{{ title }} · Efemér{% endblock %}
+
+{% block bodyClass %}site--ritualy{% endblock %}
+
+{% block body %}
+
+	<div class="ritualy">
+		<header class="ritualy__header" data-reveal>
+			<p class="text-eyebrow">rituály</p>
+			<h1 class="ritualy__heading">{{ title }}</h1>
+			<p class="ritualy__lead">{{ lead }}</p>
+		</header>
+
+		<ul class="ritualy__list">
+			{% for post in posts %}
+				{% set side = loop.index is odd ? "left" : "right" %}
+				<li class="ritualy__item ritualy__item--{{ side }}{% if loop.first %} ritualy__item--featured{% endif %}" data-reveal>
+					<a class="ritualy__link" href="{{ post.getPublicUrl }}">
+						{% if post.getHeroImage %}
+							<span class="ritualy__photo home-print">
+								<span class="home-print__photo">
+									<img src="{{ post.getHeroImage.getImageVersion("GALLERY").getURL }}" alt="">
+								</span>
+							</span>
+						{% endif %}
+						<span class="ritualy__copy">
+							{% if post.getPublishedAt %}
+								<span class="ritualy__year">{{ post.getPublishedAt|date("Y") }}</span>
+							{% endif %}
+							<span class="ritualy__title">{{ post.getTitle }}</span>
+							{% if post.getSummary %}
+								<span class="ritualy__summary">{{ post.getSummary }}</span>
+							{% endif %}
+							<span class="ritualy__more">prohlédnout</span>
+						</span>
+					</a>
+				</li>
+			{% else %}
+				<li class="ritualy__empty">Zatím tu nic není.</li>
+			{% endfor %}
+		</ul>
+	</div>
+
+{% endblock body %}
