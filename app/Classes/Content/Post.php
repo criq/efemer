@@ -3,6 +3,7 @@
 namespace App\Classes\Content;
 
 use App\Classes\Html\Excerpt;
+use App\Classes\Instagram\CaptionDates;
 use App\Classes\Storage\StorageFile;
 use App\Classes\Tools\Slugger;
 use Katu\Tools\Calendar\Time;
@@ -85,6 +86,30 @@ class Post extends \Katu\Models\Model
 		}
 
 		return null;
+	}
+
+	/**
+	 * Chronology for listings: explicit diary/event date first, then publishedAt.
+	 * Deník titles like "6. 6. 2026" are parsed when startsAt is empty.
+	 */
+	public function getExplicitAt(): ?Time
+	{
+		$startsAt = $this->getStartsAt();
+		if ($startsAt) {
+			return $startsAt;
+		}
+
+		if (Section::isJournal($this->getSection())) {
+			$title = trim((string)$this->getTitle());
+			if ($title !== "") {
+				$fromTitle = CaptionDates::parse($title)["startsAt"] ?? null;
+				if ($fromTitle instanceof Time) {
+					return $fromTitle;
+				}
+			}
+		}
+
+		return $this->getPublishedAt();
 	}
 
 	public function setEndsAt(?Time $time): Post
@@ -694,8 +719,8 @@ class Post extends \Katu\Models\Model
 		}
 
 		usort($posts, function (Post $a, Post $b) {
-			$aTime = (int)($a->getStartsAt()?->format("U") ?? $a->getPublishedAt()?->format("U") ?? 0);
-			$bTime = (int)($b->getStartsAt()?->format("U") ?? $b->getPublishedAt()?->format("U") ?? 0);
+			$aTime = (int)($a->getExplicitAt()?->format("U") ?? 0);
+			$bTime = (int)($b->getExplicitAt()?->format("U") ?? 0);
 
 			return $bTime <=> $aTime;
 		});

@@ -34,7 +34,8 @@
 				</span>
 			{% endif %}
 		</p>
-	{% elseif post.getPublishedAt %}
+	{% elseif post.getPublishedAt and post.getSection != "denik" %}
+		{# Deník: the title is the explicit diary date — do not also show publishedAt. #}
 		<p class="post-article__meta">{{ post.getPublishedAt|date("j. n. Y") }}</p>
 	{% endif %}
 	{% if post.isInvitation and post.getInstagramShortcode %}
