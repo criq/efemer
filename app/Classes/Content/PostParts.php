@@ -189,7 +189,10 @@ class PostParts
 		}
 
 		if ($parts === []) {
-			return self::fallbackResolved($post, $byId);
+			return self::stripLeadingTitleFromResolved(
+				self::fallbackResolved($post, $byId),
+				(string)$post->getTitle(),
+			);
 		}
 
 		$resolved = [];
@@ -227,7 +230,85 @@ class PostParts
 			}
 		}
 
-		return $resolved;
+		return self::stripLeadingTitleFromResolved($resolved, (string)$post->getTitle());
+	}
+
+	/**
+	 * Drop a leading body line that only repeats the public title (common for diary dates).
+	 *
+	 * @param list<array{type: string, html?: string, file?: PostFile|null, files?: list<PostFile>}> $resolved
+	 * @return list<array{type: string, html?: string, file?: PostFile|null, files?: list<PostFile>}>
+	 */
+	public static function stripLeadingTitleFromResolved(array $resolved, string $title): array
+	{
+		$titlePlain = self::normalizeComparableText($title);
+		if ($titlePlain === "") {
+			return $resolved;
+		}
+
+		foreach ($resolved as $i => $part) {
+			if (($part["type"] ?? "") !== self::TYPE_TEXT) {
+				continue;
+			}
+			$html = self::stripLeadingTitleFromHtml((string)($part["html"] ?? ""), $titlePlain);
+			if ($html === "") {
+				unset($resolved[$i]);
+			} else {
+				$resolved[$i]["html"] = $html;
+			}
+			break;
+		}
+
+		return array_values($resolved);
+	}
+
+	/**
+	 * Remove a leading block / first line that equals the title (date or otherwise).
+	 */
+	public static function stripLeadingTitleFromHtml(string $html, string $titlePlain): string
+	{
+		$html = trim($html);
+		$titlePlain = self::normalizeComparableText($titlePlain);
+		if ($html === "" || $titlePlain === "") {
+			return $html;
+		}
+
+		// Whole first block is only the title (optionally wrapped in em/strong/span).
+		$blockPattern = "/^\\s*<(p|div|h[1-6])(\\s[^>]*)?>\\s*(?:<(?:strong|em|b|i|span)(\\s[^>]*)?>\\s*)*"
+			. self::flexibleLiteralPattern($titlePlain)
+			. "\\s*(?:<\\/(?:strong|em|b|i|span)>\\s*)*<\\/\\1>\\s*/iu";
+		$stripped = preg_replace($blockPattern, "", $html, 1, $count);
+		if (is_string($stripped) && $count > 0) {
+			return trim($stripped);
+		}
+
+		// Title as the first line inside a block, before <br> or another block.
+		$linePattern = "/^(\\s*<(p|div|h[1-6])(\\s[^>]*)?>\\s*(?:<(?:strong|em|b|i|span)(\\s[^>]*)?>\\s*)*)"
+			. self::flexibleLiteralPattern($titlePlain)
+			. "\\s*(?:<\\/(?:strong|em|b|i|span)>\\s*)*(?:<br\\s*\\/?>\\s*|\\n+)/iu";
+		$stripped = preg_replace($linePattern, "\$1", $html, 1, $count);
+		if (is_string($stripped) && $count > 0) {
+			return trim($stripped);
+		}
+
+		return $html;
+	}
+
+	private static function normalizeComparableText(string $raw): string
+	{
+		$text = trim(html_entity_decode(strip_tags($raw), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+		$text = preg_replace("/\\s+/u", " ", $text) ?? $text;
+
+		return trim($text);
+	}
+
+	private static function flexibleLiteralPattern(string $plain): string
+	{
+		// Match the title with flexible whitespace (e.g. "26. 5. 2026" ↔ "26.  5. 2026").
+		$parts = preg_split("/\\s+/u", $plain) ?: [];
+		$escaped = array_map(static fn(string $part): string => preg_quote($part, "/"), $parts);
+
+		return implode("\\s+", $escaped);
 	}
 
 	/**
