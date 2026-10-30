@@ -57,12 +57,19 @@ class Index extends \Katu\Controllers\Controller
 	 */
 	private function sectionPlotImages(array $posts): array
 	{
+		// Prefer highest LLM rating. Avoid getWidth/getHeight here — each call can
+		// download from GCS and made the homepage time out on production.
 		$best = null;
-		$bestScore = -1.0;
+		$bestRating = -1.0;
 
 		foreach ($posts as $post) {
 			foreach ($post->getFiles() as $file) {
 				if ($file->isDemoted() || $file->getRole() === "skip") {
+					continue;
+				}
+
+				$rating = $file->getRating() ?? 0.55;
+				if ($rating <= $bestRating) {
 					continue;
 				}
 
@@ -71,25 +78,7 @@ class Index extends \Katu\Controllers\Controller
 					continue;
 				}
 
-				try {
-					$width = (float)$image->getWidth();
-					$height = (float)$image->getHeight();
-				} catch (\Throwable) {
-					continue;
-				}
-				if ($height <= 0) {
-					continue;
-				}
-
-				$ratio = $width / $height;
-				$landscape = $ratio >= 1.15 ? 1.0 : ($ratio >= 1.0 ? 0.35 : 0.0);
-				$rating = $file->getRating() ?? 0.55;
-				$score = ($landscape * 2.0) + $rating;
-				if ($score <= $bestScore) {
-					continue;
-				}
-
-				$bestScore = $score;
+				$bestRating = $rating;
 				$best = [
 					"url" => $post->getPublicUrl(),
 					"image" => $image,
