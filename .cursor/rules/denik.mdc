@@ -10,9 +10,9 @@ alwaysApply: false
 
 ## Layout
 
-- Soft white→greige intro: eyebrow, title, lead
+- White intro: eyebrow, title, lead
 - Continuous **feed of whole diary posts** (same body as detail via `Posts/body.twig` + `Posts/parts.twig`)
-- Greige bands separated by `.75rem` white gaps; slightly tighter padding than standalone `/denik/{slug}`
+- Flat white ground (no greige bands); slightly tighter padding than standalone `/denik/{slug}`
 - Title links to the standalone post URL (`linkedTitle`); no section eyebrow in the feed
 - All published deník posts in one response (no AJAX pager yet)
 - No scroll / entrance animations on the index
