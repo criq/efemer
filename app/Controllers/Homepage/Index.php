@@ -4,6 +4,7 @@ namespace App\Controllers\Homepage;
 
 use App\Classes\Content\Post;
 use App\Classes\Content\Section;
+use App\Classes\Ingest\IngestItemFile;
 use App\Classes\Views\HTMLEngine;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -57,10 +58,12 @@ class Index extends \Katu\Controllers\Controller
 	 */
 	private function sectionPlotImages(array $posts): array
 	{
-		// Prefer highest LLM rating. Avoid getWidth/getHeight here — each call can
-		// download from GCS and made the homepage time out on production.
-		$best = null;
-		$bestRating = -1.0;
+		// Prefer LLM orientation=landscape, then rating. Avoid getWidth/getHeight —
+		// each call can download from GCS and made the homepage time out on production.
+		$bestLandscape = null;
+		$bestLandscapeRating = -1.0;
+		$bestAny = null;
+		$bestAnyRating = -1.0;
 
 		foreach ($posts as $post) {
 			foreach ($post->getFiles() as $file) {
@@ -69,26 +72,49 @@ class Index extends \Katu\Controllers\Controller
 				}
 
 				$rating = $file->getRating() ?? 0.55;
-				if ($rating <= $bestRating) {
-					continue;
-				}
-
 				$image = $file->getImage();
 				if (!$image) {
 					continue;
 				}
 
-				$bestRating = $rating;
-				$best = [
+				$candidate = [
 					"url" => $post->getPublicUrl(),
 					"image" => $image,
 					"post" => $post,
 					"file" => $file,
 				];
+
+				if ($rating > $bestAnyRating) {
+					$bestAnyRating = $rating;
+					$bestAny = $candidate;
+				}
+
+				if ($this->fileOrientation($file) === "landscape" && $rating > $bestLandscapeRating) {
+					$bestLandscapeRating = $rating;
+					$bestLandscape = $candidate;
+				}
 			}
 		}
 
+		$best = $bestLandscape ?? $bestAny;
+
 		return $best ? [$best] : [];
+	}
+
+	private function fileOrientation(\App\Classes\Content\PostFile $file): ?string
+	{
+		$storageFileId = (int)$file->storageFileId;
+		if ($storageFileId < 1) {
+			return null;
+		}
+
+		$ingestFile = IngestItemFile::getOneBy([
+			"storageFileId" => $storageFileId,
+		]);
+
+		$orientation = $ingestFile?->getOrientation();
+
+		return is_string($orientation) && $orientation !== "" ? strtolower($orientation) : null;
 	}
 
 	/**
