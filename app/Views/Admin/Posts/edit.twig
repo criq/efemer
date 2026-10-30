@@ -32,6 +32,7 @@
 								{% for code in sections %}
 									<option value="{{ code }}" {% if post.getSection == code %}selected{% endif %}>
 										{% if code == "ritualy" %}Svatební rituály
+										{% elseif code == "umeni" %}Umění
 										{% elseif code == "denik" %}Deník
 										{% else %}Události{% endif %}
 									</option>

@@ -1,5 +1,5 @@
 ---
-description: Public content model — posts, rituály + deník + invitations
+description: Public content model — rituály, umění, deník + homepage invitations
 alwaysApply: true
 ---
 
@@ -11,7 +11,7 @@ Public site is **not** assembled from the page-component tree. Typed entities:
 |---|---|
 | `ingest_items` | Raw imported sources (stage 1+); not public |
 | `posts` | All public content after materialize |
-| `events` | Legacy admin table only; public site uses invitation posts |
+| `events` | Legacy admin table only; public invitations are posts |
 | `appearances` | Press / v tisku |
 
 ## Sections
@@ -19,53 +19,38 @@ Public site is **not** assembled from the page-component tree. Typed entities:
 | Code | Czech | Path | Role |
 |---|---|---|---|
 | `ritualy` | Svatební rituály | `/svatebni-ritualy` | Business portfolio — weddings / bridal only |
-| `udalosti` | Události | `/udalosti` | Current **invitations** + lasting **reports** |
-| `denik` | Deník | `/denik` | Everything else lasting, chronological |
+| `umeni` | Umění | `/umeni` | Installations, portraits, art-led work |
+| `denik` | Deník | `/denik` | Dated journal — diary, workshops, reports, the rest |
+| `udalosti` | Události | `/udalosti` | Current **invitations** only (ephemeral detail URLs) |
 
-`/udalosti` lists current invitations (“nadcházející”) then lasting reports (“reportáže”). Expired invitations 404 on detail and drop from the list. Homepage plot for Události uses report photos (not invites).
+Invitations are primarily the **homepage hero** (“Připoj se”). Nav is rituály · umění · deník · kontakt. Legacy `himmelhaus` / `workshopy` redirect to `/denik`.
 
-Soft ingest `kind` and free keywords stay for enrichment/search. Legacy `himmelhaus` / `workshopy` / `umeni` redirect to `/denik`.
-
-`Section::work()` (homepage plots / nav order) = rituály → události → deník.
+`Section::work()` (homepage plots) = rituály → umění → deník.
 
 ## Controlled tags
 
-`tags` JSON on `ingest_items` / `posts` is the source of truth for invitation framing:
-
 | Tag | Meaning | Public fate |
 |---|---|---|
-| `invitation` | Open call to an upcoming/current event | path under `/udalosti`, ephemeral; hero CTA; `isInvitation` synced cache |
-| `report` | Lasting write-up of an event that already happened | lasting `udalosti` listing |
+| `invitation` | Open call to an upcoming/current event | `/udalosti/…` detail + homepage hero; expires → 404 |
+| `report` | Lasting write-up of an event that already happened | lasting `denik` |
 
-Mutually exclusive. Empty tags = ordinary journal. LLM fills via KeywordAnalyzer; allowlist in `App\Classes\Content\Tags`.
+Mutually exclusive. LLM fills via KeywordAnalyzer; allowlist in `App\Classes\Content\Tags`.
 
 ## Homepage
 
-Visual layout is in `homepage.mdc`. Text is the next **current invitation** post, else the latest lasting work post. Hero photos come from that same featured post. Then three plots: Rituály → Události (reports) → Deník.
+Visual layout is in `homepage.mdc`. Featured text/photos: current invitation, else latest lasting work post. Then three plots: Rituály → Umění → Deník.
 
-## Invitations
+## Materialize mapping
 
-Materialized from tag `invitation` (+ `startsAt` / `endsAt` / `place`), section `udalosti`. Public only while current (effective end ≥ now); expired → hidden everywhere including detail **404**. Listing `/udalosti` is current invites only (no archive). Admin legacy **Události** (`events` table) remains until removed.
+- `invitation` → `udalosti` (ephemeral)
+- `kind=wedding` → `ritualy`
+- `kind=installation|portrait` → `umeni`
+- everything else lasting (incl. workshop / report) → `denik`
 
 ## Post parts (`layoutJson.parts`)
 
-Public post/invitation body is an ordered list in `posts.layoutJson.parts`:
-
-| type | fields | Notes |
-|---|---|---|
-| `text` | `html` | Sanitized HTML chunk |
-| `image` | `postFileId` | One selected photo |
-| `gallery` | `postFileIds` | Ordered photos |
-
-- **`post_files`**: only photos included in the post (subset of ingest), ordered; rating/role/demote kept. Demoted/skip never enter.
-- Parts reference **`postFileId`**, not ingest ids.
-- **`bodyHtml` / `excerpt`**: derived — excerpt from first text part; bodyHtml = concat of text parts (search/admin fallback).
-- Built by `PostMaterializer` via Gemini (`PostLayoutPlanner`): `excerpt` is for cards/listings only; body `parts` hold the complete copy (including opening lines). LLM curates photos (not all required), groups related ones into galleries, interleaves short text beats.
-- Public detail (work + invitations) shares `Posts/article.twig`: one continuous centered block (header + parts + lightbox). Rematerialize existing: `MaterializePosts --args='{"existingOnly":true}'`.
-- Edited in admin post form. See `App\Classes\Content\PostParts`.
+Public body is an ordered list in `posts.layoutJson.parts` (`text` / `image` / `gallery`). See `App\Classes\Content\PostParts`. Rematerialize: `MaterializePosts --args='{"existingOnly":true}'`.
 
 ## Import
 
 Load into ingest via Katu jobs first (see `ingest.mdc`). Public `posts` come from `MaterializePosts`, not refresh jobs.
-
-Materialize mapping: `invitation` → `udalosti` (ephemeral); `kind=wedding` → `ritualy`; `report` or `kind=workshop` → lasting `udalosti`; everything else lasting → `denik`.

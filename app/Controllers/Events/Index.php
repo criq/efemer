@@ -8,25 +8,19 @@ use App\Classes\Views\HTMLEngine;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+/**
+ * Invitation listing (optional deep link). Primary surface is the homepage hero.
+ */
 class Index extends \Katu\Controllers\Controller
 {
 	public function getResponse(ServerRequestInterface $request, ResponseInterface $response)
 	{
-		$groups = [];
-
 		$invitations = Post::getCurrentInvitations();
+		$groups = [];
 		if ($invitations !== []) {
 			$groups[] = [
 				"title" => "nadcházející",
 				"posts" => $invitations,
-			];
-		}
-
-		$reports = Post::getPublishedBySection(Section::UDALOSTI);
-		if ($reports !== []) {
-			$groups[] = [
-				"title" => "reportáže",
-				"posts" => $reports,
 			];
 		}
 

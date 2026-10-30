@@ -15,6 +15,11 @@ class View extends \Katu\Controllers\Controller
 		return $this->render($request, $response, Section::RITUALY, $slug);
 	}
 
+	public function umeni(ServerRequestInterface $request, ResponseInterface $response, string $slug)
+	{
+		return $this->render($request, $response, Section::UMENI, $slug);
+	}
+
 	public function denik(ServerRequestInterface $request, ResponseInterface $response, string $slug)
 	{
 		return $this->render($request, $response, Section::DENIK, $slug);

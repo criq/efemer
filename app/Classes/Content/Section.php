@@ -5,6 +5,7 @@ namespace App\Classes\Content;
 class Section
 {
 	public const RITUALY = "ritualy";
+	public const UMENI = "umeni";
 	public const DENIK = "denik";
 	public const UDALOSTI = "udalosti";
 
@@ -12,27 +13,25 @@ class Section
 	public const HIMMELHAUS = "himmelhaus";
 	/** @deprecated Merged into DENIK */
 	public const WORKSHOPY = "workshopy";
-	/** @deprecated Merged into DENIK */
-	public const UMENI = "umeni";
 
 	/** Legacy journal section codes (pre-deník collapse). */
 	public const LEGACY_JOURNAL = [
 		self::HIMMELHAUS,
 		self::WORKSHOPY,
-		self::UMENI,
 	];
 
 	public static function all(): array
 	{
 		return [
 			self::RITUALY,
+			self::UMENI,
 			self::DENIK,
 			self::UDALOSTI,
 		];
 	}
 
 	/**
-	 * Lasting public sections (homepage plots + nav work items).
+	 * Lasting public sections (homepage plots + nav).
 	 *
 	 * @return list<string>
 	 */
@@ -40,7 +39,7 @@ class Section
 	{
 		return [
 			self::RITUALY,
-			self::UDALOSTI,
+			self::UMENI,
 			self::DENIK,
 		];
 	}
@@ -67,7 +66,8 @@ class Section
 	{
 		return match ($section) {
 			self::RITUALY => "Svatební rituály",
-			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY, self::UMENI => "Deník",
+			self::UMENI => "Umění",
+			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY => "Deník",
 			self::UDALOSTI => "Události",
 			default => $section,
 		};
@@ -77,7 +77,8 @@ class Section
 	{
 		return match ($section) {
 			self::RITUALY => "rituály",
-			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY, self::UMENI => "deník",
+			self::UMENI => "umění",
+			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY => "deník",
 			self::UDALOSTI => "události",
 			default => $section,
 		};
@@ -87,7 +88,8 @@ class Section
 	{
 		return match ($section) {
 			self::RITUALY => "/svatebni-ritualy",
-			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY, self::UMENI => "/denik",
+			self::UMENI => "/umeni",
+			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY => "/denik",
 			self::UDALOSTI => "/udalosti",
 			default => "/" . $section,
 		};
@@ -97,7 +99,8 @@ class Section
 	{
 		return match ($section) {
 			self::RITUALY => "sections.ritualy",
-			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY, self::UMENI => "sections.denik",
+			self::UMENI => "sections.umeni",
+			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY => "sections.denik",
 			self::UDALOSTI => "sections.udalosti",
 			default => "homepage.index",
 		};
@@ -107,8 +110,9 @@ class Section
 	{
 		return match ($section) {
 			self::RITUALY => "Bespoke přechodové rituály pro pár a rodinu — ne svatební koordinace, ale obřad na míru místu, rostlinám a lidem.",
-			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY, self::UMENI => "Zápisky z domu, dílen, slavností a krajiny — chronologicky, tak jak přicházejí.",
-			self::UDALOSTI => "Pozvánky na to, co se právě chystá, a reportáže ze slavností a dílen, které už zůstávají.",
+			self::UMENI => "Instalace, happeningy a práce s rostlinou jako nositelkou významu.",
+			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY => "Zápisky z domu, dílen, slavností a krajiny — chronologicky, tak jak přicházejí.",
+			self::UDALOSTI => "Pozvánky na to, co se právě chystá.",
 			default => "",
 		};
 	}

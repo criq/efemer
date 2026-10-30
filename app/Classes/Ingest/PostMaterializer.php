@@ -255,7 +255,7 @@ class PostMaterializer
 
 	private function resolveSection(IngestItem $item): ?string
 	{
-		// Ephemeral open calls stay under /udalosti (hidden from the lasting listing).
+		// Ephemeral open calls — detail under /udalosti; surfaced on the homepage hero.
 		if ($item->isInvitation()) {
 			return Section::UDALOSTI;
 		}
@@ -265,12 +265,12 @@ class PostMaterializer
 			return Section::RITUALY;
 		}
 
-		// Lasting event reports (workshop recaps, slavnosti) → Události.
-		if ($item->isReport() || $item->getKind() === "workshop") {
-			return Section::UDALOSTI;
+		// Umění = installations, floral portraits, art-led work.
+		if (in_array($item->getKind(), ["installation", "portrait"], true)) {
+			return Section::UMENI;
 		}
 
-		// Everything else lasting → dated journal.
+		// Workshops, reports, diary, and the rest → dated journal.
 		return Section::DENIK;
 	}
 

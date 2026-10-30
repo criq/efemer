@@ -15,6 +15,11 @@ class Index extends \Katu\Controllers\Controller
 		return $this->render($request, $response, Section::RITUALY);
 	}
 
+	public function umeni(ServerRequestInterface $request, ResponseInterface $response)
+	{
+		return $this->render($request, $response, Section::UMENI);
+	}
+
 	public function denik(ServerRequestInterface $request, ResponseInterface $response)
 	{
 		return $this->render($request, $response, Section::DENIK);

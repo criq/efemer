@@ -56,7 +56,7 @@
 								<option value="">—</option>
 								{% for code in sections %}
 									<option value="{{ code }}" {% if form.section == code %}selected{% endif %}>
-										{% if code == "ritualy" %}Svatební rituály{% elseif code == "denik" %}Deník{% else %}{{ code }}{% endif %}
+										{% if code == "ritualy" %}Svatební rituály{% elseif code == "umeni" %}Umění{% elseif code == "denik" %}Deník{% else %}{{ code }}{% endif %}
 									</option>
 								{% endfor %}
 							</select>
