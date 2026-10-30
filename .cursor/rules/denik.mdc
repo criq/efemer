@@ -1,0 +1,18 @@
+---
+description: Deník section listing — editorial journal layout
+globs: app/Views/Sections/denik.twig,static/scss/3-blocks/denik.scss,app/Controllers/Sections/**
+alwaysApply: false
+---
+
+# Deník listing
+
+`/denik` uses `Sections/denik.twig` (not the shared section grid). Rituály / umění stay on `Sections/index.twig`.
+
+## Layout
+
+- Greige page ground; white header; soft white→greige header wash
+- Posts grouped by **published** year
+- Alternating photo + copy rows (photo left / right); featured first entry larger
+- Photos reuse `.home-print` shadow + ≤0.5° tilt; keep native aspect ratio
+- Title (often a diary date) in Fraunces; summary clamped to 3 lines; `zapsáno` = publishedAt
+- Scroll reveal via `data-reveal` + `.is-in` (deník-scoped only; respects `prefers-reduced-motion`)
