@@ -72,7 +72,7 @@ todos:
     content: "Superseded: collapsed himmelhaus/workshopy/umeni into denik journal"
     status: cancelled
   - id: denik-journal
-    content: "Public IA: rituály + umění + deník (reports in deník); invitations homepage hero; legacy himmelhaus/workshopy → /denik"
+    content: "Public IA: rituály → deník → umění (reports in deník); invitations homepage hero; legacy himmelhaus/workshopy → /denik"
     status: completed
   - id: ig-keyword-corpus
     content: "IG KeywordIngest done — 631 IG items kw-v3 (0 loaded); 126 invitations"
