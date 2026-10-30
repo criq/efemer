@@ -521,14 +521,14 @@ Rules:
 - Keywords: lowercase except proper names / place names. Avoid duplicate casing variants.
 - Each file needs 3–8 specific keywords (plants, objects, people, mood, place) — not only copies of item keywords.
 - kind:
-  - wedding = svatba / novomanželé
-  - workshop = ANY public gathering, workshop, slavnost, pouť, vycházka, brigáda, pop-up, or event invitation where people are invited to join (e.g. "zveme", "sraz je", "připojte se", "vstupenky", "poslední místa", Kupalo, Votivní Wanderlust, Volání na stromy, Ciderfest)
-  - gift = dar / kytice pro mámu / named gift or tribute bouquet (including farewell/memorial bouquets for a named person)
+  - wedding = ONLY an actual wedding / bridal ritual / novomanželé / svatební obřad (ceremony, bridal bouquet for that wedding, wedding veil, newlyweds). Not masopust, carnival, birthday, výročí party, seasonal gathering, or "veselka" that is not a wedding. Mentioning a past wedding in passing does not make the post wedding.
+  - workshop = public gathering, workshop, slavnost, masopust, pouť, vycházka, brigáda, pop-up, seasonal feast, or event invitation where people join (e.g. "zveme", "sraz je", "připojte se", Kupalo, Wanderlust, Ciderfest, masopustní veselky)
+  - gift = dar / kytice pro mámu / birthday / named gift or tribute bouquet (including farewell/memorial bouquets for a named person)
   - portrait = person-focused floral portrait without clear wedding
   - bouquet = standalone authored bouquet / commission (not a shop SKU)
   - product = only shop-like / catalog product shots
   - installation / diary / other as appropriate
-  - Prefer workshop whenever the post invites people to an event/happening/walk/gathering (even in a cemetery, church, gallery, or @himmlhaus). Prefer gift|portrait|bouquet over diary when those fit better.
+  - Prefer workshop for masopust / slavnost / seasonal feast write-ups. Prefer gift|portrait|bouquet over diary when those fit better. Never use wedding for carnival or non-bridal veselky.
 - tags (controlled; empty array when neither fits; never invent free keywords here):
   - "invitation" — the post invites readers to an upcoming or current event/workshop/walk/slavnost/pop-up ("zveme", "připojte se", "sraz", "vstupenky", poster with future date/time/venue). Mutually exclusive with "report".
   - "report" — a lasting write-up / photo essay about an event that already happened (workshop recap, slavnost reportáž, after the gathering). Not an open call to attend. Prefer report over invitation when the text is past-tense storytelling rather than a call to join.
