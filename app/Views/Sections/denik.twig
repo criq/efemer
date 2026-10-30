@@ -7,48 +7,26 @@
 {% block body %}
 
 	<div class="denik">
-		<header class="denik__header" data-reveal>
+		<header class="denik__intro">
 			<p class="text-eyebrow">{{ title|lower }}</p>
 			<h1 class="denik__heading">{{ title }}</h1>
 			<p class="denik__lead">{{ lead }}</p>
 		</header>
 
-		{% for group in groups %}
-			<section class="denik__year" data-reveal>
-				<h2 class="denik__year-label">
-					<span class="denik__year-num">{{ group.title }}</span>
-				</h2>
-
-				<ul class="denik__entries">
-					{% for post in group.posts %}
-						{% set featured = loop.parent.loop.first and loop.first %}
-						{% set side = loop.index is odd ? "left" : "right" %}
-						<li class="denik__entry denik__entry--{{ side }}{% if featured %} denik__entry--featured{% endif %}" data-reveal>
-							<a class="denik__link" href="{{ post.getPublicUrl }}">
-								{% if post.getHeroImage %}
-									<span class="denik__photo home-print">
-										<span class="home-print__photo">
-											<img src="{{ post.getHeroImage.getImageVersion("GALLERY").getURL }}" alt="">
-										</span>
-									</span>
-								{% endif %}
-								<span class="denik__copy">
-									<span class="denik__title">{{ post.getTitle }}</span>
-									{% if post.getSummary %}
-										<span class="denik__summary">{{ post.getSummary }}</span>
-									{% endif %}
-									{% if post.getPublishedAt %}
-										<span class="denik__meta">zapsáno {{ post.getPublishedAt|date("j. n. Y") }}</span>
-									{% endif %}
-								</span>
-							</a>
-						</li>
-					{% endfor %}
-				</ul>
-			</section>
-		{% else %}
-			<p class="denik__empty">Zatím tu nic není.</p>
-		{% endfor %}
+		<div class="denik__feed">
+			{% for post in posts %}
+				<article class="post-article denik-feed__item" id="post-{{ post.getId }}">
+					{% include "Posts/body.twig" with {
+						post: post,
+						linkedTitle: true,
+						showSectionEyebrow: false,
+						headingTag: "h2",
+					} %}
+				</article>
+			{% else %}
+				<p class="denik__empty">Zatím tu nic není.</p>
+			{% endfor %}
+		</div>
 	</div>
 
 {% endblock body %}

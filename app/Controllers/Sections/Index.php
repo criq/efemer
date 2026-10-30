@@ -33,13 +33,11 @@ class Index extends \Katu\Controllers\Controller
 
 	public function denik(ServerRequestInterface $request, ResponseInterface $response)
 	{
-		$posts = Post::getPublishedBySection(Section::DENIK);
-
 		return $response->withBody((new HTMLEngine($request))->render("Sections/denik.twig", [
 			"section" => Section::DENIK,
 			"title" => Section::title(Section::DENIK),
 			"lead" => Section::lead(Section::DENIK),
-			"groups" => $this->groupByYear($posts),
+			"posts" => Post::getPublishedBySection(Section::DENIK),
 		]));
 	}
 
@@ -51,29 +49,5 @@ class Index extends \Katu\Controllers\Controller
 			"lead" => Section::lead($section),
 			"posts" => Post::getPublishedBySection($section),
 		]));
-	}
-
-	/**
-	 * @param list<Post> $posts
-	 * @return list<array{title: string, posts: list<Post>}>
-	 */
-	private function groupByYear(array $posts): array
-	{
-		$groups = [];
-		foreach ($posts as $post) {
-			$year = $post->getPublishedAt()?->format("Y") ?? "";
-			if ($year === "") {
-				$year = "—";
-			}
-			if (!isset($groups[$year])) {
-				$groups[$year] = [
-					"title" => $year,
-					"posts" => [],
-				];
-			}
-			$groups[$year]["posts"][] = $post;
-		}
-
-		return array_values($groups);
 	}
 }
