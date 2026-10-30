@@ -1,5 +1,5 @@
 ---
-description: Rituály section listing — homepage-style intro + plot panels
+description: Rituály section listing — centered ceremony bands
 globs: app/Views/Sections/ritualy.twig,static/scss/3-blocks/ritualy.scss,app/Controllers/Sections/**
 alwaysApply: false
 ---
@@ -10,9 +10,10 @@ alwaysApply: false
 
 ## Layout
 
-- Intro reuses homepage text hero (`.home-hero.home-hero--text`): kicker, title, longer lead, blurb, CTA → kontakt (“Napsat o rituálu”)
-- Wedding cards: greige panels, **smaller portrait peeking from the left**, text on the right (from 801px). Phones stack portrait on top.
-- Prefer portrait listing images via `Post::getPreferredImage("portrait")`
-- Grid: **2 columns** from 801px, **3 columns** from 1100px; `.75rem` white gaps
-- Title = newlywed names from materialize; summary = crafted perex
+- Soft white→greige intro: eyebrow, title, lead, blurb, CTA → kontakt (“Napsat o rituálu”)
+- One wedding per full-width greige band (`.75rem` white gaps) — **not** a card grid, **not** a left-hugging split
+- Each band: **names + perex centered on top**, portrait collage centered below
+- Collage: lead + optional small aside via `Post::getPreferredImages("portrait", 2)`; native aspect ratios
+- Alternate slight left/right sway (`--a` / `--b`); first panel slightly larger
+- Title = newlywed names; summary = crafted perex; quiet year; “Prohlédnout”
 - No scroll / entrance animations

@@ -587,6 +587,67 @@ class Post extends \Katu\Models\Model
 		return $bestPreferred ?? $bestAny ?? $this->getHeroImage();
 	}
 
+	/**
+	 * Ranked listing images for collage panels (unique storage files).
+	 *
+	 * @return list<\Katu\Tools\Images\Image>
+	 */
+	public function getPreferredImages(?string $preferOrientation = null, int $limit = 2): array
+	{
+		if ($limit < 1) {
+			return [];
+		}
+
+		$preferOrientation = $preferOrientation !== null ? strtolower($preferOrientation) : null;
+		$ranked = [];
+
+		foreach ($this->getFiles() as $file) {
+			if ($file->isDemoted() || $file->getRole() === "skip") {
+				continue;
+			}
+
+			$image = $file->getImage();
+			if (!$image) {
+				continue;
+			}
+
+			$rating = $file->getRating() ?? 0.55;
+			$matchesPrefer = $preferOrientation !== null && $file->getOrientation() === $preferOrientation;
+			$ranked[] = [
+				"image" => $image,
+				"key" => (int)$file->storageFileId,
+				"score" => ($matchesPrefer ? 1000.0 : 0.0) + $rating,
+			];
+		}
+
+		usort($ranked, static fn (array $a, array $b): int => $b["score"] <=> $a["score"]);
+
+		$picked = [];
+		$seen = [];
+		foreach ($ranked as $row) {
+			$key = $row["key"];
+			if ($key > 0 && isset($seen[$key])) {
+				continue;
+			}
+			if ($key > 0) {
+				$seen[$key] = true;
+			}
+			$picked[] = $row["image"];
+			if (count($picked) >= $limit) {
+				break;
+			}
+		}
+
+		if ($picked === []) {
+			$hero = $this->getHeroImage();
+			if ($hero) {
+				$picked[] = $hero;
+			}
+		}
+
+		return $picked;
+	}
+
 	public function clearFiles(): void
 	{
 		foreach ($this->getFiles() as $file) {
