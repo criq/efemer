@@ -1,5 +1,5 @@
 ---
-description: Rituály section listing — centered ceremony bands
+description: Rituály section — full-post scroll feed
 globs: app/Views/Sections/ritualy.twig,static/scss/3-blocks/ritualy.scss,app/Controllers/Sections/**
 alwaysApply: false
 ---
@@ -11,9 +11,8 @@ alwaysApply: false
 ## Layout
 
 - Soft white→greige intro: eyebrow, title, lead, blurb, CTA → kontakt (“Napsat o rituálu”)
-- One wedding per full-width greige band (`.75rem` white gaps) — **not** a card grid, **not** a left-hugging split
-- Each band: **names + perex centered on top**, portrait collage centered below
-- Collage: lead + optional small aside via `Post::getPreferredImages("portrait", 2)`; native aspect ratios
-- Alternate slight left/right sway (`--a` / `--b`); first panel slightly larger
-- Title = newlywed names; summary = crafted perex; quiet year; “Prohlédnout”
-- No scroll / entrance animations
+- Continuous **feed of whole wedding posts** (same body as detail via `Posts/body.twig` + `Posts/parts.twig`)
+- Greige bands separated by `.75rem` white gaps; slightly tighter padding than standalone `/svatebni-ritualy/{slug}`
+- Title links to the standalone post URL (`linkedTitle`); no section eyebrow in the feed
+- All published rituály posts in one response (~small corpus; no AJAX pager yet)
+- No scroll / entrance animations on the index

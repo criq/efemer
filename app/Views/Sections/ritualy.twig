@@ -17,37 +17,15 @@
 			<a class="ritualy__cta" href="{{ url("site.kontakt") }}">Napsat o rituálu</a>
 		</header>
 
-		<div class="ritualy__list">
+		<div class="ritualy__feed">
 			{% for post in posts %}
-				{% set images = post.getPreferredImages("portrait", 2) %}
-				{% set sway = loop.index is odd ? "a" : "b" %}
-				<article class="ritualy-panel ritualy-panel--{{ sway }}{% if loop.first %} ritualy-panel--first{% endif %}">
-					<div class="ritualy-panel__copy">
-						{% if post.getPublishedAt %}
-							<p class="ritualy-panel__year">{{ post.getPublishedAt|date("Y") }}</p>
-						{% endif %}
-						<h2 class="ritualy-panel__title"><a href="{{ post.getPublicUrl }}">{{ post.getTitle }}</a></h2>
-						{% if post.getSummary %}
-							<p class="ritualy-panel__perex">{{ post.getSummary }}</p>
-						{% endif %}
-						<a class="ritualy-panel__more" href="{{ post.getPublicUrl }}">Prohlédnout</a>
-					</div>
-					{% if images %}
-						<div class="ritualy-panel__side">
-							<a class="home-print ritualy-panel__print ritualy-panel__print--lead" href="{{ post.getPublicUrl }}">
-								<span class="home-print__photo">
-									<img src="{{ images[0].getImageVersion("GALLERY").getURL }}" alt="">
-								</span>
-							</a>
-							{% if images[1] is defined %}
-								<a class="home-print home-print--aside ritualy-panel__print ritualy-panel__print--aside" href="{{ post.getPublicUrl }}">
-									<span class="home-print__photo">
-										<img src="{{ images[1].getImageVersion("GALLERY").getURL }}" alt="">
-									</span>
-								</a>
-							{% endif %}
-						</div>
-					{% endif %}
+				<article class="post-article ritualy-feed__item" id="post-{{ post.getId }}">
+					{% include "Posts/body.twig" with {
+						post: post,
+						linkedTitle: true,
+						showSectionEyebrow: false,
+						headingTag: "h2",
+					} %}
 				</article>
 			{% else %}
 				<p class="ritualy__empty">Zatím tu nic není.</p>

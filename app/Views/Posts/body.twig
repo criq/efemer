@@ -1,0 +1,53 @@
+{#
+	Shared post article body. Expects `post`.
+	Optional:
+	- linkedTitle (bool): wrap title in link to the public post URL
+	- showSectionEyebrow (bool): section link above the title (default true)
+	- sectionPath, sectionTitle: used when showSectionEyebrow
+	- headingTag: "h1" (default) or "h2" for feed items
+#}
+{% set linkedTitle = linkedTitle|default(false) %}
+{% set showSectionEyebrow = showSectionEyebrow|default(true) %}
+{% set headingTag = headingTag|default("h1") %}
+
+<header class="post-article__header"{% if not linkedTitle %} data-reveal{% endif %}>
+	{% if showSectionEyebrow and sectionPath is defined and sectionTitle is defined %}
+		<p class="text-eyebrow"><a href="{{ sectionPath }}">{{ sectionTitle|lower }}</a></p>
+	{% endif %}
+	{% if post.isInvitation %}
+		<span class="post-article__kicker">{{ post.getInviteKicker }}</span>
+	{% endif %}
+	{% if linkedTitle %}
+		<{{ headingTag }} class="post-article__title">
+			<a href="{{ post.getPublicUrl }}">{{ post.getTitle }}</a>
+		</{{ headingTag }}>
+	{% else %}
+		<{{ headingTag }} class="post-article__title">{{ post.getTitle }}</{{ headingTag }}>
+	{% endif %}
+	{% if post.isInvitation and (post.getPlace or post.getDateLabel) %}
+		<p class="post-article__meta">
+			{% if post.getPlace %}<span>{{ post.getPlace }}</span>{% endif %}
+			{% if post.getPlace and post.getDateLabel %}<span> · </span>{% endif %}
+			{% if post.getDateLabel %}
+				<span>
+					{{ post.getDateLabel }}{% if post.getTimeLabel %} · {{ post.getTimeLabel }}{% endif %}
+				</span>
+			{% endif %}
+		</p>
+	{% elseif post.getPublishedAt %}
+		<p class="post-article__meta">{{ post.getPublishedAt|date("j. n. Y") }}</p>
+	{% endif %}
+	{% if post.isInvitation and post.getInstagramShortcode %}
+		<p class="post-article__actions">
+			<a class="post-article__cta" href="https://www.instagram.com/p/{{ post.getInstagramShortcode }}/" target="_blank" rel="noopener noreferrer">Připoj se</a>
+		</p>
+	{% endif %}
+</header>
+
+{% include "Posts/parts.twig" with { parts: post.getResolvedParts } %}
+
+{% if post.getInstagramShortcode %}
+	<p class="post-article__out"{% if not linkedTitle %} data-reveal{% endif %}>
+		<a href="https://www.instagram.com/p/{{ post.getInstagramShortcode }}/" target="_blank" rel="noopener noreferrer">na Instagramu</a>
+	</p>
+{% endif %}

@@ -12718,7 +12718,7 @@ body.builder .builder-file-list--insert:not(:empty),
   text-decoration: none;
 }
 
-.ritualy__list {
+.ritualy__feed {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -12730,167 +12730,21 @@ body.builder .builder-file-list--insert:not(:empty),
   text-align: center;
 }
 
-.ritualy-panel {
-  --panel-pad-y: max(2.25rem, min(5vw, 3.75rem));
-  --panel-pad-x: max(1.25rem, min(5vw, 3rem));
-  --collage-w: min(100%, 20rem);
-  --aside-w: 34%;
-  align-items: center;
+.ritualy-feed__item {
   background: #faf9f7;
-  display: flex;
-  flex-direction: column;
-  gap: max(1.75rem, min(4vw, 2.75rem));
-  padding: max(2.25rem, min(5vw, 3.75rem)) max(1.25rem, min(5vw, 3rem));
-  padding: var(--panel-pad-y) var(--panel-pad-x);
-}
-
-.ritualy-panel--first {
-  --panel-pad-y: max(2.75rem, min(6vw, 4.5rem));
-  --collage-w: min(100%, 24rem);
-}
-
-.ritualy-panel__copy {
-  margin: 0 auto;
-  max-width: 32rem;
-  text-align: center;
-  width: 100%;
-}
-
-.ritualy-panel__year {
-  color: #8b9488;
-  font-family: "Outfit", "Helvetica Neue", sans-serif;
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  margin: 0 0 0.55rem;
-  text-transform: uppercase;
-}
-
-.ritualy-panel__title {
-  font-family: "Fraunces", "Times New Roman", Times, serif;
-  font-size: max(2rem, min(5vw, 3rem));
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.08;
   margin: 0;
+  max-width: none;
+  padding: max(2rem, min(5vw, 3.25rem)) max(1rem, min(4vw, 2.5rem)) max(2.5rem, min(5vw, 3.5rem));
 }
-.ritualy-panel__title a {
+.ritualy-feed__item .post-article__title a {
   color: inherit;
   -webkit-text-decoration: none;
   text-decoration: none;
 }
-.ritualy-panel__title a:hover {
+.ritualy-feed__item .post-article__title a:hover {
   color: #6f7d68;
 }
 
-.ritualy-panel--first .ritualy-panel__title {
-  font-size: max(2.35rem, min(6vw, 3.5rem));
-}
-
-.ritualy-panel__perex {
-  color: #5e675c;
-  font-size: max(1rem, min(1.8vw, 1.12rem));
-  line-height: 1.55;
-  margin: 1rem auto 0;
-  max-width: 28rem;
-  text-wrap: balance;
-}
-
-.ritualy-panel__more {
-  border-bottom: 1px solid currentColor;
-  color: inherit;
-  display: inline-block;
-  font-family: "Outfit", "Helvetica Neue", sans-serif;
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  margin-top: 1.35rem;
-  padding-bottom: 0.15rem;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  text-transform: uppercase;
-}
-.ritualy-panel__more:hover {
-  color: #6f7d68;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-}
-
-.ritualy-panel__side {
-  isolation: isolate;
-  margin: 0 auto;
-  position: relative;
-  width: var(--collage-w);
-}
-
-.ritualy-panel__print {
-  display: block;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-}
-
-.ritualy-panel__print--lead {
-  display: block;
-  transform: rotate(-0.35deg);
-  width: 100%;
-}
-.ritualy-panel__print--lead img {
-  display: block;
-  height: auto;
-  max-width: 100%;
-  width: 100%;
-}
-
-.ritualy-panel__print--aside {
-  position: absolute;
-  right: -6%;
-  top: 62%;
-  transform: translateY(-30%) rotate(0.45deg);
-  width: var(--aside-w);
-  z-index: 2;
-}
-
-.ritualy-panel--b .ritualy-panel__print--lead {
-  transform: rotate(0.35deg);
-}
-
-.ritualy-panel--b .ritualy-panel__print--aside {
-  left: -6%;
-  right: auto;
-  transform: translateY(-30%) rotate(-0.45deg);
-}
-
-@media screen and (min-width: 801px) {
-  .ritualy-panel {
-    --collage-w: min(52vw, 28rem);
-    --panel-pad-y: max(2.75rem, min(5vw, 4.25rem));
-  }
-  .ritualy-panel--first {
-    --collage-w: min(56vw, 32rem);
-  }
-  .ritualy-panel--a .ritualy-panel__side {
-    transform: translateX(-1.25rem);
-  }
-  .ritualy-panel--b .ritualy-panel__side {
-    transform: translateX(1.25rem);
-  }
-}
-@media screen and (min-width: 1200px) {
-  .ritualy-panel {
-    --collage-w: min(40vw, 34rem);
-    --panel-pad-x: max(2rem, min(6vw, 5rem));
-    --panel-pad-y: max(3.25rem, min(5.5vw, 5rem));
-  }
-  .ritualy-panel--first {
-    --collage-w: min(42vw, 38rem);
-  }
-  .ritualy-panel--a .ritualy-panel__side {
-    transform: translateX(-2rem);
-  }
-  .ritualy-panel--b .ritualy-panel__side {
-    transform: translateX(2rem);
-  }
-}
 .site--umeni {
   background: #faf9f7;
 }
@@ -13155,6 +13009,11 @@ body.builder .builder-file-list--insert:not(:empty),
   letter-spacing: -0.03em;
   line-height: 1.05;
   margin: 0;
+}
+.post-article__title a {
+  color: inherit;
+  -webkit-text-decoration: none;
+  text-decoration: none;
 }
 
 .post-article__meta {
