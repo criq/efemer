@@ -2,6 +2,7 @@
 
 namespace App\Classes\Content;
 
+use App\Classes\Ingest\IngestItemFile;
 use App\Classes\Storage\StorageFile;
 
 class PostFile extends \Katu\Models\Model
@@ -100,6 +101,24 @@ class PostFile extends \Katu\Models\Model
 	public function getImage(): ?\Katu\Tools\Images\Image
 	{
 		return $this->getStorageFile()->getImage();
+	}
+
+	/**
+	 * LLM orientation from ingest enrichment (landscape|portrait|square), if known.
+	 */
+	public function getOrientation(): ?string
+	{
+		$storageFileId = (int)$this->storageFileId;
+		if ($storageFileId < 1) {
+			return null;
+		}
+
+		$ingestFile = IngestItemFile::getOneBy([
+			"storageFileId" => $storageFileId,
+		]);
+		$orientation = $ingestFile?->getOrientation();
+
+		return is_string($orientation) && $orientation !== "" ? strtolower($orientation) : null;
 	}
 
 	public function getAdminPayload(): array

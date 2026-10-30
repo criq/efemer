@@ -549,6 +549,44 @@ class Post extends \Katu\Models\Model
 		return $file ? $file->getImage() : null;
 	}
 
+	/**
+	 * Listing image: prefer a high-rated file with the given LLM orientation,
+	 * else the best-rated non-demoted file, else the cover/hero.
+	 * Avoids getWidth/getHeight (GCS) — uses ingest orientation only.
+	 */
+	public function getPreferredImage(?string $preferOrientation = null): ?\Katu\Tools\Images\Image
+	{
+		$preferOrientation = $preferOrientation !== null ? strtolower($preferOrientation) : null;
+		$bestPreferred = null;
+		$bestPreferredRating = -1.0;
+		$bestAny = null;
+		$bestAnyRating = -1.0;
+
+		foreach ($this->getFiles() as $file) {
+			if ($file->isDemoted() || $file->getRole() === "skip") {
+				continue;
+			}
+
+			$image = $file->getImage();
+			if (!$image) {
+				continue;
+			}
+
+			$rating = $file->getRating() ?? 0.55;
+			if ($rating > $bestAnyRating) {
+				$bestAnyRating = $rating;
+				$bestAny = $image;
+			}
+
+			if ($preferOrientation !== null && $file->getOrientation() === $preferOrientation && $rating > $bestPreferredRating) {
+				$bestPreferredRating = $rating;
+				$bestPreferred = $image;
+			}
+		}
+
+		return $bestPreferred ?? $bestAny ?? $this->getHeroImage();
+	}
+
 	public function clearFiles(): void
 	{
 		foreach ($this->getFiles() as $file) {

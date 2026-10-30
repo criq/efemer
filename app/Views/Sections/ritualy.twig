@@ -18,10 +18,11 @@
 				{% set side = loop.index is odd ? "left" : "right" %}
 				<li class="ritualy__item ritualy__item--{{ side }}{% if loop.first %} ritualy__item--featured{% endif %}" data-reveal>
 					<a class="ritualy__link" href="{{ post.getPublicUrl }}">
-						{% if post.getHeroImage %}
+						{% set image = post.getPreferredImage("landscape") %}
+						{% if image %}
 							<span class="ritualy__photo home-print">
 								<span class="home-print__photo">
-									<img src="{{ post.getHeroImage.getImageVersion("GALLERY").getURL }}" alt="">
+									<img src="{{ image.getImageVersion("GALLERY").getURL }}" alt="">
 								</span>
 							</span>
 						{% endif %}
