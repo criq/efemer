@@ -289,7 +289,40 @@ class PostMaterializer
 			}
 		}
 
+		if (in_array($item->getKind(), ["installation", "portrait"], true)) {
+			$normalized = $this->normalizeArtTitle((string)($plan["title"] ?? ""));
+			if ($normalized !== "") {
+				return $normalized;
+			}
+		}
+
 		return $this->deriveTitle($item);
+	}
+
+	private function normalizeArtTitle(string $raw): string
+	{
+		$title = trim(html_entity_decode(strip_tags($raw), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+		$title = preg_replace("/\s+/u", " ", $title) ?? $title;
+		$title = trim($title, " \t\n\r\0\x0B\"'«»");
+		$title = preg_replace("/@[\\p{L}\\p{N}._]+/u", "", $title) ?? $title;
+		$title = preg_replace("/#\\S+/u", "", $title) ?? $title;
+		$title = preg_replace("/\s+/u", " ", $title) ?? $title;
+		$title = trim($title, " \t\n\r\0\x0B,&");
+		if ($title === "" || strtolower($title) === "null") {
+			return "";
+		}
+		// Reject bare dates and long sentence pastes — layout planner should supply a short work title.
+		if (preg_match("/^\\d{1,2}\\.?\\s*\\d{1,2}\\.?\\s*\\d{2,4}$/u", $title)) {
+			return "";
+		}
+		if (mb_strlen($title) > 80) {
+			return "";
+		}
+		if (mb_strlen($title) > 55 && preg_match("/[.!?]\\s/u", $title)) {
+			return "";
+		}
+
+		return $title;
 	}
 
 	private function normalizeCoupleTitle(string $raw): string

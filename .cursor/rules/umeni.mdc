@@ -14,5 +14,6 @@ alwaysApply: false
 - Continuous **feed of whole art posts** (same body as detail via `Posts/body.twig` + `Posts/parts.twig`)
 - Full-bleed greige shells (`.umeni-feed__item`) with a centered `.post-article` inside; `.75rem` white gaps between bands
 - Title links to the standalone post URL (`linkedTitle`); no section eyebrow in the feed
+- Public titles come from MaterializePosts / PostLayoutPlanner as short **work titles** (not caption openers or bare dates)
 - Infinite scroll: first **4** posts, then `?page=N&partial=1` HTML fragments (`X-Feed-Next` header); JS in `static/javascript/index.js`
 - No scroll / entrance animations on the index

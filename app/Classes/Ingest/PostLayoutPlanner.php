@@ -105,7 +105,7 @@ Return JSON only:
 Rules:
 - parts must contain the COMPLETE body copy from the source (including the opening lines). Do not omit text just because it also appears in excerpt.
 - excerpt is a short teaser (perex) for homepage/cards/section listings only — plain text. It is NOT shown as a separate block on the post page. Write a polished 1–2 sentence Czech perex: concrete mood, place, plants, or ritual — not a raw first-line paste, no hashtags, no @handles. About 120–220 characters; never over 280.
-- title: leave null unless the WEDDING rules below apply.
+- title: leave null unless the WEDDING or ART rules below apply.
 - Split body into several short text parts (roughly 1–3 sentences / ~60–180 words each). Prefer more shorter beats over one long wall.
 - Keep Czech wording faithful; you may re-paragraph and wrap in <p> (optional <em>). Do not invent facts, dates, or places.
 - Interleave photos with text: image, text, image|gallery, text… Do not dump all photos after one text blob.
@@ -124,6 +124,18 @@ PROMPT;
 WEDDING (kind=wedding) — required:
 - title MUST be the newlyweds' names when you can find them in the body, captions, @mentions, or photos (e.g. "Veru a Jindra", "Marie a Tomáš"). Prefer first names; Czech "a" between them. One known name alone is OK. Never use Instagram handles (@…) as the title — resolve to a real name if the text gives one, otherwise omit that person. If names are truly unknown, set title to null.
 - excerpt (perex) should feel ceremonial and specific to this wedding (flowers, place, gesture) — still 1–2 sentences, no handles/hashtags.
+PROMPT;
+		}
+
+		if (in_array($item->getKind(), ["installation", "portrait"], true)) {
+			$prompt .= <<<'PROMPT'
+
+
+ART (kind=installation|portrait) — required:
+- title MUST be a short public work title (Czech preferred; keep a clear existing proper name in its language). Aim for about 2–8 words / under ~50 characters: motif, place, season, or piece name (e.g. "Madre Tierra", "Obloha", "Filipojakubská noc", "Studánky", "Efemér pro sklárnu Rückl").
+- Never use a full opening sentence, Instagram caption paste, hashtags, @handles, or a bare calendar date as the title.
+- If Source title is already a short proper name, refine/keep it rather than inventing something new. If Source title is a long sentence or only a date, invent a fitting short title from the body and photos.
+- excerpt (perex) should feel artful and specific to this piece (plants, place, gesture, light) — still 1–2 sentences, no handles/hashtags.
 PROMPT;
 		}
 
