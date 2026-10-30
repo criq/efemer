@@ -32,8 +32,7 @@ class StorageFile extends \Katu\Models\Model
 			return $existing;
 		}
 
-		$path = implode("/", [
-			\App\Classes\ThirdParty\Google\Cloud::getFilesEnvironmentShard(),
+		$path = \App\Classes\ThirdParty\Google\Cloud::getFilesObjectPrefix() . implode("/", [
 			$time->format("Y"),
 			$time->format("m"),
 			$time->format("d"),

@@ -11,6 +11,12 @@ class Cloud
 	public const PROJECT_ID = "efemer-456414";
 	public const FILES_BUCKET = "efemer";
 
+	/** Object prefix for uploaded media: gs://efemer/files/{DEV|PROD}/… */
+	public const FILES_ROOT = "files";
+
+	/** Object prefix for database dumps: gs://efemer/db/{DEV|PROD}/… */
+	public const DB_ROOT = "db";
+
 	public static function getProjectId(): string
 	{
 		return self::PROJECT_ID;
@@ -50,9 +56,20 @@ class Cloud
 		return $shard;
 	}
 
+	/**
+	 * Prefix for media objects: files/{SHARD}/
+	 */
 	public static function getFilesObjectPrefix(): string
 	{
-		return static::getFilesEnvironmentShard() . "/";
+		return self::FILES_ROOT . "/" . static::getFilesEnvironmentShard() . "/";
+	}
+
+	/**
+	 * Prefix for database dumps: db/{SHARD}/
+	 */
+	public static function getDbObjectPrefix(): string
+	{
+		return self::DB_ROOT . "/" . static::getFilesEnvironmentShard() . "/";
 	}
 
 	public static function uriBelongsToCurrentEnvironment(string $uri): bool
@@ -71,4 +88,3 @@ class Cloud
 		]);
 	}
 }
-

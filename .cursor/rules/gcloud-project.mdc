@@ -6,7 +6,8 @@ alwaysApply: true
 # Google Cloud Project
 
 - **gcloud project ID**: `efemer-456414`
-- **files bucket**: `efemer` (GCS; objects sharded by env: `DEV/…`, `PROD/…`; legacy `efemer-files` unused)
+- **files bucket**: `efemer` — media under `files/{DEV|PROD}/…`, DB dumps under `db/{DEV|PROD}/…` (legacy `efemer-files` unused)
+- **DB backup**: `./deploy/backup-db.sh` → `gs://efemer/db/{SHARD}/YYYY/MM/DD/efemer-HHMMSS.sql.gz` (cron on curios-vm daily)
 - **Instagram session secret**: `instagram-session-id` (Secret Manager; accessor `efemer-storage@efemer-456414.iam.gserviceaccount.com`)
 - **Gemini API key**: Secret Manager `gemini-api-key` (API key `Gemini`, restricted to `generativelanguage.googleapis.com`; same accessor). Never commit the key.
 - Use this project when running `gcloud` commands, deploying to GCP, or working with Google Cloud resources for this repository.

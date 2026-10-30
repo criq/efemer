@@ -40,8 +40,9 @@ Reload after changes: `sudo caddy validate --config /etc/caddy/Caddyfile && sudo
 ## GCS (files)
 
 - GCP project: `efemer-456414` (see `gcloud-project.mdc`)
-- Bucket: `efemer`
+- Bucket: `efemer` — media `files/{DEV|PROD}/…`, DB dumps `db/{DEV|PROD}/…`
 - Credentials: `.secret/` (gitignored, rsynced on deploy)
+- Daily DB backup on curios-vm: `15 3 * * *` → `./deploy/backup-db.sh` → `gs://efemer/db/PROD/…`
 
 ## Deploy
 

@@ -1,13 +1,19 @@
 ---
-description: Multi-stage ingest — Katu jobs load sources into ingest_items
+description: Multi-stage ingest — load → KeywordIngest → MaterializePosts
 alwaysApply: true
 ---
 
 # Ingest pipeline
 
-Sources load into **`ingest_items` / `ingest_item_files`** (stage 1). Stage 2 (`KeywordIngest`) adds Gemini keywords / photo roles / cover. Taxonomy and public `posts` come later.
+| Stage | Job | Result |
+|---|---|---|
+| 1 Load | `RefreshEfemerCz` / `RefreshInstagram*` / `ImportInstagramDump` | `ingest_items` + files → status `loaded` |
+| 2 Enrich | `KeywordIngest` (+ inline `KeywordQc`) | keywords, cover/roles, timeframe → `keyworded` |
+| 3 Public | `MaterializePosts` | `posts` + `post_files` + `layoutJson.parts` → `materialized` |
 
-All operational scripts are Katu jobs via `bin/cli.php`. **Interactive long jobs:** use `./bin/job` (TTY, Ctrl+C works). **Do not use `-T`** for those or Ctrl+C leaves orphans — then `./bin/job jobs:kill -f`.
+Taxonomy (`categorized`) is still provisional — soft `kind` ≠ site section. Public model: [`.cursor/rules/content-model.mdc`](content-model.mdc).
+
+All ops are Katu jobs via `bin/cli.php`. **Interactive long jobs:** `./bin/job` (TTY). **Do not use `-T`** or Ctrl+C leaves orphans — then `./bin/job jobs:kill -f`.
 
 ```bash
 cd ~/Sites/efemer
@@ -19,51 +25,47 @@ cd ~/Sites/efemer
 ./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"efemer_flowers","full":true}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"himmlhaus","full":true}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
 
-# stage 2 — Gemini keywords / roles / cover (KeywordQc runs inline after each item)
+# stage 2 — Gemini keywords / roles / cover / timeframe (KeywordQc inline)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest --args='{"limit":1}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest --args='{"id":123,"rekeyword":true}' -f
-# items flagged needs_rekeyword are picked up again by KeywordIngest (needsEnrichment)
+# needs_rekeyword flags are re-queued via KeywordIngest (needsEnrichment)
 
-# eval golden covers/roles + corpus export for taxonomy (periodic, not per batch)
+# eval + corpus (periodic, not per batch)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.EvaluateKeywords -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ExportCorpus -f
 
 # clear LLM results only (keeps stage-1 ingest)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ResetKeywordEnrichment --args='{"yes":true}' -f
 
-# keyworded ingest → public posts (invitations → section udalosti, ephemeral)
+# keyworded → public posts (invitations → udalosti, ephemeral)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"id":427}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"invitationsOnly":true}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"existingOnly":true}' -f
-
 ```
 
+Uploads go to GCS `gs://efemer/files/{DEV|PROD}/…`. Reset/purge only touches the current env shard. Admin: `/admin/ingest` (pipeline + kind facets + keyword search).
 
+Gemini: Secret Manager `gemini-api-key` (model `gemini-3.8-flash`); local fallback `.secret/gemini.api`. See `gcloud-project.mdc`.
 
-
-
-Uploads go to GCS `gs://efemer/{DEV|PROD}/…`. Reset/purge only touches the current env shard. Admin: `/admin/ingest` (pipeline + kind facets + keyword search).
-
-Gemini key: Secret Manager `gemini-api-key` (see `gcloud-project.mdc`); local fallback `.secret/gemini.api`.
-
-Eval sets (edit after human review): `app/Resources/Ingest/eval/covers.json`, `roles.json`. Exports land in `tmp/ingest/exports/` (gitignored, mounted).
+Eval sets: `app/Resources/Ingest/eval/covers.json`, `roles.json`. Exports: `tmp/ingest/exports/` (gitignored, mounted).
 
 | Job | Role |
 |---|---|
 | `Ingest.RefreshEfemerCz` | efemer.cz → ingest |
 | `Ingest.RefreshInstagram` | one IG account → ingest |
 | `Ingest.RefreshInstagramAccounts` | both IG accounts → ingest |
-| `Ingest.ImportInstagramDump` | `data/instagram` dump → ingest (Archiver or Instaloader layout) |
-| `Ingest.KeywordIngest` | Gemini → keyworded; inline KeywordQc; retries `needs_rekeyword` |
+| `Ingest.ImportInstagramDump` | `data/instagram` dump → ingest (Archiver or Instaloader) |
+| `Ingest.KeywordIngest` | Gemini → `keyworded`; inline KeywordQc; retries `needs_rekeyword` |
 | `Ingest.EvaluateKeywords` | score cover/role eval sets |
 | `Ingest.ExportCorpus` | CSV/JSON + keyword co-occurrence |
 | `Ingest.ResetKeywordEnrichment` | clear LLM fields only (`yes:true`); status → `loaded` |
-| `Ingest.MaterializePosts` | keyworded ingest → `posts` + selected `post_files` + `layoutJson.parts` (interleaved text/image/gallery); invitations ephemeral on `/udalosti` |
+| `Ingest.MaterializePosts` | → `posts` + selected `post_files` + `layoutJson.parts`; invites ephemeral on `/udalosti` |
 | `Ingest.ResetImportedContent` | wipe posts/ingest/pages + env GCS shard |
 | `Database.Migrate` | schema migrations |
 | `Pages.ImportEfemerCz` | legacy page-builder import |
 
-Diary `postedAt`: body text date first, else index date. Upsert by `(source, sourceKey)`.
+Upsert by `(source, sourceKey)`. Diary `postedAt`: body text date first, else index date. Soft kinds: `diary|wedding|gift|portrait|workshop|installation|bouquet|product|other` (no `mourning`). Prefer Instaloader dump when RefreshInstagram is 429 (`instagram.mdc`).
