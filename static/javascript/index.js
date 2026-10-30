@@ -206,7 +206,7 @@ const initLightboxGalleries = () => {
 };
 
 const initReveal = () => {
-	const nodes = [...document.querySelectorAll(".site--denik [data-reveal], .site--ritualy [data-reveal], .site--umeni [data-reveal]")];
+	const nodes = [...document.querySelectorAll(".site--denik [data-reveal], .site--umeni [data-reveal]")];
 	if (!nodes.length) {
 		return;
 	}

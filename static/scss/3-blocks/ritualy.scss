@@ -13,25 +13,6 @@
 		border-top: none;
 		margin-top: .75rem;
 	}
-
-	[data-reveal] {
-		opacity: 0;
-		transform: translateY(1.1rem);
-		transition: opacity .75s ease, transform .75s ease;
-
-		&.is-in {
-			opacity: 1;
-			transform: none;
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		[data-reveal] {
-			opacity: 1;
-			transform: none;
-			transition: none;
-		}
-	}
 }
 
 .ritualy {

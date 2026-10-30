@@ -7,7 +7,7 @@
 {% block body %}
 
 	<div class="ritualy">
-		<section class="home-hero home-hero--text ritualy__intro" data-reveal>
+		<section class="home-hero home-hero--text ritualy__intro">
 			<div class="home-hero__text">
 				<div class="home-hero__copy">
 					<span class="home-hero__kicker">rituály</span>
@@ -23,7 +23,7 @@
 
 		<div class="ritualy__plots">
 			{% for post in posts %}
-				<article class="home-plot home-plot--{{ loop.index }}" data-reveal>
+				<article class="home-plot home-plot--{{ loop.index }}">
 					{% set image = post.getPreferredImage("landscape") %}
 					{% if image %}
 						<a class="home-print home-plot__photo" href="{{ post.getPublicUrl }}">

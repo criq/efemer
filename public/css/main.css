@@ -12529,22 +12529,6 @@ body.builder .builder-file-list--insert:not(:empty),
   border-top: none;
   margin-top: 0.75rem;
 }
-.site--ritualy [data-reveal] {
-  opacity: 0;
-  transform: translateY(1.1rem);
-  transition: opacity 0.75s ease, transform 0.75s ease;
-}
-.site--ritualy [data-reveal].is-in {
-  opacity: 1;
-  transform: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .site--ritualy [data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
 
 .ritualy {
   display: flex;

@@ -15,4 +15,4 @@ alwaysApply: false
 - Panels in a greige grid: **max 2 columns** from 801px (never 3); `.75rem` white gaps
 - Prefer landscape listing images via `Post::getPreferredImage("landscape")`
 - Title = newlywed names from materialize; summary = crafted perex
-- Scroll reveal via `data-reveal` + `.is-in` (respects reduced motion)
+- No scroll / entrance animations
