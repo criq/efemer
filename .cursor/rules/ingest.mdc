@@ -13,7 +13,14 @@ alwaysApply: true
 
 Taxonomy (`categorized`) is still provisional — soft `kind` ≠ site section. Public model: [`.cursor/rules/content-model.mdc`](content-model.mdc).
 
-All ops are Katu jobs via `bin/cli.php`. **Interactive long jobs:** `./bin/job` (TTY). **Do not use `-T`** or Ctrl+C leaves orphans — then `./bin/job jobs:kill -f`.
+**Default target is production** (`curios-vm` / `~/efemer2`) unless the user says local. Local Docker is for code/schema iteration only.
+
+All ops are Katu jobs via `bin/cli.php`. **Interactive long jobs:** `./bin/job` (TTY). **Do not use `-T`** or Ctrl+C leaves orphans — then `./bin/job jobs:kill -f`. On prod:
+
+```bash
+gcloud compute ssh curios-vm --zone=europe-west3-c --project=aukce-496911 --account=jablunka@gmail.com \
+  --command='cd ~/efemer2 && docker compose -f docker-compose.production.yml exec -T php php bin/cli.php jobs:run App.Classes.Jobs.… -f'
+```
 
 ```bash
 cd ~/Sites/efemer

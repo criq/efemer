@@ -299,7 +299,7 @@ Prod Instagram archive loop remains **off**. Prefer Instaloader dump + Import wh
 ### Next
 
 1. **ExportCorpus + EvaluateKeywords** (full corpus after IG finish); optional IG invite/cover eval rows
-2. Optional: rekeyword older items that still lack `timeframe` JSON (~130)
+2. ~~Optional: rekeyword older items that still lack `timeframe` JSON (~130)~~ — **in progress on prod** (flagged `needs_rekeyword`, KeywordIngest `rekeyword` limit 150)
 3. Embeddings / dedup → **taxonomy pause** → assign categories
 4. **Broader MaterializePosts** (beyond the 5 pilots)
 5. Rich ingest admin (manual cover/role locks, layout preview)
