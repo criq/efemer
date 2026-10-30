@@ -1,18 +1,18 @@
 ---
-description: Rituály section listing — ceremonial portfolio layout
+description: Rituály section listing — homepage-style intro + plot panels
 globs: app/Views/Sections/ritualy.twig,static/scss/3-blocks/ritualy.scss,app/Controllers/Sections/**
 alwaysApply: false
 ---
 
 # Rituály listing
 
-`/svatebni-ritualy` uses `Sections/ritualy.twig`. Deník has a journal layout; umění a gallery wall.
+`/svatebni-ritualy` uses `Sections/ritualy.twig`.
 
 ## Layout
 
-- White page; each ritual sits on a greige band (`.75rem` white gap)
-- Featured first entry larger; then alternating photo + copy chapters
-- Listing photos: prefer LLM `orientation=landscape` via `Post::getPreferredImage("landscape")`, else best-rated / cover
-- Photos reuse `.home-print` shadow + ≤0.5° tilt; native aspect ratio
-- Year eyebrow; title = newlywed names from materialize; summary = crafted perex
-- Quiet “prohlédnout” cue; scroll reveal via `data-reveal` + `.is-in` (respects reduced motion)
+- Intro reuses homepage text hero (`.home-hero.home-hero--text`): kicker, title, longer lead, blurb, CTA → kontakt (“Napsat o rituálu”)
+- Wedding cards reuse `.home-plot` peeking photos (3:2 cover, outer-edge crop, print shadow, ≤0.5° tilt)
+- Panels in a greige grid: **max 2 columns** from 801px (never 3); `.75rem` white gaps
+- Prefer landscape listing images via `Post::getPreferredImage("landscape")`
+- Title = newlywed names from materialize; summary = crafted perex
+- Scroll reveal via `data-reveal` + `.is-in` (respects reduced motion)

@@ -7,41 +7,45 @@
 {% block body %}
 
 	<div class="ritualy">
-		<header class="ritualy__header" data-reveal>
-			<p class="text-eyebrow">rituály</p>
-			<h1 class="ritualy__heading">{{ title }}</h1>
-			<p class="ritualy__lead">{{ lead }}</p>
-		</header>
+		<section class="home-hero home-hero--text ritualy__intro" data-reveal>
+			<div class="home-hero__text">
+				<div class="home-hero__copy">
+					<span class="home-hero__kicker">rituály</span>
+					<h1 class="home-hero__title">{{ title }}</h1>
+					<p class="home-hero__summary">{{ lead }}</p>
+					{% if blurb %}
+						<p class="ritualy__blurb">{{ blurb }}</p>
+					{% endif %}
+					<a class="home-hero__cta" href="{{ url("site.kontakt") }}">Napsat o rituálu</a>
+				</div>
+			</div>
+		</section>
 
-		<ul class="ritualy__list">
+		<div class="ritualy__plots">
 			{% for post in posts %}
-				{% set side = loop.index is odd ? "left" : "right" %}
-				<li class="ritualy__item ritualy__item--{{ side }}{% if loop.first %} ritualy__item--featured{% endif %}" data-reveal>
-					<a class="ritualy__link" href="{{ post.getPublicUrl }}">
-						{% set image = post.getPreferredImage("landscape") %}
-						{% if image %}
-							<span class="ritualy__photo home-print">
-								<span class="home-print__photo">
-									<img src="{{ image.getImageVersion("GALLERY").getURL }}" alt="">
-								</span>
+				<article class="home-plot home-plot--{{ loop.index }}" data-reveal>
+					{% set image = post.getPreferredImage("landscape") %}
+					{% if image %}
+						<a class="home-print home-plot__photo" href="{{ post.getPublicUrl }}">
+							<span class="home-print__photo">
+								<img src="{{ image.getImageVersion("GALLERY").getURL }}" alt="">
 							</span>
+						</a>
+					{% endif %}
+					<div class="home-plot__copy">
+						{% if post.getPublishedAt %}
+							<p class="home-plot__kicker">{{ post.getPublishedAt|date("Y") }}</p>
 						{% endif %}
-						<span class="ritualy__copy">
-							{% if post.getPublishedAt %}
-								<span class="ritualy__year">{{ post.getPublishedAt|date("Y") }}</span>
-							{% endif %}
-							<span class="ritualy__title">{{ post.getTitle }}</span>
-							{% if post.getSummary %}
-								<span class="ritualy__summary">{{ post.getSummary }}</span>
-							{% endif %}
-							<span class="ritualy__more">prohlédnout</span>
-						</span>
-					</a>
-				</li>
+						<h2 class="home-plot__title"><a href="{{ post.getPublicUrl }}">{{ post.getTitle }}</a></h2>
+						{% if post.getSummary %}
+							<p class="home-plot__lead">{{ post.getSummary }}</p>
+						{% endif %}
+					</div>
+				</article>
 			{% else %}
-				<li class="ritualy__empty">Zatím tu nic není.</li>
+				<p class="ritualy__empty">Zatím tu nic není.</p>
 			{% endfor %}
-		</ul>
+		</div>
 	</div>
 
 {% endblock body %}

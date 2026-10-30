@@ -109,10 +109,18 @@ class Section
 	public static function lead(string $section): string
 	{
 		return match ($section) {
-			self::RITUALY => "Bespoke přechodové rituály pro pár a rodinu — ne svatební koordinace, ale obřad na míru místu, rostlinám a lidem.",
+			self::RITUALY => "Bespoke přechodové rituály pro pár a rodinu — ne svatební koordinace, ale obřad na míru místu, rostlinám a lidem. Společně skládáme gesta, květiny a krajinu tak, aby svatba měla svůj vlastní dech a paměť.",
 			self::UMENI => "Instalace, happeningy a práce s rostlinou jako nositelkou významu.",
 			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY => "Zápisky z domu, dílen, slavností a krajiny — chronologicky, tak jak přicházejí.",
 			self::UDALOSTI => "Pozvánky na to, co se právě chystá.",
+			default => "",
+		};
+	}
+
+	public static function blurb(string $section): string
+	{
+		return match ($section) {
+			self::RITUALY => "Od intimního obřadu v krajině po celodenní slavnost s rodinou — každý rituál vzniká z rozhovoru, místa a sezóny.",
 			default => "",
 		};
 	}

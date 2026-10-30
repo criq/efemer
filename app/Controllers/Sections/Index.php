@@ -16,6 +16,7 @@ class Index extends \Katu\Controllers\Controller
 			"section" => Section::RITUALY,
 			"title" => Section::title(Section::RITUALY),
 			"lead" => Section::lead(Section::RITUALY),
+			"blurb" => Section::blurb(Section::RITUALY),
 			"posts" => Post::getPublishedBySection(Section::RITUALY),
 		]));
 	}
