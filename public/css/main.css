@@ -11676,7 +11676,7 @@ body.builder .builder-file-list--insert:not(:empty),
   overflow: hidden;
   padding: max(2.75rem, min(5vw, 4rem)) 0;
 }
-@media screen and (min-width: 1200px) {
+@media screen and (min-width: 801px) {
   .home-hero {
     background: linear-gradient(180deg, #fff 0%, #faf9f7 100%);
   }

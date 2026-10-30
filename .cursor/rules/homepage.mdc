@@ -23,7 +23,7 @@ Text sits in the wide center column. Photos from the **same** featured post (cur
 
 ## Ground
 
-- Header is **transparent** (frosted only when mobile nav is open). Footer stays white. Section plots are flat `$color-greige`. From 1200px up the hero washes white into greige top to bottom; below that it stays flat greige.
+- Header is **transparent** (frosted only when mobile nav is open). Footer stays white. Section plots are flat `$color-greige`. From 801px up the hero washes white into greige top to bottom; phones stay flat greige.
 - Separate those blocks, including the three columns, with **.75rem** of the white page. No hairlines. No gap between the header and the hero.
 - The hero is only as tall as its photos, with clear top and bottom padding. The poster on the left sets that height.
 

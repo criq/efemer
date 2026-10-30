@@ -60,7 +60,7 @@
 	overflow: hidden;
 	padding: clamp(2.75rem, 5vw, 4rem) 0;
 
-	@media screen and (min-width: 1200px) {
+	@media screen and (min-width: 801px) {
 		background: linear-gradient(180deg, $color-bg 0%, $color-greige 100%);
 	}
 
