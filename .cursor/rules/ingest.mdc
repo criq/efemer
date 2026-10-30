@@ -47,6 +47,10 @@ cd ~/Sites/efemer
 # clear LLM results only (keeps stage-1 ingest)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ResetKeywordEnrichment --args='{"yes":true}' -f
 
+# wipe public posts only (keep keyworded ingest), then rematerialize
+./bin/job jobs:run App.Classes.Jobs.Ingest.ResetPosts --args='{"yes":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"limit":50}' -f
+
 # keyworded → public posts (invitations → udalosti, ephemeral)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"id":427}' -f
@@ -77,6 +81,7 @@ Eval sets: `app/Resources/Ingest/eval/covers.json`, `roles.json`. Exports: `tmp/
 | `Ingest.ExportCorpus` | CSV/JSON + keyword co-occurrence |
 | `Ingest.ResetKeywordEnrichment` | clear LLM fields only (`yes:true`); status → `loaded` |
 | `Ingest.MaterializePosts` | → `posts` + selected `post_files` + `layoutJson.parts`; invites ephemeral on `/udalosti`; weddings titled by couple names + perex; `installation` → umění with short work titles |
+| `Ingest.ResetPosts` | delete public posts only; unlink ingest → `keyworded` (keeps stage-1/2 + files) |
 | `Ingest.ResetImportedContent` | wipe posts/ingest/pages + env GCS shard |
 | `Database.Migrate` | schema migrations |
 | `Pages.ImportEfemerCz` | legacy page-builder import |
