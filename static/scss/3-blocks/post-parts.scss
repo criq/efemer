@@ -95,6 +95,12 @@
 	.post-parts__gallery {
 		gap: clamp(1.25rem, 2vw, 1.75rem);
 	}
+
+	// Two-up: a touch narrower than the full breakout so portraits don’t dominate.
+	.post-parts__gallery:has(> .post-parts__frame:nth-child(2):last-child) {
+		margin-inline: calc((100% - min(54rem, 84vw)) / 2);
+		width: min(54rem, 84vw);
+	}
 }
 
 .post-parts__frame {
