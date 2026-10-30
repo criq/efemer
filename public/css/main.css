@@ -12593,22 +12593,10 @@ body.builder .builder-file-list--insert:not(:empty),
 }
 
 .home-principy__header {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
   margin-bottom: max(1.5rem, min(3vw, 2.25rem));
+  max-width: 40rem;
 }
-@media screen and (min-width: 901px) {
-  .home-principy__header {
-    align-items: start;
-    display: grid;
-    grid-gap: max(1.5rem, min(3vw, 2.5rem));
-    gap: max(1.5rem, min(3vw, 2.5rem));
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  }
-}
-
-.home-principy__title-block .text-eyebrow {
+.home-principy__header .text-eyebrow {
   margin-bottom: 0.55rem;
 }
 
@@ -12626,13 +12614,8 @@ body.builder .builder-file-list--insert:not(:empty),
   color: #5e675c;
   font-size: max(0.98rem, min(1.6vw, 1.08rem));
   line-height: 1.5;
-  margin: 0;
+  margin: 0.85rem 0 0;
   text-wrap: pretty;
-}
-@media screen and (min-width: 901px) {
-  .home-principy__lead {
-    padding-top: calc(0.55rem + 1em);
-  }
 }
 
 .home-principy__grid {

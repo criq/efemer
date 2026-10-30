@@ -1042,20 +1042,9 @@
 }
 
 .home-principy__header {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
 	margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+	max-width: 40rem;
 
-	@media screen and (min-width: 901px) {
-		align-items: start;
-		display: grid;
-		gap: clamp(1.5rem, 3vw, 2.5rem);
-		grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-	}
-}
-
-.home-principy__title-block {
 	.text-eyebrow {
 		margin-bottom: .55rem;
 	}
@@ -1075,13 +1064,8 @@
 	color: $color-muted;
 	font-size: clamp(.98rem, 1.6vw, 1.08rem);
 	line-height: 1.5;
-	margin: 0;
+	margin: .85rem 0 0;
 	text-wrap: pretty;
-
-	// Sit level with the display title (under the eyebrow).
-	@media screen and (min-width: 901px) {
-		padding-top: calc(0.55rem + 1em);
-	}
 }
 
 .home-principy__grid {
