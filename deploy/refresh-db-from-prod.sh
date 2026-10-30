@@ -52,7 +52,8 @@ SSH_KEY="${SSH_KEY:-$HOME/.ssh/google_compute_engine}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 WORK="${ROOT}/tmp/db-refresh"
 mkdir -p "$WORK"
-REMOTE_SQL_HOST="${HOME}/prod-sync-efemer/efemer-from-prod-${STAMP}.sql"
+# Path on curios-vm (do not use local $HOME — that expands to /Users/… on the Mac).
+REMOTE_SQL_HOST="/home/jan/prod-sync-efemer/efemer-from-prod-${STAMP}.sql"
 LOCAL_SQL="${WORK}/efemer-from-prod-${STAMP}.sql"
 LOCAL_SQL_DEV="${WORK}/efemer-from-prod-${STAMP}-dev-uris.sql"
 
