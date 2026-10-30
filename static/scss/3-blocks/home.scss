@@ -903,7 +903,7 @@
 
 	@media screen and (min-width: 801px) {
 		display: grid;
-		align-items: end;
+		align-items: start;
 		column-gap: clamp(1.75rem, 3.5vw, 2.75rem);
 		grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
 		max-width: 58rem;
@@ -1048,7 +1048,7 @@
 	margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
 
 	@media screen and (min-width: 901px) {
-		align-items: end;
+		align-items: start;
 		display: grid;
 		gap: clamp(1.5rem, 3vw, 2.5rem);
 		grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
@@ -1078,12 +1078,14 @@
 	margin: 0;
 	text-wrap: pretty;
 
+	// Sit level with the display title (under the eyebrow).
 	@media screen and (min-width: 901px) {
-		padding-bottom: .2rem;
+		padding-top: calc(0.55rem + 1em);
 	}
 }
 
 .home-principy__grid {
+	align-items: start;
 	display: flex;
 	flex-direction: column;
 	gap: clamp(1.5rem, 3vw, 2.25rem);
@@ -1110,11 +1112,8 @@
 
 	@media screen and (min-width: 1200px) {
 		column-count: 2;
+		column-fill: balance;
 		column-gap: 1.65rem;
-
-		p {
-			break-inside: avoid;
-		}
 	}
 }
 
