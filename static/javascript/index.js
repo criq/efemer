@@ -294,10 +294,60 @@ const initReveal = () => {
 	nodes.forEach((node) => observer.observe(node));
 };
 
+const initNewsletterForms = () => {
+	document.querySelectorAll("[data-newsletter-form]").forEach((form) => {
+		const input = form.querySelector('input[type="email"]');
+		const button = form.querySelector('button[type="submit"]');
+		const status = form.querySelector("[data-newsletter-status]");
+		if (!input || !button || !status) {
+			return;
+		}
+
+		const setStatus = (message, kind) => {
+			status.hidden = !message;
+			status.textContent = message || "";
+			status.classList.toggle("is-error", kind === "error");
+			status.classList.toggle("is-ok", kind === "ok");
+		};
+
+		form.addEventListener("submit", (event) => {
+			event.preventDefault();
+			const email = (input.value || "").trim();
+			if (!email || !input.checkValidity()) {
+				setStatus("Zadejte platný e-mail.", "error");
+				input.focus();
+				return;
+			}
+
+			if (typeof window.lhi !== "function") {
+				setStatus("Odběr teď nejde odeslat. Zkuste to prosím znovu.", "error");
+				return;
+			}
+
+			button.disabled = true;
+			setStatus("Přihlašuji…", null);
+
+			try {
+				window.lhi("subscribe", {
+					email,
+					interests: ["newsletters"],
+				});
+				setStatus("Děkujeme — jste přihlášeni.", "ok");
+				form.reset();
+			} catch (error) {
+				setStatus("Odběr se nepodařilo odeslat. Zkuste to prosím znovu.", "error");
+			} finally {
+				button.disabled = false;
+			}
+		});
+	});
+};
+
 document.addEventListener("DOMContentLoaded", () => {
 	initGallerySlideshows();
 	initSiteNav();
 	initLightboxGalleries();
 	initReveal();
 	initFeeds();
+	initNewsletterForms();
 });

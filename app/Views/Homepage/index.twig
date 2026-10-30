@@ -183,4 +183,11 @@
 		</div>
 	</section>
 
+	<section class="home-newsletter" data-reveal>
+		<p class="text-eyebrow">newsletter</p>
+		<h2 class="home-newsletter__heading">Dopisy</h2>
+		<p class="home-newsletter__lead">Občasné zprávy o slavnostech na Himmelhausu, rituálech a sezóně — bez spamování.</p>
+		{% include "Partials/newsletter-form.twig" with { formId: "home-newsletter-email" } %}
+	</section>
+
 {% endblock body %}

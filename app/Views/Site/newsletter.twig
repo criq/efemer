@@ -4,10 +4,11 @@
 
 {% block body %}
 
-	<div class="plain-page" data-reveal>
+	<div class="plain-page plain-page--center" data-reveal>
 		<p class="text-eyebrow">newsletter</p>
 		<h1>Dopisy</h1>
-		<p class="plain-page__lead">Odběr zatím připravujeme. Napište na <a href="mailto:efemer.info@gmail.com">efemer.info@gmail.com</a>, pokud chcete vědět o slavnostech na Himmelhausu.</p>
+		<p class="plain-page__lead">Občasné zprávy o slavnostech na Himmelhausu, rituálech a sezóně — bez spamování.</p>
+		{% include "Partials/newsletter-form.twig" with { formId: "newsletter-page-email" } %}
 	</div>
 
 {% endblock body %}

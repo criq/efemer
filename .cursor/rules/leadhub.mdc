@@ -1,0 +1,18 @@
+---
+description: Leadhub pixel and newsletter subscribe
+globs: app/Views/Templates/default.twig,app/Views/Partials/newsletter-form.twig,static/javascript/index.js,app/Classes/Views/HTMLEngine.php
+alwaysApply: false
+---
+
+# Leadhub
+
+Site-wide pixel in `Templates/default.twig` (pageview). Newsletter forms call `lhi('subscribe', { email, interests: ['newsletters'] })`.
+
+| Item | Value |
+|---|---|
+| Tracking ID | `bQVrGwsJSGSpLS5` (override with `LEADHUB_TRACKING_ID` in `.env`) |
+| Interest list code | `newsletters` (case-sensitive) |
+| Form partial | `Partials/newsletter-form.twig` |
+| Surfaces | homepage `.home-newsletter`, `/newsletter` |
+
+Tracking ID is public (client JS). Confirm list code under Leadhub → Odběratelské listy if subscribe does not appear in Audience.

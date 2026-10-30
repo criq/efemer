@@ -1,0 +1,17 @@
+<form class="newsletter-form" data-newsletter-form novalidate>
+	<label class="newsletter-form__label" for="{{ formId|default("newsletter-email") }}">E-mail</label>
+	<div class="newsletter-form__row">
+		<input
+			class="newsletter-form__input"
+			id="{{ formId|default("newsletter-email") }}"
+			type="email"
+			name="email"
+			autocomplete="email"
+			required
+			placeholder="vas@email.cz"
+		>
+		<button class="newsletter-form__submit" type="submit">Odebírat</button>
+	</div>
+	<p class="newsletter-form__consent">Přihlášením souhlasíte se zasíláním e-mailů od Efeméru. Odhlásit se můžete kdykoli.</p>
+	<p class="newsletter-form__status" data-newsletter-status aria-live="polite" hidden></p>
+</form>

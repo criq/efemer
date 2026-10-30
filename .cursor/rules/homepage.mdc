@@ -42,3 +42,7 @@ Greige band `.home-about` after the three plots (same `.75rem` white gap):
 1. Brief **principy** teaser (eyebrow + one balanced sentence)
 2. Portrait (`/img/lucie-kralikova.jpg`, `home-print` tilt) + contact (name, email, phone, place) — stacked on phones; two columns from 801px
 3. Full **Principy** essay + **Já** (no co-founder name)
+
+## Newsletter (below about)
+
+Greige band `.home-newsletter`: Dopisy intro + shared `Partials/newsletter-form.twig`. Leadhub pixel (`lhi('subscribe')`, list `newsletters`) — see `leadhub.mdc`.
