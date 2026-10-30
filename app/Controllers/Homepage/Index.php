@@ -11,22 +11,54 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class Index extends \Katu\Controllers\Controller
 {
+	private const FEED_PAGE_SIZE = 4;
+
 	public function getResponse(ServerRequestInterface $request, ResponseInterface $response)
 	{
+		$params = $request->getQueryParams();
+		$page = max(1, (int)($params["page"] ?? 1));
+		$partial = (string)($params["partial"] ?? "") === "1";
+
+		$all = Post::getPublished();
+		$total = count($all);
+		$offset = ($page - 1) * self::FEED_PAGE_SIZE;
+		$feedPosts = array_slice($all, $offset, self::FEED_PAGE_SIZE);
+		$hasMore = ($offset + count($feedPosts)) < $total;
+		$nextPage = $hasMore ? $page + 1 : null;
+
+		$engine = new HTMLEngine($request);
+
+		if ($partial) {
+			$html = $engine->render("Homepage/feed.twig", [
+				"posts" => $feedPosts,
+			]);
+			$response = $response
+				->withHeader("Content-Type", "text/html; charset=UTF-8")
+				->withHeader("Cache-Control", "no-store");
+			if ($nextPage !== null) {
+				$nextUrl = (string)\Katu\Tools\Routing\URL::getFor("homepage.index") . "?page={$nextPage}&partial=1";
+				$response = $response->withHeader("X-Feed-Next", $nextUrl);
+			}
+
+			return $response->withBody($html);
+		}
+
 		$sections = [];
 		foreach (Section::work() as $code) {
 			$sections[] = $this->sectionPlot($code);
 		}
 
-		$latest = Post::getPublished();
 		$invitation = Post::getUpcomingInvitation();
-		$featured = $invitation ?? ($latest[0] ?? null);
+		$featured = $invitation ?? ($all[0] ?? null);
 
-		return $response->withBody((new HTMLEngine($request))->render("Homepage/index.twig", [
+		return $response->withBody($engine->render("Homepage/index.twig", [
 			"invitation" => $invitation,
-			"latestPost" => $latest[0] ?? null,
+			"latestPost" => $all[0] ?? null,
 			"heroImages" => $this->heroImages($featured),
 			"sections" => $sections,
+			"feedPosts" => $feedPosts,
+			"feedHasMore" => $hasMore,
+			"feedNextPage" => $nextPage,
 		]));
 	}
 

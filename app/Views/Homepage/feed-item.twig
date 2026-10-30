@@ -1,0 +1,23 @@
+<article class="home-feed__item" id="home-post-{{ post.getId }}">
+	<div class="post-article home-feed__article">
+		{% set sectionCode = post.getSection %}
+		{% if sectionCode == "ritualy" %}
+			{% set sectionRoute = "sections.ritualy" %}
+			{% set sectionLabel = "rituály" %}
+		{% elseif sectionCode == "umeni" %}
+			{% set sectionRoute = "sections.umeni" %}
+			{% set sectionLabel = "umění" %}
+		{% else %}
+			{% set sectionRoute = "sections.denik" %}
+			{% set sectionLabel = "deník" %}
+		{% endif %}
+		{% include "Posts/body.twig" with {
+			post: post,
+			linkedTitle: true,
+			showSectionEyebrow: true,
+			sectionPath: url(sectionRoute),
+			sectionTitle: sectionLabel,
+			headingTag: "h2",
+		} %}
+	</div>
+</article>

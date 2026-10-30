@@ -190,4 +190,17 @@
 		</div>
 	</section>
 
+	<div
+		class="home-feed"
+		data-feed
+		{% if feedHasMore %}data-feed-next="{{ url("homepage.index") }}?page={{ feedNextPage }}&amp;partial=1"{% endif %}
+	>
+		{% for post in feedPosts %}
+			{% include "Homepage/feed-item.twig" %}
+		{% endfor %}
+		{% if feedHasMore %}
+			<div class="feed-sentinel" data-feed-sentinel aria-hidden="true"></div>
+		{% endif %}
+	</div>
+
 {% endblock body %}

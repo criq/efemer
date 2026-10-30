@@ -12420,6 +12420,42 @@ body.builder .builder-file-list--insert:not(:empty),
     padding: 0.5rem 0 0.5rem 0.25rem;
   }
 }
+.home-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.home-feed__item {
+  background: #faf9f7;
+  box-sizing: border-box;
+  margin: 0;
+  min-width: 0;
+  overflow-x: clip;
+  padding: max(1.6rem, min(3.5vw, 2.5rem)) 0;
+  width: 100%;
+}
+
+.home-feed__article.post-article {
+  gap: max(1.15rem, min(3vw, 1.75rem));
+  margin-left: auto;
+  margin-right: auto;
+  max-width: min(44rem, 100%);
+  overflow-x: visible;
+  padding: 0 max(1rem, min(4vw, 2.5rem));
+  width: 100%;
+}
+.home-feed__article.post-article .post-article__title a {
+  color: inherit;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+.home-feed__article.post-article .post-article__title a:hover {
+  color: #6f7d68;
+}
+
 .home-about {
   --about-peek: 0;
   background: #faf9f7;

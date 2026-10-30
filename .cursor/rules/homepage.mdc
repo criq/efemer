@@ -41,5 +41,6 @@ Two greige bands (`.75rem` white gap), after the plots:
 
 1. **`.home-principy`** — stacked header (eyebrow + title + lead) | story prose + tenets list
 2. **`.home-about`** — portrait (gentle top peek from 801px) | body stack: kontakt (name + details list), já, dopisy with inline email+button
+3. **`.home-feed`** — infinite scroll of all lasting published posts (`Post::getPublished()`, page size 4); partials via `/?page=N&partial=1` + `X-Feed-Next`. Same greige item shells as deník; section eyebrow on each item.
 
 Leadhub: see `leadhub.mdc`.
