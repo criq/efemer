@@ -12775,7 +12775,7 @@ body.builder .builder-file-list--insert:not(:empty),
   margin: 0;
   min-width: 0;
   overflow-x: clip;
-  padding: max(1.25rem, min(3vw, 2rem)) 0;
+  padding: max(1.6rem, min(3.5vw, 2.5rem)) 0;
   width: 100%;
 }
 
@@ -12914,7 +12914,7 @@ body.builder .builder-file-list--insert:not(:empty),
   margin: 0;
   min-width: 0;
   overflow-x: clip;
-  padding: max(1.25rem, min(3vw, 2rem)) 0;
+  padding: max(1.6rem, min(3.5vw, 2.5rem)) 0;
   width: 100%;
 }
 
