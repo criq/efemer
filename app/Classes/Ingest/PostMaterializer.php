@@ -255,6 +255,7 @@ class PostMaterializer
 
 	private function resolveSection(IngestItem $item): ?string
 	{
+		// Ephemeral open calls stay under /udalosti (hidden from the lasting listing).
 		if ($item->isInvitation()) {
 			return Section::UDALOSTI;
 		}
@@ -264,7 +265,12 @@ class PostMaterializer
 			return Section::RITUALY;
 		}
 
-		// Everything else lasting → one dated journal.
+		// Lasting event reports (workshop recaps, slavnosti) → Události.
+		if ($item->isReport() || $item->getKind() === "workshop") {
+			return Section::UDALOSTI;
+		}
+
+		// Everything else lasting → dated journal.
 		return Section::DENIK;
 	}
 

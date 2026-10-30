@@ -19,12 +19,14 @@ Public site is **not** assembled from the page-component tree. Typed entities:
 | Code | Czech | Path | Role |
 |---|---|---|---|
 | `ritualy` | Svatební rituály | `/svatebni-ritualy` | Business portfolio — weddings / bridal only |
+| `udalosti` | Události | `/udalosti` | Lasting event **reports** (workshop/slavnost write-ups) |
 | `denik` | Deník | `/denik` | Everything else lasting, chronological |
-| `udalosti` | Události | `/udalosti` | Current invitations only (ephemeral) |
 
-Soft ingest `kind` and free keywords stay for enrichment/search — they do **not** drive a multi-way site taxonomy. Legacy `himmelhaus` / `workshopy` / `umeni` redirect to `/denik`.
+Invitations (tag `invitation`) also use path `/udalosti/…` but are ephemeral: homepage hero only, hidden from the Události listing/plot when expired or while current they’re still not in the reports grid.
 
-`Section::work()` = rituály + deník. `Section::all()` adds Události.
+Soft ingest `kind` and free keywords stay for enrichment/search. Legacy `himmelhaus` / `workshopy` / `umeni` redirect to `/denik`.
+
+`Section::work()` (homepage plots / nav order) = rituály → události → deník.
 
 ## Controlled tags
 
@@ -32,14 +34,14 @@ Soft ingest `kind` and free keywords stay for enrichment/search — they do **no
 
 | Tag | Meaning | Public fate |
 |---|---|---|
-| `invitation` | Open call to an upcoming/current event | section `udalosti`, ephemeral; `isInvitation` synced cache |
-| `report` | Lasting write-up of an event that already happened | lasting `denik` |
+| `invitation` | Open call to an upcoming/current event | path under `/udalosti`, ephemeral; hero CTA; `isInvitation` synced cache |
+| `report` | Lasting write-up of an event that already happened | lasting `udalosti` listing |
 
 Mutually exclusive. Empty tags = ordinary journal. LLM fills via KeywordAnalyzer; allowlist in `App\Classes\Content\Tags`.
 
 ## Homepage
 
-Visual layout is in `homepage.mdc`. Text is the next **current invitation** post, else the latest lasting work post. Hero photos come from that same featured post. Then two plots: Rituály + Deník.
+Visual layout is in `homepage.mdc`. Text is the next **current invitation** post, else the latest lasting work post. Hero photos come from that same featured post. Then three plots: Rituály → Události (reports) → Deník.
 
 ## Invitations
 
@@ -66,4 +68,4 @@ Public post/invitation body is an ordered list in `posts.layoutJson.parts`:
 
 Load into ingest via Katu jobs first (see `ingest.mdc`). Public `posts` come from `MaterializePosts`, not refresh jobs.
 
-Materialize mapping: `invitation` → `udalosti`; `kind=wedding` → `ritualy`; everything else lasting → `denik`.
+Materialize mapping: `invitation` → `udalosti` (ephemeral); `kind=wedding` → `ritualy`; `report` or `kind=workshop` → lasting `udalosti`; everything else lasting → `denik`.

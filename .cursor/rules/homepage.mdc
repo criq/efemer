@@ -33,4 +33,4 @@ Featured item is the next **current invitation** post, else the latest lasting w
 
 ## Section plots
 
-Two lasting sections only (not Události): rituály + deník. One photo and centered text each. Prefer a high-rated file from that section’s posts. Photo on top. On phones a bit narrower (`min(88%, 22rem)`, centered). The photo runs past the outer edge; the block clips picture and shadow. **Two columns** from 801px up (same .75rem white gap). Stacked below 801px. The outer-edge crop is `2.25rem` until 1280px, then `4.25rem`.
+Three lasting plots: rituály → události (reports, not invitations) → deník. One photo and centered text each. Prefer a high-rated file from that section’s posts. Photo on top. On phones a bit narrower (`min(88%, 22rem)`, centered). The photo runs past the outer edge; the block clips picture and shadow. **Two columns** from 801px up (third wraps; same .75rem white gap). Stacked below 801px. The outer-edge crop is `2.25rem` until 1280px, then `4.25rem`.

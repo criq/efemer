@@ -38,7 +38,7 @@ class Edit extends \Katu\Controllers\Controller
 			$endsAtRaw = trim((string)($body["endsAt"] ?? ""));
 			$isInvitation = !empty($body["isInvitation"]);
 
-			$allowedSections = array_merge(Section::work(), [Section::UDALOSTI]);
+			$allowedSections = Section::all();
 			if ($title === "") {
 				$errors->addError(new Error("Zadejte název."));
 			}
@@ -127,7 +127,7 @@ class Edit extends \Katu\Controllers\Controller
 		return $response->withBody((new HTMLEngine($request))->render("Admin/Posts/edit.twig", [
 			"errors" => $errors,
 			"post" => $post,
-			"sections" => array_merge(Section::work(), [Section::UDALOSTI]),
+			"sections" => Section::all(),
 			"postFiles" => $postFiles,
 			"ingestPhotos" => $ingestPhotos,
 			"editorPartsJson" => json_encode($editorParts, JSON_UNESCAPED_UNICODE),

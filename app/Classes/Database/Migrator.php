@@ -30,6 +30,7 @@ use App\Classes\Database\Migrations\PostFileEnrichmentSchema;
 use App\Classes\Database\Migrations\ContentTagsSchema;
 use App\Classes\Database\Migrations\PostsDenikSection;
 use App\Classes\Database\Migrations\PostsTimeframeSchema;
+use App\Classes\Database\Migrations\UdalostiReportsFromDenik;
 use App\Classes\Database\Migrations\SeedEventsAppearances;
 use App\Classes\Database\Migrations\StorageFilesSchema;
 use Katu\PDO\Connection;
@@ -99,6 +100,7 @@ class Migrator
 			new PostFileEnrichmentSchema,
 			new ContentTagsSchema,
 			new PostsDenikSection,
+			new UdalostiReportsFromDenik,
 		];
 	}
 

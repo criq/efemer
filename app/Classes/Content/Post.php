@@ -584,17 +584,17 @@ class Post extends \Katu\Models\Model
 			"section" => $section,
 			"status" => self::STATUS_PUBLISHED,
 		])->getItems() as $post) {
-			if ($post->isPubliclyVisible()) {
-				$posts[] = $post;
+			if (!$post->isPubliclyVisible()) {
+				continue;
 			}
+			// Události listing/plot = lasting reports only; invitations live on the homepage hero.
+			if ($section === Section::UDALOSTI && $post->isInvitation()) {
+				continue;
+			}
+			$posts[] = $post;
 		}
 
-		usort($posts, function (Post $a, Post $b) use ($section) {
-			if ($section === Section::UDALOSTI) {
-				return ((int)($a->getStartsAt()?->format("U") ?? 0)) <=> ((int)($b->getStartsAt()?->format("U") ?? 0));
-			}
-
-			// Journal: prefer event/content date when known, else publish date.
+		usort($posts, function (Post $a, Post $b) {
 			$aTime = (int)($a->getStartsAt()?->format("U") ?? $a->getPublishedAt()?->format("U") ?? 0);
 			$bTime = (int)($b->getStartsAt()?->format("U") ?? $b->getPublishedAt()?->format("U") ?? 0);
 
