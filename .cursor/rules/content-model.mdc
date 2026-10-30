@@ -1,5 +1,5 @@
 ---
-description: Public content model — posts, four sections, invitation ephemerality
+description: Public content model — posts, five sections, invitation ephemerality
 alwaysApply: true
 ---
 
@@ -14,18 +14,19 @@ Public site is **not** assembled from the page-component tree. Typed entities:
 | `events` | Legacy admin table only; public site uses invitation posts |
 | `appearances` | Press / v tisku |
 
-## Sections (provisional — taxonomy may change after keyword corpus)
+## Sections (provisional — soft homes, overlaps OK)
 
-| Code | Czech | Path | Entity |
+| Code | Czech | Path | Primarily |
 |---|---|---|---|
-| `ritualy` | Svatební rituály | `/svatebni-ritualy` | lasting posts |
-| `himmelhaus` | Himmelhaus | `/himmelhaus` | lasting posts |
-| `umeni` | Umění | `/umeni` | lasting posts |
-| `udalosti` | Události | `/udalosti` | posts tagged `invitation` |
+| `ritualy` | Svatební rituály | `/svatebni-ritualy` | weddings / bridal rituals only |
+| `himmelhaus` | Himmelhaus | `/himmelhaus` | house diary |
+| `workshopy` | Workshopy | `/workshopy` | lasting workshop / gathering reports |
+| `umeni` | Umění | `/umeni` | installations, art |
+| `udalosti` | Události | `/udalosti` | posts tagged `invitation` (ephemeral) |
 
-Himmelhaus is the house; Instagram handle is `@himmlhaus`. Soft ingest `kind` (diary/workshop/…) is **not** a 1:1 map to these sections.
+Himmelhaus is the house; Instagram handle is `@himmlhaus`. Soft ingest `kind` is a hint, not exclusive membership — the same story could fit more than one section.
 
-`Section::work()` is the three lasting sections. `Section::all()` includes Události.
+`Section::work()` is the four lasting sections (nav/homepage order). `Section::all()` adds Události.
 
 ## Controlled tags
 
@@ -34,13 +35,13 @@ Himmelhaus is the house; Instagram handle is `@himmlhaus`. Soft ingest `kind` (d
 | Tag | Meaning | Public fate |
 |---|---|---|
 | `invitation` | Open call to an upcoming/current event | section `udalosti`, ephemeral; `isInvitation` synced cache |
-| `report` | Lasting write-up of an event that already happened | lasting work section (workshop reports → `himmelhaus` until taxonomy) |
+| `report` | Lasting write-up of an event that already happened | lasting `workshopy` (via soft `kind=workshop`) |
 
 Mutually exclusive. Empty tags = ordinary work/diary. LLM fills via KeywordAnalyzer; allowlist in `App\Classes\Content\Tags`.
 
 ## Homepage
 
-Visual layout is in `homepage.mdc`. Text is the next **current invitation** post, else the latest lasting work post. Hero photos come from that same featured post (cover/lead + highest-rated non-demoted). Then three work-section plots (not Události).
+Visual layout is in `homepage.mdc`. Text is the next **current invitation** post, else the latest lasting work post. Hero photos come from that same featured post (cover/lead + highest-rated non-demoted). Then four work-section plots (not Události).
 
 ## Invitations
 

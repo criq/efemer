@@ -20,6 +20,11 @@ class View extends \Katu\Controllers\Controller
 		return $this->render($request, $response, Section::HIMMELHAUS, $slug);
 	}
 
+	public function workshopy(ServerRequestInterface $request, ResponseInterface $response, string $slug)
+	{
+		return $this->render($request, $response, Section::WORKSHOPY, $slug);
+	}
+
 	public function umeni(ServerRequestInterface $request, ResponseInterface $response, string $slug)
 	{
 		return $this->render($request, $response, Section::UMENI, $slug);

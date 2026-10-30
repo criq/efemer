@@ -66,7 +66,10 @@ todos:
     content: "LLM timeframe block (startsAt/endsAt/place) + controlled tags invitation/report; isInvitation synced cache; drop mourning kind; prefer workshop for invites; Gemini sole parser (no regex heuristics)"
     status: completed
   - id: content-tags
-    content: "Controlled tags on ingest_items/posts (invitation|report); KeywordAnalyzer + QC + Materializer; report workshops → himmelhaus; backfill invitations from isInvitation"
+    content: "Controlled tags on ingest_items/posts (invitation|report); KeywordAnalyzer + QC + Materializer; backfill invitations from isInvitation"
+    status: completed
+  - id: workshopy-section
+    content: "Fourth lasting section workshopy (/workshopy) — 3rd in nav/work order; kind=workshop (non-invite) materializes there; overlaps with himmelhaus OK"
     status: completed
   - id: ig-keyword-corpus
     content: "IG KeywordIngest done — 631 IG items kw-v3 (0 loaded); 126 invitations"

@@ -301,6 +301,10 @@
 	transform: rotate(-0.5deg);
 }
 
+.home-plot:nth-child(4) .home-plot__photo {
+	transform: rotate(0.35deg);
+}
+
 .home-plot__photo {
 	border-radius: 1px;
 	display: block;
@@ -494,7 +498,7 @@
 	}
 }
 
-// Tablet: two plots per row. Three columns wait for the wider frame.
+// Tablet+: 2×2 for the four work sections.
 @media screen and (min-width: 801px) {
 	.home-plots {
 		align-items: stretch;
@@ -521,12 +525,6 @@
 
 	.home-plot__title {
 		font-size: clamp(1.6rem, 2.4vw, 2.35rem);
-	}
-}
-
-@media screen and (min-width: 1200px) {
-	.home-plots {
-		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 }
 
