@@ -13,6 +13,6 @@ Site-wide pixel in `Templates/default.twig` (pageview). Newsletter forms call `l
 | Tracking ID | `bQVrGwsJSGSpLS5` (override with `LEADHUB_TRACKING_ID` in `.env`) |
 | Interest list code | `newsletters` (case-sensitive; key is `subscribe` on identify, not `interests`) |
 | Form partial | `Partials/newsletter-form.twig` |
-| Surfaces | homepage `.home-newsletter`, `/newsletter` |
+| Surfaces | homepage `.home-about__newsletter` (under Já), `/newsletter` |
 
 Tracking ID is public (client JS). Confirm list code under Leadhub → Odběratelské listy if subscribe does not appear in Audience.

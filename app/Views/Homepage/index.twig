@@ -131,63 +131,65 @@
 	</div>
 
 	<section class="home-about" data-reveal>
-		<div class="home-about__brief">
-			<p class="text-eyebrow">principy</p>
-			<p class="home-about__brief-lead">Květiny z místa a sezóny — ne z globálního řetězce. Pěstuji je na vlastní zahradě a u lokálních pěstitelů; kytici vnímám jako výtvarný objekt vázaný na krajinu a člověka.</p>
-		</div>
-
-		<div class="home-about__intro">
+		<div class="home-about__inner">
 			<figure class="home-print home-about__portrait">
 				<span class="home-print__photo">
 					<img src="/img/lucie-kralikova.jpg" alt="Lucie Králíková" width="1024" height="682">
 				</span>
 			</figure>
-			<div class="home-about__contact">
-				<p class="text-eyebrow">kontakt</p>
-				<h2 class="home-about__name">Lucie Králíková</h2>
-				<p class="home-about__role">Efemér · svatební rituály, Himmelhaus, umění</p>
-				<p class="home-about__links">
-					<a href="mailto:efemer.info@gmail.com">efemer.info@gmail.com</a><br>
-					<a href="tel:+420605938524">+420 605 938 524</a>
-				</p>
-				<p class="home-about__place">Himmelhaus, České středohoří · ateliér v Brně</p>
-			</div>
-		</div>
-
-		<div class="home-about__essay">
-			<div class="home-about__block">
-				<h2 class="home-about__heading">Principy</h2>
-				<div class="home-about__prose">
-					<p>Efemér jsem založila, protože mi leží na srdci některé dnešní postupy v obchodu s řezanými květinami.</p>
-					<p>Jako zákazníci známe zaběhlý květinový sortiment, který je celoročně k dispozici, ale méně už tušíme, že k nám putuje tisíce kilometrů, a jakou daň platí za jeho nízkou cenu a celoroční dostupnost lidé i krajina v Zimbabwe, Keni či Ekvádoru.</p>
-					<p>Neuvědomujeme si, že globální trh zapříčinil zánik téměř všech malopěstitelů květin a zahradnictví v našem sousedství. Mizí tak přirozená schopnost účelně využívat místní zdroje a často i pocit zodpovědnosti za své okolí.</p>
-					<p>Díky vyšlechtěným květinám se šíří zvrhlá estetika floristického umění, která nám podsouvá pocit studu za obyčejnou kytku z venkovské zahrady nebo ze sobotní vycházky za město.</p>
-					<p>Pro mě je práce s květinami spíše tvůrčím procesem než odcizenou průmyslovou produkcí, vnímám neoddělitelnou podobu každé kytice s jejím původem a přirozeným projevem. Proto nabízím alternativu.</p>
-					<p>Znám místa, na nichž naše květiny vyrůstaly. Pěstuji je na své vlastní zahradě ve městě v souladu s principy ekologického zemědělství.</p>
-					<p>Co si nevypěstuji, kupuji od lokálních pěstitelů či v zahradnictví.</p>
-					<p>Je pro mě normální používat rostliny podle ročního období.</p>
-					<p>Oživuji rituály a kulturní zvyky spojené s květinami.</p>
-					<p>Vstupuji na území opuštěných zahrádkářských kolonií a ploch zarůstajících plevelem.</p>
-					<p>Ráda používám rostliny vyskytující se volně v příměstské divočině i kulturní krajině.</p>
-					<p>V krajině pozoruji přirozená stanoviště jednotlivých rostlinných druhů.</p>
-					<p>Považuji kytici za výtvarný objekt v sounáležitosti s místem, kde vzniká, a člověku, kterému je určena.</p>
+			<div class="home-about__body">
+				<div class="home-about__contact">
+					<p class="text-eyebrow">kontakt</p>
+					<h2 class="home-about__name">Lucie Králíková</h2>
+					<p class="home-about__role">Efemér · svatební rituály, Himmelhaus, umění</p>
+					<ul class="home-about__details">
+						<li><a href="mailto:efemer.info@gmail.com">efemer.info@gmail.com</a></li>
+						<li><a href="tel:+420605938524">+420 605 938 524</a></li>
+						<li>Himmelhaus, České středohoří · ateliér v Brně</li>
+					</ul>
 				</div>
-			</div>
-			<div class="home-about__block">
-				<h2 class="home-about__heading">Já</h2>
-				<div class="home-about__prose">
-					<p>Jsem brněnská zahradní architektka Lucie Králíková. Efemér jsem založila s architektkou Klárou Zahradníčkovou.</p>
-					<p>Mým patronem je sv. Fiakr, ochránce zahradníků.</p>
+				<div class="home-about__ja">
+					<p class="text-eyebrow">já</p>
+					<p class="home-about__ja-text">Jsem brněnská zahradní architektka. Efemér jsem založila s architektkou Klárou Zahradníčkovou. Mým patronem je sv. Fiakr, ochránce zahradníků.</p>
+				</div>
+				<div class="home-about__newsletter">
+					<p class="text-eyebrow">dopisy</p>
+					<p class="home-about__newsletter-lead">Občasné zprávy o slavnostech na Himmelhausu, rituálech a sezóně — bez spamování.</p>
+					{% include "Partials/newsletter-form.twig" with { formId: "home-newsletter-email" } %}
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section class="home-newsletter" data-reveal>
-		<p class="text-eyebrow">newsletter</p>
-		<h2 class="home-newsletter__heading">Dopisy</h2>
-		<p class="home-newsletter__lead">Občasné zprávy o slavnostech na Himmelhausu, rituálech a sezóně — bez spamování.</p>
-		{% include "Partials/newsletter-form.twig" with { formId: "home-newsletter-email" } %}
+	<section class="home-principy" data-reveal>
+		<div class="home-principy__inner">
+			<header class="home-principy__header">
+				<div class="home-principy__title-block">
+					<p class="text-eyebrow">principy</p>
+					<h2 class="home-principy__heading">Květiny z&nbsp;místa a&nbsp;sezóny</h2>
+				</div>
+				<p class="home-principy__lead">Ne z globálního řetězce. Pěstuji je na vlastní zahradě a u lokálních pěstitelů; kytici vnímám jako výtvarný objekt vázaný na krajinu a člověka.</p>
+			</header>
+			<div class="home-principy__grid">
+				<div class="home-principy__story">
+					<p>Efemér jsem založila, protože mi leží na srdci některé dnešní postupy v obchodu s řezanými květinami.</p>
+					<p>Jako zákazníci známe zaběhlý květinový sortiment, který je celoročně k dispozici, ale méně už tušíme, že k nám putuje tisíce kilometrů, a jakou daň platí za jeho nízkou cenu a celoroční dostupnost lidé i krajina v Zimbabwe, Keni či Ekvádoru.</p>
+					<p>Neuvědomujeme si, že globální trh zapříčinil zánik téměř všech malopěstitelů květin a zahradnictví v našem sousedství. Mizí tak přirozená schopnost účelně využívat místní zdroje a často i pocit zodpovědnosti za své okolí.</p>
+					<p>Díky vyšlechtěným květinám se šíří zvrhlá estetika floristického umění, která nám podsouvá pocit studu za obyčejnou kytku z venkovské zahrady nebo ze sobotní vycházky za město.</p>
+					<p>Pro mě je práce s květinami spíše tvůrčím procesem než odcizenou průmyslovou produkcí. Vnímám neoddělitelnou podobu každé kytice s jejím původem a přirozeným projevem. Proto nabízím alternativu.</p>
+				</div>
+				<ul class="home-principy__tenets">
+					<li>Znám místa, na nichž naše květiny vyrůstaly. Pěstuji je na své vlastní zahradě ve městě v souladu s principy ekologického zemědělství.</li>
+					<li>Co si nevypěstuji, kupuji od lokálních pěstitelů či v zahradnictví.</li>
+					<li>Je pro mě normální používat rostliny podle ročního období.</li>
+					<li>Oživuji rituály a kulturní zvyky spojené s květinami.</li>
+					<li>Vstupuji na území opuštěných zahrádkářských kolonií a ploch zarůstajících plevelem.</li>
+					<li>Ráda používám rostliny vyskytující se volně v příměstské divočině i kulturní krajině.</li>
+					<li>V krajině pozoruji přirozená stanoviště jednotlivých rostlinných druhů.</li>
+					<li>Považuji kytici za výtvarný objekt v sounáležitosti s místem, kde vzniká, a člověku, kterému je určena.</li>
+				</ul>
+			</div>
+		</div>
 	</section>
 
 {% endblock body %}

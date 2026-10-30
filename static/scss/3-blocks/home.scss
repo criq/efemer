@@ -872,98 +872,105 @@
 	}
 }
 
-// About: brief principles → portrait + contact → full principy / já.
+// About: print peeks from top | contact + já + dopisy stacked beside.
 .home-about {
+	--about-peek: 0;
 	background: $color-greige;
 	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
-	gap: clamp(2.5rem, 6vw, 4rem);
-	overflow-x: clip;
-	padding: clamp(2.75rem, 7vw, 4.5rem) clamp(1.25rem, 5vw, 3rem) clamp(3rem, 7vw, 5rem);
+	isolation: isolate;
+	overflow: hidden;
+	padding: clamp(1.75rem, 4vw, 2.75rem) clamp(1.25rem, 5vw, 3rem) clamp(2rem, 4.5vw, 3rem);
 	width: 100%;
-}
 
-.home-about__brief {
-	margin-inline: auto;
-	max-width: 36rem;
-	text-align: center;
+	@media screen and (min-width: 801px) {
+		--about-peek: 2.25rem;
+		padding-top: calc(clamp(1.5rem, 3.5vw, 2.25rem) + var(--about-peek));
+	}
 
-	.text-eyebrow {
-		margin-bottom: .85rem;
+	@media screen and (min-width: 1280px) {
+		--about-peek: 3.25rem;
 	}
 }
 
-.home-about__brief-lead {
-	color: $color-ink;
-	font-size: clamp(1.05rem, 2.2vw, 1.2rem);
-	line-height: 1.55;
-	margin: 0;
-	text-wrap: balance;
-}
-
-.home-about__intro {
-	align-items: center;
+.home-about__inner {
+	align-items: start;
 	display: flex;
 	flex-direction: column;
-	gap: clamp(1.75rem, 4vw, 2.75rem);
+	gap: clamp(1.35rem, 3vw, 2rem);
 	margin-inline: auto;
-	max-width: 52rem;
+	max-width: 40rem;
 	width: 100%;
 
 	@media screen and (min-width: 801px) {
 		display: grid;
-		gap: clamp(2rem, 4vw, 3.5rem);
-		grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+		align-items: end;
+		column-gap: clamp(1.75rem, 3.5vw, 2.75rem);
+		grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+		max-width: 58rem;
+	}
+
+	@media screen and (min-width: 1200px) {
+		grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+		max-width: 64rem;
 	}
 }
 
 .home-about__portrait {
 	margin: 0;
-	max-width: min(28rem, 100%);
+	max-width: min(20rem, 100%);
 	transform: rotate(-0.4deg);
 	width: 100%;
 
 	@media screen and (min-width: 801px) {
-		justify-self: end;
+		margin-top: calc(var(--about-peek) * -1);
 		max-width: none;
+		transform: rotate(-0.45deg);
+	}
+}
+
+.home-about__body {
+	display: flex;
+	flex-direction: column;
+	gap: 1.35rem;
+
+	@media screen and (min-width: 801px) {
+		gap: 1.5rem;
+		padding-bottom: .15rem;
 	}
 }
 
 .home-about__contact {
-	text-align: center;
-
-	@media screen and (min-width: 801px) {
-		justify-self: start;
-		padding-top: .5rem;
-		text-align: left;
-	}
-
 	.text-eyebrow {
-		margin-bottom: .75rem;
+		margin-bottom: .4rem;
 	}
 }
 
 .home-about__name {
 	font-family: $font-display;
-	font-size: clamp(2rem, 4.5vw, 3rem);
+	font-size: clamp(1.75rem, 3.2vw, 2.45rem);
 	font-weight: 400;
 	letter-spacing: -0.03em;
-	line-height: 1.05;
+	line-height: 1.02;
 	margin: 0;
 }
 
 .home-about__role {
 	color: $color-muted;
-	font-size: 1.02rem;
-	line-height: 1.5;
-	margin: .75rem 0 0;
+	font-size: .95rem;
+	line-height: 1.4;
+	margin: .45rem 0 0;
 }
 
-.home-about__links {
-	font-size: 1.05rem;
-	line-height: 1.65;
-	margin: 1.25rem 0 0;
+.home-about__details {
+	font-size: .95rem;
+	line-height: 1.55;
+	list-style: none;
+	margin: .85rem 0 0;
+	padding: 0;
+
+	li + li {
+		margin-top: .15rem;
+	}
 
 	a {
 		color: inherit;
@@ -973,84 +980,212 @@
 			color: $color-accent;
 		}
 	}
+
+	li:last-child {
+		color: $color-muted;
+		font-size: .88rem;
+		margin-top: .45rem;
+	}
 }
 
-.home-about__place {
-	color: $color-muted;
+.home-about__ja {
+	border-top: 1px solid rgba($color-ink, .12);
+	padding-top: 1.15rem;
+
+	.text-eyebrow {
+		margin-bottom: .4rem;
+	}
+}
+
+.home-about__ja-text {
 	font-size: .95rem;
 	line-height: 1.5;
-	margin: 1rem 0 0;
+	margin: 0;
+	max-width: 28rem;
+	text-wrap: pretty;
 }
 
-.home-about__essay {
-	display: flex;
-	flex-direction: column;
-	gap: clamp(2.5rem, 5vw, 3.5rem);
-	margin-inline: auto;
-	max-width: 38rem;
+.home-about__newsletter {
+	border-top: 1px solid rgba($color-ink, .12);
+	padding-top: 1.15rem;
+
+	.text-eyebrow {
+		margin-bottom: .4rem;
+	}
+}
+
+.home-about__newsletter-lead {
+	color: $color-muted;
+	font-size: .88rem;
+	line-height: 1.4;
+	margin: 0 0 .75rem;
+	max-width: 26rem;
+	text-wrap: balance;
+}
+
+// Principy: statement header + story | tenets.
+.home-principy {
+	background: $color-greige;
+	box-sizing: border-box;
+	padding: clamp(2rem, 5vw, 3.25rem) clamp(1.25rem, 5vw, 3rem) clamp(2.25rem, 5.5vw, 3.5rem);
 	width: 100%;
 }
 
-.home-about__heading {
-	font-family: $font-display;
-	font-size: clamp(1.85rem, 3.5vw, 2.5rem);
-	font-weight: 400;
-	letter-spacing: -0.02em;
-	line-height: 1.1;
-	margin: 0 0 1.15rem;
-	text-align: center;
+.home-principy__inner {
+	margin-inline: auto;
+	max-width: 58rem;
+	width: 100%;
+
+	@media screen and (min-width: 1200px) {
+		max-width: 68rem;
+	}
 }
 
-.home-about__prose {
+.home-principy__header {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+
+	@media screen and (min-width: 901px) {
+		align-items: end;
+		display: grid;
+		gap: clamp(1.5rem, 3vw, 2.5rem);
+		grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+	}
+}
+
+.home-principy__title-block {
+	.text-eyebrow {
+		margin-bottom: .55rem;
+	}
+}
+
+.home-principy__heading {
+	font-family: $font-display;
+	font-size: clamp(1.85rem, 3.8vw, 2.85rem);
+	font-weight: 400;
+	letter-spacing: -0.03em;
+	line-height: 1.05;
+	margin: 0;
+	text-wrap: balance;
+}
+
+.home-principy__lead {
+	color: $color-muted;
+	font-size: clamp(.98rem, 1.6vw, 1.08rem);
+	line-height: 1.5;
+	margin: 0;
+	text-wrap: pretty;
+
+	@media screen and (min-width: 901px) {
+		padding-bottom: .2rem;
+	}
+}
+
+.home-principy__grid {
+	display: flex;
+	flex-direction: column;
+	gap: clamp(1.5rem, 3vw, 2.25rem);
+
+	@media screen and (min-width: 901px) {
+		display: grid;
+		gap: clamp(1.75rem, 3vw, 2.75rem);
+		grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+	}
+}
+
+.home-principy__story {
 	color: $color-ink;
-	font-size: 1.05rem;
-	line-height: 1.65;
+	font-size: .95rem;
+	line-height: 1.55;
 
 	p {
-		margin: 0 0 1em;
+		margin: 0 0 .85em;
 
 		&:last-child {
 			margin-bottom: 0;
 		}
 	}
-}
 
-// Newsletter subscribe (homepage + shared form styles).
-.home-newsletter {
-	background: $color-greige;
-	box-sizing: border-box;
-	padding: clamp(2.75rem, 7vw, 4.5rem) clamp(1.25rem, 5vw, 3rem);
-	text-align: center;
-	width: 100%;
+	@media screen and (min-width: 1200px) {
+		column-count: 2;
+		column-gap: 1.65rem;
 
-	.text-eyebrow {
-		margin-bottom: .85rem;
+		p {
+			break-inside: avoid;
+		}
 	}
 }
 
-.home-newsletter__heading {
-	font-family: $font-display;
-	font-size: clamp(2rem, 4.5vw, 3rem);
-	font-weight: 400;
-	letter-spacing: -0.03em;
-	line-height: 1.05;
+.home-principy__tenets {
+	border-top: 1px solid rgba($color-ink, .14);
+	color: $color-ink;
+	font-size: .92rem;
+	line-height: 1.45;
+	list-style: none;
 	margin: 0;
+	padding: 1.15rem 0 0;
+
+	@media screen and (min-width: 901px) {
+		border-left: 1px solid rgba($color-ink, .14);
+		border-top: 0;
+		padding: 0 0 0 1.5rem;
+	}
+
+	li {
+		margin: 0;
+		padding: 0 0 .85em;
+
+		&:last-child {
+			padding-bottom: 0;
+		}
+
+		&::before {
+			color: $color-faint;
+			content: "·";
+			display: inline-block;
+			margin-right: .45rem;
+			width: .55rem;
+		}
+	}
 }
 
-.home-newsletter__lead {
-	color: $color-muted;
-	font-size: clamp(1.02rem, 2vw, 1.15rem);
-	line-height: 1.55;
-	margin: 1rem auto 1.75rem;
-	max-width: 32rem;
-	text-wrap: balance;
-}
-
+// Newsletter form (homepage about + /newsletter page).
 .newsletter-form {
-	margin-inline: auto;
 	max-width: 28rem;
 	text-align: left;
 	width: 100%;
+}
+
+.home-about__newsletter .newsletter-form {
+	max-width: 26rem;
+}
+
+.home-about__newsletter .newsletter-form__row {
+	align-items: stretch;
+	flex-wrap: nowrap;
+	gap: .5rem;
+}
+
+.home-about__newsletter .newsletter-form__input {
+	background: $color-bg;
+	flex: 1 1 auto;
+	font-size: .92rem;
+	min-width: 0;
+	padding: .65rem .85rem;
+}
+
+.home-about__newsletter .newsletter-form__submit {
+	flex: 0 0 auto;
+	font-size: .72rem;
+	padding: .65rem 1rem;
+}
+
+.home-about__newsletter .newsletter-form__consent {
+	font-size: .72rem;
+	line-height: 1.35;
+	margin-top: .55rem;
 }
 
 .newsletter-form__label {
