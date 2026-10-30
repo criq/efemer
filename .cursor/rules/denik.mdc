@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Deník listing
 
-`/denik` uses `Sections/denik.twig`. Rituály and umění have their own listing layouts.
+`/denik` uses `Sections/denik.twig`. Same full-post feed pattern as rituály and umění.
 
 ## Layout
 

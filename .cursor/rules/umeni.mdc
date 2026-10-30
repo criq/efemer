@@ -1,16 +1,18 @@
 ---
-description: Umění section listing — gallery wall layout
+description: Umění section — full-post scroll feed
 globs: app/Views/Sections/umeni.twig,static/scss/3-blocks/umeni.scss,app/Controllers/Sections/**
 alwaysApply: false
 ---
 
 # Umění listing
 
-`/umeni` uses `Sections/umeni.twig`. Distinct from deník (journal) and rituály (ceremonial chapters).
+`/umeni` uses `Sections/umeni.twig`. Same feed pattern as deník and rituály.
 
 ## Layout
 
-- Greige page ground; transparent sticky header; white→greige intro wash
-- Photo-forward gallery wall: featured first piece large, then asymmetric wide/narrow spans on a 12-col grid
-- Print shadows + light tilts; native aspect ratios; captions under photos (title + year; summary only on featured)
-- Scroll reveal via `data-reveal` + `.is-in` (scoped with other section pages; respects reduced motion)
+- Intro hero: flat greige on phones; from 801px white→greige gradient (same as homepage hero)
+- Continuous **feed of whole art posts** (same body as detail via `Posts/body.twig` + `Posts/parts.twig`)
+- Full-bleed greige shells (`.umeni-feed__item`) with a centered `.post-article` inside; `.75rem` white gaps between bands
+- Title links to the standalone post URL (`linkedTitle`); no section eyebrow in the feed
+- Infinite scroll: first **4** posts, then `?page=N&partial=1` HTML fragments (`X-Feed-Next` header); JS in `static/javascript/index.js`
+- No scroll / entrance animations on the index

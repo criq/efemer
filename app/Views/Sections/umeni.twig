@@ -7,46 +7,26 @@
 {% block body %}
 
 	<div class="umeni">
-		<header class="umeni__header" data-reveal>
+		<header class="umeni__intro">
 			<p class="text-eyebrow">{{ title|lower }}</p>
 			<h1 class="umeni__heading">{{ title }}</h1>
 			<p class="umeni__lead">{{ lead }}</p>
 		</header>
 
-		<ul class="umeni__wall">
+		<div
+			class="umeni__feed"
+			data-feed
+			{% if hasMore %}data-feed-next="{{ url("sections.umeni") }}?page={{ nextPage }}&amp;partial=1"{% endif %}
+		>
 			{% for post in posts %}
-				{% set tilt = loop.index0 % 3 %}
-				{% if loop.first %}
-					{% set size = "featured" %}
-				{% elseif (loop.index0 - 1) is even %}
-					{% set size = "wide" %}
-				{% else %}
-					{% set size = "narrow" %}
-				{% endif %}
-				<li class="umeni__piece umeni__piece--{{ size }} umeni__piece--tilt-{{ tilt }}" data-reveal>
-					<a class="umeni__link" href="{{ post.getPublicUrl }}">
-						{% if post.getHeroImage %}
-							<span class="umeni__photo home-print">
-								<span class="home-print__photo">
-									<img src="{{ post.getHeroImage.getImageVersion("GALLERY").getURL }}" alt="">
-								</span>
-							</span>
-						{% endif %}
-						<span class="umeni__caption">
-							<span class="umeni__title">{{ post.getTitle }}</span>
-							{% if loop.first and post.getSummary %}
-								<span class="umeni__summary">{{ post.getSummary }}</span>
-							{% endif %}
-							{% if post.getPublishedAt %}
-								<span class="umeni__year">{{ post.getPublishedAt|date("Y") }}</span>
-							{% endif %}
-						</span>
-					</a>
-				</li>
+				{% include "Sections/umeni-item.twig" %}
 			{% else %}
-				<li class="umeni__empty">Zatím tu nic není.</li>
+				<p class="umeni__empty">Zatím tu nic není.</p>
 			{% endfor %}
-		</ul>
+			{% if hasMore %}
+				<div class="feed-sentinel" data-feed-sentinel aria-hidden="true"></div>
+			{% endif %}
+		</div>
 	</div>
 
 {% endblock body %}

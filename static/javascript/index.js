@@ -265,7 +265,7 @@ const initFeeds = () => {
 };
 
 const initReveal = () => {
-	const nodes = [...document.querySelectorAll(".site--denik [data-reveal], .site--umeni [data-reveal]")];
+	const nodes = [...document.querySelectorAll(".site--denik [data-reveal]")];
 	if (!nodes.length) {
 		return;
 	}
