@@ -296,7 +296,90 @@ class PostMaterializer
 			}
 		}
 
-		return $this->deriveTitle($item);
+		// Prefer LLM short headline when source title is a caption paste.
+		$planned = $this->normalizePublicTitle((string)($plan["title"] ?? ""));
+		if ($planned !== "") {
+			return $planned;
+		}
+
+		$derived = $this->deriveTitle($item);
+		if ($derived !== "" && !$this->looksLikeCaptionPaste($derived)) {
+			return $derived;
+		}
+
+		return $this->shortenCaptionTitle($derived !== "" ? $derived : trim((string)$item->getTitle()));
+	}
+
+	private function shortenCaptionTitle(string $raw): string
+	{
+		$title = trim(html_entity_decode(strip_tags($raw), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+		$title = preg_replace("/\s+/u", " ", $title) ?? $title;
+		$title = preg_replace("/@[\\p{L}\\p{N}._]+/u", "", $title) ?? $title;
+		$title = preg_replace("/#\\S+/u", "", $title) ?? $title;
+		$title = preg_replace("/\s+/u", " ", $title) ?? $title;
+		$title = trim($title, " \t\n\r\0\x0B,\"'«»…");
+		if ($title === "") {
+			return "";
+		}
+
+		// First sentence / clause if it is already short enough.
+		if (preg_match("/^(.{8,55}?)(?:[.!?]|\\s+[–—-]\\s+)/u", $title, $match)) {
+			$clause = trim($match[1], " \t,&");
+			if ($clause !== "" && !$this->looksLikeCaptionPaste($clause)) {
+				return $clause;
+			}
+		}
+
+		if (mb_strlen($title) <= 55 && !$this->looksLikeCaptionPaste($title)) {
+			return $title;
+		}
+
+		// Word-boundary trim — never leave a mid-word "…".
+		$cut = mb_substr($title, 0, 55);
+		if (preg_match("/^(.+\\s)\\S*$/u", $cut, $match)) {
+			$cut = rtrim($match[1]);
+		}
+		$cut = trim($cut, " \t,&");
+
+		return $cut;
+	}
+
+	private function normalizePublicTitle(string $raw): string
+	{
+		$title = trim(html_entity_decode(strip_tags($raw), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+		$title = preg_replace("/\s+/u", " ", $title) ?? $title;
+		$title = trim($title, " \t\n\r\0\x0B\"'«»");
+		$title = preg_replace("/@[\\p{L}\\p{N}._]+/u", "", $title) ?? $title;
+		$title = preg_replace("/#\\S+/u", "", $title) ?? $title;
+		$title = preg_replace("/\s+/u", " ", $title) ?? $title;
+		$title = trim($title, " \t\n\r\0\x0B,&");
+		if ($title === "" || strtolower($title) === "null") {
+			return "";
+		}
+		if ($this->looksLikeCaptionPaste($title)) {
+			return "";
+		}
+		if (mb_strlen($title) > 55) {
+			$title = rtrim(mb_substr($title, 0, 52)) . "…";
+		}
+
+		return $title;
+	}
+
+	private function looksLikeCaptionPaste(string $title): bool
+	{
+		if (str_contains($title, "@") || str_contains($title, "#")) {
+			return true;
+		}
+		if (str_ends_with($title, "…") && mb_strlen($title) > 40) {
+			return true;
+		}
+		// Long sentence-like openers (thank-yous, narrative captions).
+		if (mb_strlen($title) > 45 && preg_match("/[.!?]\\s|\\b(děkuji|děkujeme|minulý|včera|dnes)\\b/ui", $title)) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private function normalizeArtTitle(string $raw): string

@@ -62,9 +62,10 @@ cd ~/Sites/efemer
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"kind":"installation","existingOnly":true}' -f
 ```
 
-Weddings (`kind=wedding`): KeywordAnalyzer fills `couple` (“Jana a Petr”); MaterializePosts / PostLayoutPlanner set the public **title** to those names and write a short ceremonial **perex** (`posts.excerpt`). Rematerialize with `kind=wedding` after prompt changes.
-
-Art (`kind=installation` → umění): only discrete authored objects / commissions / gallery installations. Portraits and seasonal journal notes stay `denik` even when plants are sculptural. PostLayoutPlanner invents/keeps a short **work title** plus perex. Rematerialize with `kind=installation` after prompt changes; rekeyword former false positives so they become `diary`/`portrait` first.
+**Titles** (PostLayoutPlanner + `PostMaterializer::resolveTitle`):
+- Weddings (`kind=wedding`): KeywordAnalyzer fills `couple` (“Jana a Petr”); title = couple names + short ceremonial **perex** (`posts.excerpt`). Rematerialize with `kind=wedding` after prompt changes.
+- Art (`kind=installation` → umění): short **work title** + perex — not caption openers or bare dates. Rematerialize with `kind=installation` after prompt changes; rekeyword former false positives so they become `diary`/`portrait` first.
+- Everything else (deník etc.): keep Source title when it is already a clean diary date / short name; otherwise LLM invents a short headline (2–8 words). Never use truncated Instagram captions (`…`, `@handles`, thank-you pastes) as the public title — `looksLikeCaptionPaste` rejects those fallbacks.
 
 Uploads go to GCS `gs://efemer/files/{DEV|PROD}/…`. Reset/purge only touches the current env shard. Admin: `/admin/ingest` (pipeline + kind facets + keyword search).
 
