@@ -2,19 +2,41 @@
 
 {% block title %}{{ post.getTitle }} · Efemér{% endblock %}
 
-{% block bodyClass %}site--post{% endblock %}
+{% block bodyClass %}site--post {{ sectionBodyClass|default("site--denik") }}{% endblock %}
 
 {% block body %}
 
-	<article class="post-article" id="post-body">
-		{% include "Posts/body.twig" with {
-			post: post,
-			sectionPath: sectionPath,
-			sectionTitle: sectionTitle,
-			linkedTitle: false,
-			showSectionEyebrow: true,
-			headingTag: "h1",
-		} %}
-	</article>
+	{% set shell = feedClass|default("denik") %}
+	{% set itemShell = shell ~ "-feed__item" %}
+	{% set articleShell = shell ~ "-feed__article" %}
+
+	<div class="{{ shell }}">
+		<div
+			class="{{ shell }}__feed"
+			data-feed
+			{% if feedHasMore and feedNextUrl %}data-feed-next="{{ feedNextUrl }}"{% endif %}
+		>
+			<article class="{{ itemShell }}" id="post-{{ post.getId }}">
+				<div class="post-article {{ articleShell }}">
+					{% include "Posts/body.twig" with {
+						post: post,
+						sectionPath: sectionPath,
+						sectionTitle: sectionTitle,
+						linkedTitle: false,
+						showSectionEyebrow: true,
+						headingTag: "h1",
+					} %}
+				</div>
+			</article>
+
+			{% for continuePost in continuePosts|default([]) %}
+				{% include itemTemplate with { post: continuePost } %}
+			{% endfor %}
+
+			{% if feedHasMore %}
+				<div class="feed-sentinel" data-feed-sentinel aria-hidden="true"></div>
+			{% endif %}
+		</div>
+	</div>
 
 {% endblock body %}

@@ -204,6 +204,9 @@ const initLightboxGalleries = () => {
 };
 
 const initFeeds = () => {
+	// Preload when the sentinel is still ~2.5 viewports below the fold.
+	const FEED_ROOT_MARGIN = "0px 0px 250% 0px";
+
 	document.querySelectorAll("[data-feed]").forEach((feed) => {
 		const sentinel = feed.querySelector("[data-feed-sentinel]");
 		if (!sentinel) {
@@ -212,6 +215,16 @@ const initFeeds = () => {
 
 		let nextUrl = feed.dataset.feedNext || "";
 		let loading = false;
+
+		const sentinelInPreloadZone = () => {
+			if (!sentinel.isConnected) {
+				return false;
+			}
+			const rect = sentinel.getBoundingClientRect();
+			const preload = window.innerHeight * 2.5;
+
+			return rect.top <= window.innerHeight + preload;
+		};
 
 		const loadMore = async () => {
 			if (!nextUrl || loading) {
@@ -246,6 +259,10 @@ const initFeeds = () => {
 			} finally {
 				loading = false;
 				feed.classList.remove("is-loading");
+				// Observer may stay intersecting after insert — keep fetching while in zone.
+				if (nextUrl && sentinelInPreloadZone()) {
+					loadMore();
+				}
 			}
 		};
 
@@ -257,7 +274,7 @@ const initFeeds = () => {
 					}
 				});
 			},
-			{ rootMargin: "400px 0px", threshold: 0 },
+			{ rootMargin: FEED_ROOT_MARGIN, threshold: 0 },
 		);
 
 		observer.observe(sentinel);

@@ -20,4 +20,5 @@ Only **discrete art objects** — commissions, gallery/institutional installatio
 - Title links to the standalone post URL (`linkedTitle`); no section eyebrow in the feed
 - Public titles come from MaterializePosts / PostLayoutPlanner as short **work titles** (not caption openers or bare dates)
 - Infinite scroll: first **4** posts, then `?page=N&partial=1` HTML fragments (`X-Feed-Next` header); JS in `static/javascript/index.js`
+- Post detail: current post first, then older posts via `?partial=1&after={id}` (same feed chrome as the index)
 - No scroll / entrance animations on the index

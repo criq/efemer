@@ -14,6 +14,8 @@ alwaysApply: false
 - Continuous **feed of whole diary posts** (same body as detail via `Posts/body.twig` + `Posts/parts.twig`)
 - Full-bleed greige shells (`.denik-feed__item`) with a centered `.post-article` inside; `.75rem` white gaps between bands
 - Title is the explicit diary date (e.g. “6. 6. 2026”) — **no** publishedAt meta under it; sort by `Post::getExplicitAt()` (startsAt / title date / publishedAt)
+- Body must not repeat that date: `PostParts::stripLeadingTitleFromHtml` drops a leading title/date line from the first text part at render time
 - Title links to the standalone post URL (`linkedTitle`); no section eyebrow in the feed
 - Infinite scroll: first **4** posts, then `?page=N&partial=1` HTML fragments (`X-Feed-Next` header); JS in `static/javascript/index.js`
+- Post detail (`/denik/{slug}`): same greige feed chrome; current post first, then older posts in list order via `?partial=1&after={id}` (continues as if scrolling the index)
 - No scroll / entrance animations on the index
