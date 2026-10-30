@@ -21,11 +21,22 @@ Public site is **not** assembled from the page-component tree. Typed entities:
 | `ritualy` | Svatební rituály | `/svatebni-ritualy` | lasting posts |
 | `himmelhaus` | Himmelhaus | `/himmelhaus` | lasting posts |
 | `umeni` | Umění | `/umeni` | lasting posts |
-| `udalosti` | Události | `/udalosti` | invitation posts (`isInvitation`) |
+| `udalosti` | Události | `/udalosti` | posts tagged `invitation` |
 
 Himmelhaus is the house; Instagram handle is `@himmlhaus`. Soft ingest `kind` (diary/workshop/…) is **not** a 1:1 map to these sections.
 
 `Section::work()` is the three lasting sections. `Section::all()` includes Události.
+
+## Controlled tags
+
+`tags` JSON on `ingest_items` / `posts` is the source of truth for event framing (not free keywords):
+
+| Tag | Meaning | Public fate |
+|---|---|---|
+| `invitation` | Open call to an upcoming/current event | section `udalosti`, ephemeral; `isInvitation` synced cache |
+| `report` | Lasting write-up of an event that already happened | lasting work section (workshop reports → `himmelhaus` until taxonomy) |
+
+Mutually exclusive. Empty tags = ordinary work/diary. LLM fills via KeywordAnalyzer; allowlist in `App\Classes\Content\Tags`.
 
 ## Homepage
 
@@ -33,7 +44,7 @@ Visual layout is in `homepage.mdc`. Text is the next **current invitation** post
 
 ## Invitations
 
-Materialized as posts with `isInvitation`, `startsAt` / `endsAt` / `place`, section `udalosti`. Public only while current (effective end ≥ now); expired → hidden everywhere including detail **404**. Listing `/udalosti` is current invites only (no archive). Admin legacy **Události** (`events` table) remains until removed.
+Materialized from tag `invitation` (+ `startsAt` / `endsAt` / `place`), section `udalosti`. Public only while current (effective end ≥ now); expired → hidden everywhere including detail **404**. Listing `/udalosti` is current invites only (no archive). Admin legacy **Události** (`events` table) remains until removed.
 
 ## Post parts (`layoutJson.parts`)
 

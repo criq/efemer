@@ -63,7 +63,10 @@ todos:
     content: "IG stage-1 via Instaloader — 400 efemer_flowers + 231 himmlhaus; ImportInstagramDump idempotent"
     status: completed
   - id: llm-timeframe-events
-    content: "LLM timeframe block (isInvitation/startsAt/endsAt/place); drop mourning kind; prefer workshop for invites; Gemini sole parser (no regex heuristics)"
+    content: "LLM timeframe block (startsAt/endsAt/place) + controlled tags invitation/report; isInvitation synced cache; drop mourning kind; prefer workshop for invites; Gemini sole parser (no regex heuristics)"
+    status: completed
+  - id: content-tags
+    content: "Controlled tags on ingest_items/posts (invitation|report); KeywordAnalyzer + QC + Materializer; report workshops → himmelhaus; backfill invitations from isInvitation"
     status: completed
   - id: ig-keyword-corpus
     content: "IG KeywordIngest done — 631 IG items kw-v3 (0 loaded); 126 invitations"
@@ -113,15 +116,15 @@ Single source of truth for the ingest → LLM → taxonomy → public posts pipe
 Do **not** lock categories (`ritualy` / `himmelhaus` / `umeni`) during import.
 
 1. **Complete load** of all sources into ingest
-2. **Keyword + vision + timeframe** — keywords, photo ratings, cover, roles, demote, alt, crop, palette, series, layoutHints, **and** LLM `timeframe` (`isInvitation` / `startsAt` / `endsAt` / `place`)
+2. **Keyword + vision + timeframe + tags** — keywords, photo ratings, cover, roles, demote, alt, crop, palette, series, layoutHints, LLM `timeframe` (`startsAt` / `endsAt` / `place`), and controlled `tags` (`invitation` | `report`)
 3. **Inspect the corpus** — exports, facets, clusters, embeddings
 4. **Decide final category shape** — may be multi-label; may add emerging categories
 5. **Assign categories** to ingest items
-6. **Materialize** keyworded items → public `posts` (invitations = ephemeral `udalosti` posts)
+6. **Materialize** keyworded items → public `posts` (`invitation` = ephemeral `udalosti`; `report` = lasting work)
 
 Today’s four site sections remain provisional until taxonomy is settled.
 
-**LLM over regex:** categorization and date/event parsing are Gemini’s job (text + poster OCR). PHP/`KeywordQc` only enforce structural invariants (enums, cover/role locks, typo cleanup). No invitation/kind/date heuristics in PHP.
+**LLM over regex:** categorization, date/event parsing, and invitation vs report tags are Gemini’s job (text + poster OCR). PHP/`KeywordQc` only enforce structural invariants (enums, tag allowlist, cover/role locks, typo cleanup). No invitation/kind/date heuristics in PHP. `isInvitation` is a synced cache of the `invitation` tag.
 
 ## Pipeline
 

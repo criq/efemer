@@ -8,7 +8,7 @@ alwaysApply: true
 | Stage | Job | Result |
 |---|---|---|
 | 1 Load | `RefreshEfemerCz` / `RefreshInstagram*` / `ImportInstagramDump` | `ingest_items` + files → status `loaded` |
-| 2 Enrich | `KeywordIngest` (+ inline `KeywordQc`) | keywords, cover/roles, timeframe → `keyworded` |
+| 2 Enrich | `KeywordIngest` (+ inline `KeywordQc`) | keywords, cover/roles, timeframe, tags (`invitation`/`report`) → `keyworded` |
 | 3 Public | `MaterializePosts` | `posts` + `post_files` + `layoutJson.parts` → `materialized` |
 
 Taxonomy (`categorized`) is still provisional — soft `kind` ≠ site section. Public model: [`.cursor/rules/content-model.mdc`](content-model.mdc).
