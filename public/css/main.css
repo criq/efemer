@@ -12420,6 +12420,150 @@ body.builder .builder-file-list--insert:not(:empty),
     padding: 0.5rem 0 0.5rem 0.25rem;
   }
 }
+.home-about {
+  background: #faf9f7;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: max(2.5rem, min(6vw, 4rem));
+  overflow-x: clip;
+  padding: max(2.75rem, min(7vw, 4.5rem)) max(1.25rem, min(5vw, 3rem)) max(3rem, min(7vw, 5rem));
+  width: 100%;
+}
+
+.home-about__brief {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 36rem;
+  text-align: center;
+}
+.home-about__brief .text-eyebrow {
+  margin-bottom: 0.85rem;
+}
+
+.home-about__brief-lead {
+  color: #1c211c;
+  font-size: max(1.05rem, min(2.2vw, 1.2rem));
+  line-height: 1.55;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.home-about__intro {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: max(1.75rem, min(4vw, 2.75rem));
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 52rem;
+  width: 100%;
+}
+@media screen and (min-width: 801px) {
+  .home-about__intro {
+    display: grid;
+    grid-gap: max(2rem, min(4vw, 3.5rem));
+    gap: max(2rem, min(4vw, 3.5rem));
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  }
+}
+
+.home-about__portrait {
+  margin: 0;
+  max-width: min(28rem, 100%);
+  transform: rotate(-0.4deg);
+  width: 100%;
+}
+@media screen and (min-width: 801px) {
+  .home-about__portrait {
+    justify-self: end;
+    max-width: none;
+  }
+}
+
+.home-about__contact {
+  text-align: center;
+}
+@media screen and (min-width: 801px) {
+  .home-about__contact {
+    justify-self: start;
+    padding-top: 0.5rem;
+    text-align: left;
+  }
+}
+.home-about__contact .text-eyebrow {
+  margin-bottom: 0.75rem;
+}
+
+.home-about__name {
+  font-family: "Fraunces", "Times New Roman", Times, serif;
+  font-size: max(2rem, min(4.5vw, 3rem));
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.home-about__role {
+  color: #5e675c;
+  font-size: 1.02rem;
+  line-height: 1.5;
+  margin: 0.75rem 0 0;
+}
+
+.home-about__links {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  margin: 1.25rem 0 0;
+}
+.home-about__links a {
+  color: inherit;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+.home-about__links a:hover {
+  color: #6f7d68;
+}
+
+.home-about__place {
+  color: #5e675c;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 1rem 0 0;
+}
+
+.home-about__essay {
+  display: flex;
+  flex-direction: column;
+  gap: max(2.5rem, min(5vw, 3.5rem));
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 38rem;
+  width: 100%;
+}
+
+.home-about__heading {
+  font-family: "Fraunces", "Times New Roman", Times, serif;
+  font-size: max(1.85rem, min(3.5vw, 2.5rem));
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 1.15rem;
+  text-align: center;
+}
+
+.home-about__prose {
+  color: #1c211c;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+.home-about__prose p {
+  margin: 0 0 1em;
+}
+.home-about__prose p:last-child {
+  margin-bottom: 0;
+}
+
 .site--post {
   background: #fff;
 }
