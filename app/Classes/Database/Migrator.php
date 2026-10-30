@@ -28,6 +28,7 @@ use App\Classes\Database\Migrations\IngestSchema;
 use App\Classes\Database\Migrations\IngestTimeframeSchema;
 use App\Classes\Database\Migrations\PostFileEnrichmentSchema;
 use App\Classes\Database\Migrations\ContentTagsSchema;
+use App\Classes\Database\Migrations\PostsDenikSection;
 use App\Classes\Database\Migrations\PostsTimeframeSchema;
 use App\Classes\Database\Migrations\SeedEventsAppearances;
 use App\Classes\Database\Migrations\StorageFilesSchema;
@@ -97,6 +98,7 @@ class Migrator
 			new PostsTimeframeSchema,
 			new PostFileEnrichmentSchema,
 			new ContentTagsSchema,
+			new PostsDenikSection,
 		];
 	}
 
