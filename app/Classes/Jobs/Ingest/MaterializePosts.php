@@ -11,8 +11,10 @@ use Katu\Tools\Calendar\Timeout;
 
 /**
  * Materialize keyworded ingest items into public posts.
+ * Default skips already-materialized items; pass existingOnly to rematerialize.
  *
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts -f
+ * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"limit":10}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"id":427}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"invitationsOnly":true}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"existingOnly":true}' -f
@@ -52,7 +54,7 @@ class MaterializePosts extends Job
 				"MaterializePosts: %s item(s)%s%s%s%s.",
 				count($items),
 				$invitationsOnly ? ", invitationsOnly" : "",
-				$existingOnly ? ", existingOnly" : "",
+				$existingOnly ? ", existingOnly (rematerialize)" : ", new only",
 				$kind !== null ? ", kind={$kind}" : "",
 				$dryRun ? ", dryRun" : "",
 			)));
@@ -111,7 +113,6 @@ class MaterializePosts extends Job
 			} elseif (
 				$status !== IngestItem::STATUS_KEYWORDED
 				&& $status !== IngestItem::STATUS_CATEGORIZED
-				&& $status !== IngestItem::STATUS_MATERIALIZED
 			) {
 				continue;
 			}
