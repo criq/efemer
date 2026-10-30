@@ -259,29 +259,13 @@ class PostMaterializer
 			return Section::UDALOSTI;
 		}
 
-		$kind = $item->getKind();
-		// Lasting workshop / gathering write-ups (not open invitations).
-		// May overlap with Himmelhaus content; section is a soft home, not exclusive.
-		if ($kind === "workshop") {
-			return Section::WORKSHOPY;
-		}
-
-		if ($item->getInstagramAccount() === "himmlhaus") {
-			return Section::HIMMELHAUS;
-		}
-
-		// Rituály = weddings / bridal work only (soft kind=wedding).
-		if ($kind === "wedding") {
+		// Rituály = weddings / bridal work only.
+		if ($item->getKind() === "wedding") {
 			return Section::RITUALY;
 		}
-		if (in_array($kind, ["installation", "portrait"], true)) {
-			return Section::UMENI;
-		}
-		if ($kind === "diary" && $item->getSource() === IngestItem::SOURCE_EFEMER_CZ) {
-			return Section::HIMMELHAUS;
-		}
 
-		return null;
+		// Everything else lasting → one dated journal.
+		return Section::DENIK;
 	}
 
 	private function deriveTitle(IngestItem $item): string

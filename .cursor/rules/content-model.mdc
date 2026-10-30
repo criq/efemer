@@ -1,5 +1,5 @@
 ---
-description: Public content model — posts, five sections, invitation ephemerality
+description: Public content model — posts, rituály + deník + invitations
 alwaysApply: true
 ---
 
@@ -10,38 +10,36 @@ Public site is **not** assembled from the page-component tree. Typed entities:
 | Entity | Role |
 |---|---|
 | `ingest_items` | Raw imported sources (stage 1+); not public |
-| `posts` | All public content after materialize (work + invitations) |
+| `posts` | All public content after materialize |
 | `events` | Legacy admin table only; public site uses invitation posts |
 | `appearances` | Press / v tisku |
 
-## Sections (provisional — soft homes, overlaps OK)
+## Sections
 
-| Code | Czech | Path | Primarily |
+| Code | Czech | Path | Role |
 |---|---|---|---|
-| `ritualy` | Svatební rituály | `/svatebni-ritualy` | weddings / bridal rituals only |
-| `himmelhaus` | Himmelhaus | `/himmelhaus` | house diary |
-| `workshopy` | Workshopy | `/workshopy` | lasting workshop / gathering reports |
-| `umeni` | Umění | `/umeni` | installations, art |
-| `udalosti` | Události | `/udalosti` | posts tagged `invitation` (ephemeral) |
+| `ritualy` | Svatební rituály | `/svatebni-ritualy` | Business portfolio — weddings / bridal only |
+| `denik` | Deník | `/denik` | Everything else lasting, chronological |
+| `udalosti` | Události | `/udalosti` | Current invitations only (ephemeral) |
 
-Himmelhaus is the house; Instagram handle is `@himmlhaus`. Soft ingest `kind` is a hint, not exclusive membership — the same story could fit more than one section.
+Soft ingest `kind` and free keywords stay for enrichment/search — they do **not** drive a multi-way site taxonomy. Legacy `himmelhaus` / `workshopy` / `umeni` redirect to `/denik`.
 
-`Section::work()` is the four lasting sections (nav/homepage order). `Section::all()` adds Události.
+`Section::work()` = rituály + deník. `Section::all()` adds Události.
 
 ## Controlled tags
 
-`tags` JSON on `ingest_items` / `posts` is the source of truth for event framing (not free keywords):
+`tags` JSON on `ingest_items` / `posts` is the source of truth for invitation framing:
 
 | Tag | Meaning | Public fate |
 |---|---|---|
 | `invitation` | Open call to an upcoming/current event | section `udalosti`, ephemeral; `isInvitation` synced cache |
-| `report` | Lasting write-up of an event that already happened | lasting `workshopy` (via soft `kind=workshop`) |
+| `report` | Lasting write-up of an event that already happened | lasting `denik` |
 
-Mutually exclusive. Empty tags = ordinary work/diary. LLM fills via KeywordAnalyzer; allowlist in `App\Classes\Content\Tags`.
+Mutually exclusive. Empty tags = ordinary journal. LLM fills via KeywordAnalyzer; allowlist in `App\Classes\Content\Tags`.
 
 ## Homepage
 
-Visual layout is in `homepage.mdc`. Text is the next **current invitation** post, else the latest lasting work post. Hero photos come from that same featured post (cover/lead + highest-rated non-demoted). Then four work-section plots (not Události).
+Visual layout is in `homepage.mdc`. Text is the next **current invitation** post, else the latest lasting work post. Hero photos come from that same featured post. Then two plots: Rituály + Deník.
 
 ## Invitations
 
@@ -67,3 +65,5 @@ Public post/invitation body is an ordered list in `posts.layoutJson.parts`:
 ## Import
 
 Load into ingest via Katu jobs first (see `ingest.mdc`). Public `posts` come from `MaterializePosts`, not refresh jobs.
+
+Materialize mapping: `invitation` → `udalosti`; `kind=wedding` → `ritualy`; everything else lasting → `denik`.

@@ -5,49 +5,68 @@ namespace App\Classes\Content;
 class Section
 {
 	public const RITUALY = "ritualy";
-	public const HIMMELHAUS = "himmelhaus";
-	public const WORKSHOPY = "workshopy";
-	public const UMENI = "umeni";
+	public const DENIK = "denik";
 	public const UDALOSTI = "udalosti";
+
+	/** @deprecated Merged into DENIK */
+	public const HIMMELHAUS = "himmelhaus";
+	/** @deprecated Merged into DENIK */
+	public const WORKSHOPY = "workshopy";
+	/** @deprecated Merged into DENIK */
+	public const UMENI = "umeni";
+
+	/** Legacy journal section codes (pre-deník collapse). */
+	public const LEGACY_JOURNAL = [
+		self::HIMMELHAUS,
+		self::WORKSHOPY,
+		self::UMENI,
+	];
 
 	public static function all(): array
 	{
 		return [
 			self::RITUALY,
-			self::HIMMELHAUS,
-			self::WORKSHOPY,
-			self::UMENI,
+			self::DENIK,
 			self::UDALOSTI,
 		];
 	}
 
+	/**
+	 * Lasting public sections (homepage plots + nav work items).
+	 *
+	 * @return list<string>
+	 */
 	public static function work(): array
 	{
 		return [
 			self::RITUALY,
-			self::HIMMELHAUS,
-			self::WORKSHOPY,
-			self::UMENI,
+			self::DENIK,
 		];
 	}
 
 	public static function isValid(string $section): bool
 	{
-		return in_array($section, self::all(), true);
+		return in_array($section, self::all(), true)
+			|| in_array($section, self::LEGACY_JOURNAL, true);
 	}
 
 	public static function isWork(string $section): bool
 	{
-		return in_array($section, self::work(), true);
+		return in_array($section, self::work(), true)
+			|| in_array($section, self::LEGACY_JOURNAL, true);
+	}
+
+	public static function isJournal(string $section): bool
+	{
+		return $section === self::DENIK
+			|| in_array($section, self::LEGACY_JOURNAL, true);
 	}
 
 	public static function title(string $section): string
 	{
 		return match ($section) {
 			self::RITUALY => "Svatební rituály",
-			self::HIMMELHAUS => "Himmelhaus",
-			self::WORKSHOPY => "Workshopy",
-			self::UMENI => "Umění",
+			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY, self::UMENI => "Deník",
 			self::UDALOSTI => "Události",
 			default => $section,
 		};
@@ -57,9 +76,7 @@ class Section
 	{
 		return match ($section) {
 			self::RITUALY => "rituály",
-			self::HIMMELHAUS => "himmelhaus",
-			self::WORKSHOPY => "workshopy",
-			self::UMENI => "umění",
+			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY, self::UMENI => "deník",
 			self::UDALOSTI => "události",
 			default => $section,
 		};
@@ -69,9 +86,7 @@ class Section
 	{
 		return match ($section) {
 			self::RITUALY => "/svatebni-ritualy",
-			self::HIMMELHAUS => "/himmelhaus",
-			self::WORKSHOPY => "/workshopy",
-			self::UMENI => "/umeni",
+			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY, self::UMENI => "/denik",
 			self::UDALOSTI => "/udalosti",
 			default => "/" . $section,
 		};
@@ -81,9 +96,7 @@ class Section
 	{
 		return match ($section) {
 			self::RITUALY => "sections.ritualy",
-			self::HIMMELHAUS => "sections.himmelhaus",
-			self::WORKSHOPY => "sections.workshopy",
-			self::UMENI => "sections.umeni",
+			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY, self::UMENI => "sections.denik",
 			self::UDALOSTI => "sections.udalosti",
 			default => "homepage.index",
 		};
@@ -93,9 +106,7 @@ class Section
 	{
 		return match ($section) {
 			self::RITUALY => "Bespoke přechodové rituály pro pár a rodinu — ne svatební koordinace, ale obřad na míru místu, rostlinám a lidem.",
-			self::HIMMELHAUS => "Deník kamenného domu v Českém středohoří, kde Lucie žije a otevírá dům slavnostem.",
-			self::WORKSHOPY => "Reportáže z dílen, slavností a společných setkání — to, co už se stalo a zůstává.",
-			self::UMENI => "Instalace, happeningy, kniha Svátosti a práce s rostlinou jako nositelkou významu.",
+			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY, self::UMENI => "Zápisky z domu, dílen, slavností a krajiny — chronologicky, tak jak přicházejí.",
 			self::UDALOSTI => "Slavnosti, poutě a otevřený dům — pozvánky na to, co se právě chystá.",
 			default => "",
 		};

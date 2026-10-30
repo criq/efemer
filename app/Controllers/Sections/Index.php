@@ -15,19 +15,9 @@ class Index extends \Katu\Controllers\Controller
 		return $this->render($request, $response, Section::RITUALY);
 	}
 
-	public function himmelhaus(ServerRequestInterface $request, ResponseInterface $response)
+	public function denik(ServerRequestInterface $request, ResponseInterface $response)
 	{
-		return $this->render($request, $response, Section::HIMMELHAUS);
-	}
-
-	public function workshopy(ServerRequestInterface $request, ResponseInterface $response)
-	{
-		return $this->render($request, $response, Section::WORKSHOPY);
-	}
-
-	public function umeni(ServerRequestInterface $request, ResponseInterface $response)
-	{
-		return $this->render($request, $response, Section::UMENI);
+		return $this->render($request, $response, Section::DENIK);
 	}
 
 	private function render(ServerRequestInterface $request, ResponseInterface $response, string $section): ResponseInterface

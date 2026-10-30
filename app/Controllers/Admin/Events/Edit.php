@@ -69,7 +69,7 @@ class Edit extends \Katu\Controllers\Controller
 			"title" => $event?->getTitle() ?? "",
 			"url" => $event?->getUrl() ?? "",
 			"place" => $event?->getPlace() ?? "",
-			"section" => $event?->getSection() ?? Section::HIMMELHAUS,
+			"section" => $event?->getSection() ?? Section::DENIK,
 			"startsAt" => $event?->getStartsAtLocal() ?? "",
 			"endsAt" => $event?->getEndsAtLocal() ?? "",
 			"published" => $event ? $event->isPublished() : true,

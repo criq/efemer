@@ -594,8 +594,9 @@ class Post extends \Katu\Models\Model
 				return ((int)($a->getStartsAt()?->format("U") ?? 0)) <=> ((int)($b->getStartsAt()?->format("U") ?? 0));
 			}
 
-			$aTime = (int)($a->getPublishedAt()?->format("U") ?? 0);
-			$bTime = (int)($b->getPublishedAt()?->format("U") ?? 0);
+			// Journal: prefer event/content date when known, else publish date.
+			$aTime = (int)($a->getStartsAt()?->format("U") ?? $a->getPublishedAt()?->format("U") ?? 0);
+			$bTime = (int)($b->getStartsAt()?->format("U") ?? $b->getPublishedAt()?->format("U") ?? 0);
 
 			return $bTime <=> $aTime;
 		});

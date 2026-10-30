@@ -16,29 +16,12 @@ class InstagramClassifier
 		$caption = trim((string)($post["caption"] ?? ""));
 		$normalized = $this->normalize($caption);
 
-		if ($account === "himmlhaus") {
-			return $this->result(Section::HIMMELHAUS, $caption, 0.96);
-		}
-
 		$ritualScore = $this->score($normalized, $this->ritualPatterns());
-		$artScore = $this->score($normalized, $this->artPatterns());
-		$houseScore = $this->score($normalized, $this->housePatterns());
-
-		if ($houseScore >= 2 && $houseScore >= $ritualScore && $houseScore >= $artScore) {
-			return $this->result(Section::HIMMELHAUS, $caption, min(0.93, 0.7 + 0.05 * $houseScore));
+		if ($ritualScore >= 1 && $account !== "himmlhaus") {
+			return $this->result(Section::RITUALY, $caption, min(0.94, 0.62 + 0.08 * $ritualScore));
 		}
 
-		if ($ritualScore > $artScore && $ritualScore >= 1) {
-			$confidence = min(0.94, 0.62 + 0.08 * $ritualScore);
-
-			return $this->result(Section::RITUALY, $caption, $confidence);
-		}
-
-		if ($artScore >= 1) {
-			return $this->result(Section::UMENI, $caption, min(0.92, 0.6 + 0.08 * $artScore));
-		}
-
-		return $this->result(Section::UMENI, $caption, 0.55);
+		return $this->result(Section::DENIK, $caption, $account === "himmlhaus" ? 0.96 : 0.7);
 	}
 
 	/**

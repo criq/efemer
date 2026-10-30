@@ -335,24 +335,6 @@
 	}
 }
 
-@media screen and (min-width: 801px) {
-	.home-plot--himmelhaus {
-		.home-plot__photo {
-			margin-bottom: calc((var(--plot-pad-bottom) + var(--plot-edge)) * -1);
-			margin-top: auto;
-			order: 2;
-
-			img {
-				margin-bottom: calc(var(--plot-photo-over) * -1);
-				margin-top: 0;
-			}
-		}
-
-		.home-plot__copy {
-			padding: 0 0 1.5rem;
-		}
-	}
-}
 
 .home-plot__copy {
 	padding: 1.5rem 0 0;
@@ -498,7 +480,7 @@
 	}
 }
 
-// Tablet+: 2×2 for the four work sections.
+// Tablet+: rituály + deník side by side.
 @media screen and (min-width: 801px) {
 	.home-plots {
 		align-items: stretch;
@@ -516,11 +498,6 @@
 
 	.home-plot__photo img {
 		margin-top: calc(var(--plot-photo-over) * -1);
-	}
-
-	.home-plot--himmelhaus .home-plot__photo img {
-		margin-bottom: calc(var(--plot-photo-over) * -1);
-		margin-top: 0;
 	}
 
 	.home-plot__title {

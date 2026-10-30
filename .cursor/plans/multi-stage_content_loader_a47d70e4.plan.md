@@ -69,7 +69,10 @@ todos:
     content: "Controlled tags on ingest_items/posts (invitation|report); KeywordAnalyzer + QC + Materializer; backfill invitations from isInvitation"
     status: completed
   - id: workshopy-section
-    content: "Fourth lasting section workshopy (/workshopy) — 3rd in nav/work order; kind=workshop (non-invite) materializes there; overlaps with himmelhaus OK"
+    content: "Superseded: collapsed himmelhaus/workshopy/umeni into denik journal"
+    status: cancelled
+  - id: denik-journal
+    content: "Public IA: rituály (weddings) + deník (dated journal) + události (invites); legacy paths 301 to /denik"
     status: completed
   - id: ig-keyword-corpus
     content: "IG KeywordIngest done — 631 IG items kw-v3 (0 loaded); 126 invitations"

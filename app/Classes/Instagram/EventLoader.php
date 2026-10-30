@@ -62,7 +62,7 @@ class EventLoader
 			"bodyHtml" => $this->captionToHtml($caption),
 			"url" => PostUrl::canonical($shortcode),
 			"place" => is_string($post["location"] ?? null) ? $post["location"] : null,
-			"section" => Section::HIMMELHAUS,
+			"section" => Section::DENIK,
 			"startsAt" => $dates["startsAt"],
 			"endsAt" => $dates["endsAt"],
 			"heroFile" => $hero,

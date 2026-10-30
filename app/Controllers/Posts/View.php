@@ -15,26 +15,16 @@ class View extends \Katu\Controllers\Controller
 		return $this->render($request, $response, Section::RITUALY, $slug);
 	}
 
-	public function himmelhaus(ServerRequestInterface $request, ResponseInterface $response, string $slug)
+	public function denik(ServerRequestInterface $request, ResponseInterface $response, string $slug)
 	{
-		return $this->render($request, $response, Section::HIMMELHAUS, $slug);
-	}
-
-	public function workshopy(ServerRequestInterface $request, ResponseInterface $response, string $slug)
-	{
-		return $this->render($request, $response, Section::WORKSHOPY, $slug);
-	}
-
-	public function umeni(ServerRequestInterface $request, ResponseInterface $response, string $slug)
-	{
-		return $this->render($request, $response, Section::UMENI, $slug);
+		return $this->render($request, $response, Section::DENIK, $slug);
 	}
 
 	private function render(ServerRequestInterface $request, ResponseInterface $response, string $section, string $slug): ResponseInterface
 	{
 		$path = Section::pathPrefix($section) . "/" . ltrim($slug, "/");
 		$post = Post::getByPath($path);
-		if (!$post || !$post->isPubliclyVisible() || $post->isInvitation()) {
+		if (!$post || !$post->isPubliclyVisible()) {
 			throw new \Katu\Exceptions\ModelNotFoundException;
 		}
 
@@ -42,6 +32,7 @@ class View extends \Katu\Controllers\Controller
 			"post" => $post,
 			"sectionTitle" => Section::title($post->getSection()),
 			"sectionPath" => Section::pathPrefix($post->getSection()),
+			"parts" => $post->getResolvedParts(),
 		]));
 	}
 }
