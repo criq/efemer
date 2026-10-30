@@ -108,7 +108,7 @@ class Section
 		return match ($section) {
 			self::RITUALY => "Bespoke přechodové rituály pro pár a rodinu — ne svatební koordinace, ale obřad na míru místu, rostlinám a lidem.",
 			self::DENIK, self::HIMMELHAUS, self::WORKSHOPY, self::UMENI => "Zápisky z domu, dílen, slavností a krajiny — chronologicky, tak jak přicházejí.",
-			self::UDALOSTI => "Reportáže ze slavností, dílen a společných setkání — to, co už se stalo a zůstává.",
+			self::UDALOSTI => "Pozvánky na to, co se právě chystá, a reportáže ze slavností a dílen, které už zůstávají.",
 			default => "",
 		};
 	}

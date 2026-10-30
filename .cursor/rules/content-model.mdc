@@ -19,10 +19,10 @@ Public site is **not** assembled from the page-component tree. Typed entities:
 | Code | Czech | Path | Role |
 |---|---|---|---|
 | `ritualy` | Svatební rituály | `/svatebni-ritualy` | Business portfolio — weddings / bridal only |
-| `udalosti` | Události | `/udalosti` | Lasting event **reports** (workshop/slavnost write-ups) |
+| `udalosti` | Události | `/udalosti` | Current **invitations** + lasting **reports** |
 | `denik` | Deník | `/denik` | Everything else lasting, chronological |
 
-Invitations (tag `invitation`) also use path `/udalosti/…` but are ephemeral: homepage hero only, hidden from the Události listing/plot when expired or while current they’re still not in the reports grid.
+`/udalosti` lists current invitations (“nadcházející”) then lasting reports (“reportáže”). Expired invitations 404 on detail and drop from the list. Homepage plot for Události uses report photos (not invites).
 
 Soft ingest `kind` and free keywords stay for enrichment/search. Legacy `himmelhaus` / `workshopy` / `umeni` redirect to `/denik`.
 

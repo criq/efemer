@@ -12,11 +12,28 @@ class Index extends \Katu\Controllers\Controller
 {
 	public function getResponse(ServerRequestInterface $request, ResponseInterface $response)
 	{
-		return $response->withBody((new HTMLEngine($request))->render("Sections/index.twig", [
-			"section" => Section::UDALOSTI,
+		$groups = [];
+
+		$invitations = Post::getCurrentInvitations();
+		if ($invitations !== []) {
+			$groups[] = [
+				"title" => "nadcházející",
+				"posts" => $invitations,
+			];
+		}
+
+		$reports = Post::getPublishedBySection(Section::UDALOSTI);
+		if ($reports !== []) {
+			$groups[] = [
+				"title" => "reportáže",
+				"posts" => $reports,
+			];
+		}
+
+		return $response->withBody((new HTMLEngine($request))->render("Events/index.twig", [
 			"title" => Section::title(Section::UDALOSTI),
 			"lead" => Section::lead(Section::UDALOSTI),
-			"posts" => Post::getPublishedBySection(Section::UDALOSTI),
+			"groups" => $groups,
 		]));
 	}
 }
