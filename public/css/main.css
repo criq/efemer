@@ -11261,11 +11261,16 @@ body.builder .builder-file-list--insert:not(:empty),
 }
 
 .site-header {
-  background: #fff;
-  border-bottom: 1px solid #e6e2dc;
+  background: transparent;
+  border-bottom: none;
   position: sticky;
   top: 0;
   z-index: 30;
+}
+.site-header.is-nav-open {
+  background: rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
 }
 
 .site-header__inner {
@@ -11620,9 +11625,6 @@ body.builder .builder-file-list--insert:not(:empty),
 
 .site--home {
   background: #fff;
-}
-.site--home .site-header {
-  border-bottom: none;
 }
 .site--home .site-main {
   display: flex;
@@ -12283,10 +12285,6 @@ body.builder .builder-file-list--insert:not(:empty),
 .site--denik {
   background: #faf9f7;
 }
-.site--denik .site-header {
-  background: #fff;
-  border-bottom: none;
-}
 .site--denik .site-main {
   margin-top: 0;
   padding: 0;
@@ -12513,10 +12511,6 @@ body.builder .builder-file-list--insert:not(:empty),
 }
 .site--ritualy {
   background: #fff;
-}
-.site--ritualy .site-header {
-  background: #fff;
-  border-bottom: none;
 }
 .site--ritualy .site-main {
   margin-top: 0;
@@ -12754,10 +12748,6 @@ body.builder .builder-file-list--insert:not(:empty),
 .site--umeni {
   background: #faf9f7;
 }
-.site--umeni .site-header {
-  background: #fff;
-  border-bottom: none;
-}
 .site--umeni .site-main {
   margin-top: 0;
   padding: 0;
@@ -12966,9 +12956,6 @@ body.builder .builder-file-list--insert:not(:empty),
 }
 .site--post {
   background: #fff;
-}
-.site--post .site-header {
-  border-bottom: none;
 }
 
 .post-article {

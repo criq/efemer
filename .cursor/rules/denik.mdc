@@ -10,7 +10,7 @@ alwaysApply: false
 
 ## Layout
 
-- Greige page ground; white header; soft white→greige header wash
+- Greige page ground; transparent sticky header; soft white→greige intro wash
 - Posts grouped by **published** year
 - Alternating photo + copy rows (photo left / right); featured first entry larger
 - Photos reuse `.home-print` shadow + ≤0.5° tilt; keep native aspect ratio

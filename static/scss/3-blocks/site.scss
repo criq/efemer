@@ -7,11 +7,16 @@
 }
 
 .site-header {
-	background: $color-bg;
-	border-bottom: 1px solid $color-line;
+	background: transparent;
+	border-bottom: none;
 	position: sticky;
 	top: 0;
 	z-index: 30;
+
+	&.is-nav-open {
+		background: rgba($color-bg, 0.94);
+		backdrop-filter: blur(8px);
+	}
 }
 
 .site-header__inner {

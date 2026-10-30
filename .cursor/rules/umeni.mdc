@@ -10,7 +10,7 @@ alwaysApply: false
 
 ## Layout
 
-- Greige page ground; white header wash
+- Greige page ground; transparent sticky header; white→greige intro wash
 - Photo-forward gallery wall: featured first piece large, then asymmetric wide/narrow spans on a 12-col grid
 - Print shadows + light tilts; native aspect ratios; captions under photos (title + year; summary only on featured)
 - Scroll reveal via `data-reveal` + `.is-in` (scoped with other section pages; respects reduced motion)
