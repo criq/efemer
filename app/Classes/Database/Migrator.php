@@ -27,6 +27,7 @@ use App\Classes\Database\Migrations\IngestItemFileSlots;
 use App\Classes\Database\Migrations\IngestSchema;
 use App\Classes\Database\Migrations\IngestTimeframeSchema;
 use App\Classes\Database\Migrations\PostFileEnrichmentSchema;
+use App\Classes\Database\Migrations\PostFileOrientationSchema;
 use App\Classes\Database\Migrations\ContentTagsSchema;
 use App\Classes\Database\Migrations\PostsDenikSection;
 use App\Classes\Database\Migrations\PostsTimeframeSchema;
@@ -99,6 +100,7 @@ class Migrator
 			new IngestTimeframeSchema,
 			new PostsTimeframeSchema,
 			new PostFileEnrichmentSchema,
+			new PostFileOrientationSchema,
 			new ContentTagsSchema,
 			new PostsDenikSection,
 			new UdalostiReportsFromDenik,
