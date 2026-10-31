@@ -31,10 +31,10 @@ Invitations are primarily the **homepage hero** (“Připoj se”). Nav is ritu�
 
 | Tag | Meaning | Public fate |
 |---|---|---|
-| `invitation` | Open call to an upcoming/current event | `/udalosti/…` detail + homepage hero; expires → 404 |
+| `invitation` | Open call to an upcoming/current event | Current → `/udalosti/…` + homepage hero; **past** → lasting `denik` (invitation tag dropped on the public post) |
 | `report` | Lasting write-up of an event that already happened | lasting `denik` |
 
-Mutually exclusive. LLM fills via KeywordAnalyzer; allowlist in `App\Classes\Content\Tags`.
+Mutually exclusive. LLM fills via KeywordAnalyzer; allowlist in `App\Classes\Content\Tags`. Past vs current is decided at materialize from `endsAt` / start day (see `PostMaterializer::isPastInvitation`).
 
 ## Homepage
 
@@ -42,7 +42,8 @@ Visual layout is in `homepage.mdc`. Featured text/photos: current invitation, el
 
 ## Materialize mapping
 
-- `invitation` → `udalosti` (ephemeral)
+- `invitation` + event still current → `udalosti` (ephemeral)
+- `invitation` + event already past → `denik` (lasting; no public `invitation` tag)
 - `kind=wedding` → `ritualy`
 - `kind=installation` → `umeni` (named art object / commission only — not seasonal diary or portraits)
 - everything else lasting (incl. `portrait`, workshop, report) → `denik`

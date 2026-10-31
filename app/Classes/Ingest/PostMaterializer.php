@@ -5,6 +5,7 @@ namespace App\Classes\Ingest;
 use App\Classes\Content\Post;
 use App\Classes\Content\PostParts;
 use App\Classes\Content\Section;
+use App\Classes\Content\Tags;
 use App\Classes\Jobs\ConsoleStyle;
 use Katu\Tools\Calendar\Time;
 
@@ -97,7 +98,7 @@ class PostMaterializer
 		$post->setStartsAt($item->getStartsAt());
 		$post->setEndsAt($item->getEndsAt());
 		$post->setPlace($item->getPlace());
-		$post->setTagsList($item->getTagsList());
+		$post->setTagsList($this->publicTags($item));
 
 		$pathSlug = $this->pathSlug($item, $title);
 		$post->setPath(Post::pathFor($section, $pathSlug, $post->getId() !== null ? (int)$post->getId() : null));
@@ -253,9 +254,9 @@ class PostMaterializer
 
 	private function resolveSection(IngestItem $item): ?string
 	{
-		// Ephemeral open calls — detail under /udalosti; surfaced on the homepage hero.
+		// Current open calls — /udalosti + homepage hero. Past invitations → lasting deník.
 		if ($item->isInvitation()) {
-			return Section::UDALOSTI;
+			return $this->isPastInvitation($item) ? Section::DENIK : Section::UDALOSTI;
 		}
 
 		// Rituály = weddings / bridal work only.
@@ -270,6 +271,54 @@ class PostMaterializer
 
 		// Workshops, reports, diary, and the rest → dated journal.
 		return Section::DENIK;
+	}
+
+	/**
+	 * Invitation whose event end (or start day) is already over — archive as lasting deník.
+	 */
+	private function isPastInvitation(IngestItem $item): bool
+	{
+		if (!$item->isInvitation() || !$item->getStartsAt()) {
+			return false;
+		}
+
+		return !$this->isInvitationStillCurrent($item);
+	}
+
+	private function isInvitationStillCurrent(IngestItem $item): bool
+	{
+		if (!$item->isInvitation()) {
+			return false;
+		}
+
+		$end = $item->getEndsAt();
+		if (!$end) {
+			$start = $item->getStartsAt();
+			if (!$start) {
+				return false;
+			}
+			$end = new Time($start->format("Y-m-d") . " 23:59:59");
+		}
+
+		return (int)$end->format("U") >= time();
+	}
+
+	/**
+	 * Drop the live invitation tag on past invites so they stay publicly visible in deník.
+	 *
+	 * @return list<string>
+	 */
+	private function publicTags(IngestItem $item): array
+	{
+		$tags = $item->getTagsList();
+		if (!$this->isPastInvitation($item)) {
+			return $tags;
+		}
+
+		return array_values(array_filter(
+			$tags,
+			static fn (string $tag) => $tag !== Tags::INVITATION,
+		));
 	}
 
 	/**
@@ -457,11 +506,9 @@ class PostMaterializer
 
 	private function pathSlug(IngestItem $item, string $title): string
 	{
-		if ($item->isInvitation()) {
-			$start = $item->getStartsAt();
-			$date = $start ? $start->format("Y-m-d") : (new Time)->format("Y-m-d");
-
-			return trim($date . " " . $title);
+		// Current invitations and past invites both date from the event when known.
+		if ($item->isInvitation() && $item->getStartsAt()) {
+			return trim($item->getStartsAt()->format("Y-m-d") . " " . $title);
 		}
 
 		$posted = $item->getPostedAt();
@@ -522,7 +569,7 @@ class PostMaterializer
 
 	private function resolvePattern(IngestItem $item): string
 	{
-		if ($item->isInvitation()) {
+		if ($item->isInvitation() && !$this->isPastInvitation($item)) {
 			return "hero_text_gallery";
 		}
 
