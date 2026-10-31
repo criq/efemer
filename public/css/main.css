@@ -12482,7 +12482,7 @@ body.builder .builder-file-list--insert:not(:empty),
   align-items: start;
   display: flex;
   flex-direction: column;
-  gap: max(1.35rem, min(3vw, 2rem));
+  gap: max(1.35rem, min(3vw, 1.85rem));
   margin-left: auto;
   margin-right: auto;
   max-width: 40rem;
@@ -12490,18 +12490,18 @@ body.builder .builder-file-list--insert:not(:empty),
 }
 @media screen and (min-width: 801px) {
   .home-about__inner {
-    display: grid;
-    align-items: start;
     grid-column-gap: max(1.75rem, min(3.5vw, 2.75rem));
     -moz-column-gap: max(1.75rem, min(3.5vw, 2.75rem));
          column-gap: max(1.75rem, min(3.5vw, 2.75rem));
-    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     max-width: 58rem;
+    grid-row-gap: max(1.5rem, min(3vw, 2.25rem));
+    row-gap: max(1.5rem, min(3vw, 2.25rem));
   }
 }
 @media screen and (min-width: 1200px) {
   .home-about__inner {
-    grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
     max-width: 64rem;
   }
 }
@@ -12520,18 +12520,11 @@ body.builder .builder-file-list--insert:not(:empty),
   }
 }
 
-.home-about__body {
-  display: flex;
-  flex-direction: column;
-  gap: 1.35rem;
-}
 @media screen and (min-width: 801px) {
-  .home-about__body {
-    gap: 1.5rem;
-    padding-bottom: 0.15rem;
+  .home-about__contact {
+    padding-top: 0.15rem;
   }
 }
-
 .home-about__contact .text-eyebrow {
   margin-bottom: 0.4rem;
 }
@@ -12576,9 +12569,11 @@ body.builder .builder-file-list--insert:not(:empty),
   margin-top: 0.45rem;
 }
 
-.home-about__ja {
-  border-top: 1px solid rgba(28, 33, 28, 0.12);
-  padding-top: 1.15rem;
+@media screen and (max-width: 800px) {
+  .home-about__ja {
+    border-top: 1px solid rgba(28, 33, 28, 0.12);
+    padding-top: 1.15rem;
+  }
 }
 .home-about__ja .text-eyebrow {
   margin-bottom: 0.4rem;
@@ -12592,9 +12587,11 @@ body.builder .builder-file-list--insert:not(:empty),
   text-wrap: pretty;
 }
 
-.home-about__newsletter {
-  border-top: 1px solid rgba(28, 33, 28, 0.12);
-  padding-top: 1.15rem;
+@media screen and (max-width: 800px) {
+  .home-about__newsletter {
+    border-top: 1px solid rgba(28, 33, 28, 0.12);
+    padding-top: 1.15rem;
+  }
 }
 .home-about__newsletter .text-eyebrow {
   margin-bottom: 0.4rem;

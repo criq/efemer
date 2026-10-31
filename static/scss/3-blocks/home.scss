@@ -910,7 +910,7 @@
 	}
 }
 
-// About: print peeks from top | contact + já + dopisy stacked beside.
+// About: 2×2 — photo | kontakt / já | dopisy (stacked on phones).
 .home-about {
 	--about-peek: 0;
 	background: $color-greige;
@@ -934,21 +934,20 @@
 	align-items: start;
 	display: flex;
 	flex-direction: column;
-	gap: clamp(1.35rem, 3vw, 2rem);
+	gap: clamp(1.35rem, 3vw, 1.85rem);
 	margin-inline: auto;
 	max-width: 40rem;
 	width: 100%;
 
 	@media screen and (min-width: 801px) {
-		display: grid;
-		align-items: start;
 		column-gap: clamp(1.75rem, 3.5vw, 2.75rem);
-		grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 		max-width: 58rem;
+		row-gap: clamp(1.5rem, 3vw, 2.25rem);
 	}
 
 	@media screen and (min-width: 1200px) {
-		grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
 		max-width: 64rem;
 	}
 }
@@ -966,18 +965,11 @@
 	}
 }
 
-.home-about__body {
-	display: flex;
-	flex-direction: column;
-	gap: 1.35rem;
-
-	@media screen and (min-width: 801px) {
-		gap: 1.5rem;
-		padding-bottom: .15rem;
-	}
-}
-
 .home-about__contact {
+	@media screen and (min-width: 801px) {
+		padding-top: .15rem;
+	}
+
 	.text-eyebrow {
 		margin-bottom: .4rem;
 	}
@@ -1027,8 +1019,10 @@
 }
 
 .home-about__ja {
-	border-top: 1px solid rgba($color-ink, .12);
-	padding-top: 1.15rem;
+	@media screen and (max-width: 800px) {
+		border-top: 1px solid rgba($color-ink, .12);
+		padding-top: 1.15rem;
+	}
 
 	.text-eyebrow {
 		margin-bottom: .4rem;
@@ -1044,8 +1038,10 @@
 }
 
 .home-about__newsletter {
-	border-top: 1px solid rgba($color-ink, .12);
-	padding-top: 1.15rem;
+	@media screen and (max-width: 800px) {
+		border-top: 1px solid rgba($color-ink, .12);
+		padding-top: 1.15rem;
+	}
 
 	.text-eyebrow {
 		margin-bottom: .4rem;
