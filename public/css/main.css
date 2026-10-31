@@ -12438,6 +12438,120 @@ body.builder .builder-file-list--insert:not(:empty),
   width: 100%;
 }
 
+.home-feed__item--bleed {
+  padding-top: max(1.1rem, min(2.4vw, 1.75rem));
+  padding-bottom: max(1.1rem, min(2.4vw, 1.75rem));
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.home-feed-bleed {
+  color: inherit;
+  display: block;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.home-feed-bleed__gallery {
+  align-items: center;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: max(0.55rem, min(1.2vw, 1rem));
+  justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+@media screen and (min-width: 901px) {
+  .home-feed-bleed__gallery {
+    gap: max(0.65rem, min(1.4vw, 1.15rem));
+    margin-left: calc(50% - 52vw);
+    margin-right: calc(50% - 52vw);
+    width: 104vw;
+  }
+}
+@media screen and (max-width: 700px) {
+  .home-feed-bleed__gallery {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.home-feed-bleed__frame {
+  flex: 1 1 0;
+  margin: 0;
+  max-width: 22rem;
+  min-width: 0;
+  transform-origin: center center;
+}
+@media screen and (min-width: 901px) {
+  .home-feed-bleed__frame {
+    flex: 1 1 12rem;
+    max-width: 28rem;
+    min-width: min(14rem, 18vw);
+  }
+}
+@media screen and (max-width: 700px) {
+  .home-feed-bleed__frame {
+    flex: 0 0 auto;
+    max-width: none;
+    width: 100%;
+  }
+}
+
+.home-feed-bleed__tilt-0 {
+  transform: rotate(-0.35deg);
+}
+
+.home-feed-bleed__tilt-1 {
+  transform: rotate(0.4deg);
+}
+
+.home-feed-bleed__tilt-2 {
+  transform: rotate(-0.25deg);
+}
+
+@media screen and (max-width: 700px) {
+  .home-feed-bleed__tilt-0,
+  .home-feed-bleed__tilt-1,
+  .home-feed-bleed__tilt-2 {
+    transform: none;
+  }
+}
+.home-feed-bleed__print {
+  margin: 0;
+  width: 100%;
+}
+
+.home-feed-bleed__photo {
+  border-radius: 1px;
+  box-shadow: 0 1.1rem 2.4rem -1.2rem rgba(40, 32, 24, 0.38);
+  display: block;
+  overflow: hidden;
+}
+@media screen and (max-width: 700px) {
+  .home-feed-bleed__photo {
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+.home-feed-bleed__photo img {
+  display: block;
+  height: auto;
+  max-height: min(58vh, 32rem);
+  max-width: 100%;
+  width: 100%;
+}
+@media screen and (max-width: 700px) {
+  .home-feed-bleed__photo img {
+    max-height: none;
+  }
+}
+
 .home-feed__article.post-article {
   gap: max(1.15rem, min(3vw, 1.75rem));
   margin-left: auto;

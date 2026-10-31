@@ -1,0 +1,22 @@
+{# Image-led / thin_text: title-less full-bleed gallery in the homepage feed. #}
+<article
+	class="home-feed__item home-feed__item--bleed"
+	id="home-post-{{ post.getId }}"
+	data-feed-url="{{ post.getPublicPath }}"
+	data-feed-title="{{ post.getTitle|e("html_attr") }} · Efemér"
+>
+	<a class="home-feed-bleed" href="{{ post.getPublicUrl }}" aria-label="{{ post.getTitle|e("html_attr") }}">
+		<ul class="home-feed-bleed__gallery" aria-hidden="true">
+			{% for file in bleedFiles %}
+				{% set src = file.getImage.getImageVersion("GALLERY").getURL %}
+				<li class="home-feed-bleed__frame home-feed-bleed__tilt-{{ loop.index0 % 3 }}">
+					<figure class="home-feed-bleed__print">
+						<span class="home-feed-bleed__photo">
+							<img src="{{ src }}" alt="">
+						</span>
+					</figure>
+				</li>
+			{% endfor %}
+		</ul>
+	</a>
+</article>

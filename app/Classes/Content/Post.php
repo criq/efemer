@@ -393,6 +393,91 @@ class Post extends \Katu\Models\Model
 		return CaptionDates::isDateOnlyTitle(trim((string)$this->getTitle()));
 	}
 
+	/**
+	 * Image-led / thin_text posts (gallery_essay or essentially no prose).
+	 * Homepage feed renders these as a title-less full-bleed gallery.
+	 */
+	public function isImageLed(): bool
+	{
+		$pattern = $this->getLayoutJson()["pattern"] ?? null;
+		if ($pattern === "gallery_essay") {
+			return true;
+		}
+
+		$plain = trim(html_entity_decode(strip_tags((string)($this->bodyHtml ?? "")), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+
+		return $plain === "";
+	}
+
+	/**
+	 * Photos for the feed full-bleed strip (layout parts first, then files).
+	 *
+	 * @return list<PostFile>
+	 */
+	public function getBleedGalleryFiles(int $limit = 12): array
+	{
+		$limit = max(1, $limit);
+		$files = [];
+		$seen = [];
+
+		foreach ($this->getResolvedParts() as $part) {
+			$type = $part["type"] ?? "";
+			if ($type === "image" && ($part["file"] ?? null) instanceof PostFile) {
+				$batch = [$part["file"]];
+			} elseif ($type === "gallery" && is_array($part["files"] ?? null)) {
+				$batch = $part["files"];
+			} else {
+				continue;
+			}
+
+			foreach ($batch as $file) {
+				if (!$file instanceof PostFile || $file->isDemoted() || $file->getRole() === "skip") {
+					continue;
+				}
+				$key = (int)$file->storageFileId;
+				if ($key > 0 && isset($seen[$key])) {
+					continue;
+				}
+				if (!$file->getImage()) {
+					continue;
+				}
+				if ($key > 0) {
+					$seen[$key] = true;
+				}
+				$files[] = $file;
+				if (count($files) >= $limit) {
+					return $files;
+				}
+			}
+		}
+
+		if ($files !== []) {
+			return $files;
+		}
+
+		foreach ($this->getFiles() as $file) {
+			if ($file->isDemoted() || $file->getRole() === "skip") {
+				continue;
+			}
+			$key = (int)$file->storageFileId;
+			if ($key > 0 && isset($seen[$key])) {
+				continue;
+			}
+			if (!$file->getImage()) {
+				continue;
+			}
+			if ($key > 0) {
+				$seen[$key] = true;
+			}
+			$files[] = $file;
+			if (count($files) >= $limit) {
+				break;
+			}
+		}
+
+		return $files;
+	}
+
 	public function setPath(?string $path): Post
 	{
 		$this->path = $path;

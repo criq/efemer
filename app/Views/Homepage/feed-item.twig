@@ -1,3 +1,7 @@
+{% set bleedFiles = post.isImageLed ? post.getBleedGalleryFiles(10) : [] %}
+{% if bleedFiles|length > 0 %}
+	{% include "Homepage/feed-item-bleed.twig" with { post: post, bleedFiles: bleedFiles } %}
+{% else %}
 <article
 	class="home-feed__item"
 	id="home-post-{{ post.getId }}"
@@ -26,3 +30,4 @@
 		} %}
 	</div>
 </article>
+{% endif %}
