@@ -61,6 +61,33 @@
 					{% if seriesKey %}
 						<div><dt>Série</dt><dd>{{ seriesKey }}</dd></div>
 					{% endif %}
+					<div><dt>Embedding</dt><dd>{% if hasEmbedding %}ano{% else %}—{% endif %}</dd></div>
+					{% if duplicateOf %}
+						<div>
+							<dt>Duplicitní k</dt>
+							<dd>
+								<a href="{{ url("admin.ingest.view", { ingestItemId: duplicateOf.getId }) }}">
+									#{{ duplicateOf.getId }} — {{ duplicateOf.getTitle|default("bez názvu") }}
+								</a>
+							</dd>
+						</div>
+					{% endif %}
+					{% if duplicateChildren|length > 0 %}
+						<div>
+							<dt>Duplicity</dt>
+							<dd>
+								<ul class="admin-ingest-tags">
+									{% for child in duplicateChildren %}
+										<li>
+											<a href="{{ url("admin.ingest.view", { ingestItemId: child.getId }) }}">
+												#{{ child.getId }} — {{ child.getTitle|default("bez názvu") }}
+											</a>
+										</li>
+									{% endfor %}
+								</ul>
+							</dd>
+						</div>
+					{% endif %}
 				</dl>
 			</div>
 		</section>

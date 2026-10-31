@@ -405,7 +405,8 @@ class IngestItem extends \Katu\Models\Model
 		$this->entities = null;
 		$this->categories = null;
 		$this->classificationRaw = null;
-		$this->embedding = null;
+		$this->setEmbedding(null);
+		$this->setDuplicateOfId(null);
 		if (!(int)$this->coverLocked) {
 			$this->coverFileId = null;
 			$this->coverRationale = null;
@@ -420,6 +421,107 @@ class IngestItem extends \Katu\Models\Model
 		$this->tags = null;
 
 		return $this;
+	}
+
+	/**
+	 * @param list<float>|null $embedding
+	 */
+	public function setEmbedding(?array $embedding): IngestItem
+	{
+		if ($embedding === null || $embedding === []) {
+			$this->embedding = null;
+
+			return $this;
+		}
+
+		$floats = [];
+		foreach ($embedding as $value) {
+			$floats[] = (float)$value;
+		}
+		$this->embedding = json_encode($floats, JSON_THROW_ON_ERROR);
+
+		return $this;
+	}
+
+	/**
+	 * @return list<float>|null
+	 */
+	public function getEmbedding(): ?array
+	{
+		if ($this->embedding === null || $this->embedding === "") {
+			return null;
+		}
+
+		if (is_array($this->embedding)) {
+			$floats = [];
+			foreach ($this->embedding as $value) {
+				$floats[] = (float)$value;
+			}
+
+			return $floats === [] ? null : $floats;
+		}
+
+		$raw = is_string($this->embedding) ? $this->embedding : (string)$this->embedding;
+		$decoded = json_decode($raw, true);
+		if (!is_array($decoded) || $decoded === []) {
+			return null;
+		}
+
+		$floats = [];
+		foreach ($decoded as $value) {
+			$floats[] = (float)$value;
+		}
+
+		return $floats;
+	}
+
+	public function hasEmbedding(): bool
+	{
+		return $this->getEmbedding() !== null;
+	}
+
+	public function setDuplicateOfId(?int $duplicateOfId): IngestItem
+	{
+		$this->duplicateOfId = $duplicateOfId !== null && $duplicateOfId > 0 ? $duplicateOfId : null;
+
+		return $this;
+	}
+
+	public function getDuplicateOfId(): ?int
+	{
+		return $this->duplicateOfId !== null && (int)$this->duplicateOfId > 0
+			? (int)$this->duplicateOfId
+			: null;
+	}
+
+	public function getDuplicateOf(): ?IngestItem
+	{
+		$id = $this->getDuplicateOfId();
+		if ($id === null) {
+			return null;
+		}
+
+		return static::get($id);
+	}
+
+	/**
+	 * Items that point at this one as their duplicateOfId.
+	 *
+	 * @return list<IngestItem>
+	 */
+	public function getDuplicateChildren(): array
+	{
+		$id = (int)$this->getId();
+		if ($id < 1) {
+			return [];
+		}
+
+		$children = [];
+		foreach (static::getBy(["duplicateOfId" => $id])->getItems() as $item) {
+			$children[] = $item;
+		}
+
+		return $children;
 	}
 
 	/**

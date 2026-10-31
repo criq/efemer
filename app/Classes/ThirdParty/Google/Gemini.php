@@ -9,7 +9,9 @@ use GuzzleHttp\Exception\GuzzleException;
 class Gemini
 {
 	public const MODEL = "gemini-3.8-flash";
+	public const EMBEDDING_MODEL = "gemini-embedding-001";
 	private const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent";
+	private const EMBED_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/%s:embedContent";
 	private const MAX_ATTEMPTS = 5;
 
 	private HttpClient $http;
@@ -149,6 +151,77 @@ class Gemini
 				],
 				"raw" => $json,
 			];
+		}
+	}
+
+	/**
+	 * Text embedding via Gemini embedContent (gemini-embedding-001).
+	 *
+	 * @return list<float>
+	 */
+	public function embedText(string $text, string $model = self::EMBEDDING_MODEL): array
+	{
+		$text = trim($text);
+		if ($text === "") {
+			throw new \InvalidArgumentException("Cannot embed empty text.");
+		}
+
+		$body = [
+			"content" => [
+				"parts" => [
+					["text" => $text],
+				],
+			],
+		];
+		$url = sprintf(self::EMBED_ENDPOINT, rawurlencode($model)) . "?key=" . rawurlencode($this->apiKey);
+		$attempt = 0;
+
+		while (true) {
+			$attempt++;
+			Signals::throwIfStopped();
+
+			try {
+				$response = $this->http->request("POST", $url, [
+					"headers" => [
+						"Content-Type" => "application/json",
+					],
+					"json" => $body,
+				]);
+			} catch (GuzzleException $exception) {
+				throw new \RuntimeException("Gemini embed request failed: " . $exception->getMessage(), 0, $exception);
+			}
+
+			$status = $response->getStatusCode();
+			$rawBody = (string)$response->getBody();
+
+			if ($this->shouldRetry($status, $rawBody) && $attempt < self::MAX_ATTEMPTS) {
+				$delay = min(120, 5 * (2 ** ($attempt - 1)));
+				$this->log("Gemini embed HTTP {$status} — waiting {$delay}s before retry {$attempt}/" . self::MAX_ATTEMPTS . ".");
+				$this->sleepInterruptible($delay);
+				continue;
+			}
+
+			if ($status >= 400) {
+				$snippet = mb_substr(trim($rawBody), 0, 300);
+				throw new \RuntimeException("Gemini embed HTTP {$status}: {$snippet}");
+			}
+
+			$json = json_decode($rawBody, true);
+			if (!is_array($json)) {
+				throw new \RuntimeException("Gemini embed returned non-JSON.");
+			}
+
+			$values = $json["embedding"]["values"] ?? null;
+			if (!is_array($values) || $values === []) {
+				throw new \RuntimeException("Gemini embed returned no values.");
+			}
+
+			$floats = [];
+			foreach ($values as $value) {
+				$floats[] = (float)$value;
+			}
+
+			return $floats;
 		}
 	}
 

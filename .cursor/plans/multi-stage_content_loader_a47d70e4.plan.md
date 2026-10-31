@@ -1,6 +1,6 @@
 ---
 name: Multi-stage content loader
-overview: "Master plan: stage-1 + KeywordIngest done; broad MaterializePosts in flight on prod (~457 public + 281 keyworded running). Next after materialize: corpus re-export/eval → embeddings → taxonomy pause → rich admin."
+overview: "Master plan: stage-1 + KeywordIngest + MaterializePosts + EmbedIngest/DedupIngest shipped. Next: run embeddings on prod → taxonomy pause → rich admin."
 todos:
   - id: schema-ingest
     content: Base ingest schema + stage-1 load tables
@@ -96,8 +96,8 @@ todos:
     content: "Superseded: invitations are posts (MaterializePosts), not Event entity"
     status: cancelled
   - id: embeddings-dedup
-    content: Embeddings for clustering/dedup/series; duplicateOfId (seriesKey nearly unused so far — do not lean on it yet)
-    status: pending
+    content: "EmbedIngest (gemini-embedding-001) + DedupIngest soft duplicateOfId + neighbors.csv export; public posts unchanged"
+    status: completed
   - id: taxonomy-discovery
     content: "Pause after full keyworded corpus; multi-label facets (occasion/material/place/medium + event); do not map kind→section 1:1"
     status: pending
@@ -105,8 +105,8 @@ todos:
     content: "PostMaterializer + layoutJson.parts; invitations → udalosti / past→deník; dateTitle rematerialize done; broader MaterializePosts running on prod (281 keyworded)"
     status: completed
   - id: stage3-materialize-broad
-    content: "Finish MaterializePosts for remaining keyworded on prod (281 in flight); spot-check titles/sections"
-    status: in_progress
+    content: "Broader MaterializePosts finished on prod (keyworded batch Done); spot-check titles/sections/bleed still useful"
+    status: completed
   - id: ingest-admin-rich
     content: Manual cover/role pick (locks), reject visibility, layout preview (list facets already shipped)
     status: pending
@@ -310,11 +310,11 @@ Prod Instagram archive loop remains **off**. Prefer Instaloader dump + Import wh
 
 ### Next
 
-1. **Finish broader MaterializePosts** on prod (281 keyworded in flight; then spot-check)
-2. **ExportCorpus + EvaluateKeywords** (full corpus); optional IG invite/cover eval rows
-3. Embeddings / dedup → **taxonomy pause** → assign categories (soft `kind` still ≠ section)
-4. Rich ingest admin (manual cover/role locks, layout preview)
-5. ~~empty `bodyHtml` / `thin_text`~~ — **accept image-led** (HTTrack mirror has no prose)
+1. ~~Broader MaterializePosts~~ — done (224 ok / 7 skipped); optional spot-check titles / bleed / sections
+2. ~~ExportCorpus + EvaluateKeywords~~ — done 2026-10-31; optional IG invite eval rows / demote spot-check
+3. **Embeddings / dedup** → **taxonomy pause** → assign categories (soft `kind` still ≠ section)
+4. **Rich ingest admin** (manual cover/role locks, layout preview)
+5. ~~empty `bodyHtml` / `thin_text`~~ — accept image-led (HTTrack mirror)
 6. Drop legacy admin `events` UI when ready
 
 ### Materialize CLI (already shipped)

@@ -62,6 +62,9 @@ class View extends \Katu\Controllers\Controller
 				: $classificationRaw;
 		}
 
+		$duplicateOf = $item->getDuplicateOf();
+		$duplicateChildren = $item->getDuplicateChildren();
+
 		return $response->withBody((new HTMLEngine($request))->render("Admin/Ingest/view.twig", [
 			"item" => $item,
 			"files" => $files,
@@ -74,6 +77,9 @@ class View extends \Katu\Controllers\Controller
 			"kind" => $item->getKind(),
 			"palette" => $item->getPalette(),
 			"seriesKey" => $item->getSeriesKey(),
+			"hasEmbedding" => $item->hasEmbedding(),
+			"duplicateOf" => $duplicateOf,
+			"duplicateChildren" => $duplicateChildren,
 			"layoutHints" => $layoutHints,
 			"layoutHintsPretty" => $layoutHints
 				? json_encode($layoutHints, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)

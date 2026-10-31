@@ -9,6 +9,7 @@ alwaysApply: true
 |---|---|---|
 | 1 Load | `RefreshEfemerCz` / `RefreshInstagram*` / `ImportInstagramDump` | `ingest_items` + files → status `loaded` |
 | 2 Enrich | `KeywordIngest` (+ inline `KeywordQc`) | keywords, cover/roles, timeframe, tags (`invitation`/`report`) → `keyworded` |
+| 2b Embed | `EmbedIngest` → `DedupIngest` | text embedding + soft `duplicateOfId` (does not change public posts) |
 | 3 Public | `MaterializePosts` | `posts` + `post_files` + `layoutJson.parts` → `materialized` |
 
 Taxonomy (`categorized`) is still provisional — soft `kind` ≠ site section. Public model: [`.cursor/rules/content-model.mdc`](content-model.mdc).
@@ -43,6 +44,14 @@ cd ~/Sites/efemer
 # eval + corpus (periodic, not per batch)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.EvaluateKeywords -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ExportCorpus -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.ExportCorpus --args='{"status":""}' -f
+
+# embeddings + soft dedup (after keyworded/materialized; soft duplicateOfId only)
+./bin/job jobs:run App.Classes.Jobs.Ingest.EmbedIngest --args='{"limit":50}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.EmbedIngest -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.EmbedIngest --args='{"id":123,"reembed":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.DedupIngest -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.DedupIngest --args='{"threshold":0.92,"dryRun":true}' -f
 
 # clear LLM results only (keeps stage-1 ingest)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ResetKeywordEnrichment --args='{"yes":true}' -f
@@ -72,9 +81,9 @@ cd ~/Sites/efemer
 
 Uploads go to GCS `gs://efemer/files/{DEV|PROD}/…`. Reset/purge only touches the current env shard. Admin: `/admin/ingest` (pipeline + kind facets + keyword search).
 
-Gemini: Secret Manager `gemini-api-key` (model `gemini-3.8-flash`); local fallback `.secret/gemini.api`. See `gcloud-project.mdc`.
+Gemini: Secret Manager `gemini-api-key` (chat `gemini-3.8-flash`, embeddings `gemini-embedding-001`); local fallback `.secret/gemini.api`. See `gcloud-project.mdc`.
 
-Eval sets: `app/Resources/Ingest/eval/covers.json`, `roles.json`. Exports: `tmp/ingest/exports/` (gitignored, mounted).
+Eval sets: `app/Resources/Ingest/eval/covers.json`, `roles.json`. Exports: `tmp/ingest/exports/` (gitignored, mounted) — includes `neighbors.csv` when embeddings exist.
 
 | Job | Role |
 |---|---|
@@ -83,8 +92,10 @@ Eval sets: `app/Resources/Ingest/eval/covers.json`, `roles.json`. Exports: `tmp/
 | `Ingest.RefreshInstagramAccounts` | both IG accounts → ingest |
 | `Ingest.ImportInstagramDump` | `data/instagram` dump → ingest (Archiver or Instaloader) |
 | `Ingest.KeywordIngest` | Gemini → `keyworded`; inline KeywordQc; retries `needs_rekeyword` |
+| `Ingest.EmbedIngest` | Gemini text embedding → `ingest_items.embedding` (keyworded/materialized; `reembed` clears soft dupes) |
+| `Ingest.DedupIngest` | cosine ≥ 0.92 → soft `duplicateOfId` (older wins); does not hide public posts |
 | `Ingest.EvaluateKeywords` | score cover/role eval sets |
-| `Ingest.ExportCorpus` | CSV/JSON + keyword co-occurrence |
+| `Ingest.ExportCorpus` | CSV/JSON + keyword co-occurrence + `neighbors.csv` |
 | `Ingest.ResetKeywordEnrichment` | clear LLM fields only (`yes:true`); status → `loaded` |
 | `Ingest.MaterializePosts` | → `posts` + selected `post_files` + `layoutJson.parts` (default: new keyworded only; `existingOnly` rematerializes); current invites → `/udalosti`, **past invites → lasting deník**; weddings titled by couple names + perex; `installation` → umění with short work titles |
 | `Ingest.ResetPosts` | delete public posts only; unlink ingest → `keyworded` (keeps stage-1/2 + files) |

@@ -69,6 +69,8 @@ class CorpusExport
 				"postedAt" => $item->getPostedAt()?->format("Y-m-d H:i:s"),
 				"enrichmentVersion" => $item->getEnrichmentVersion(),
 				"coverFileId" => $item->getCoverFileId(),
+				"duplicateOfId" => $item->getDuplicateOfId(),
+				"hasEmbedding" => $item->hasEmbedding(),
 				"keywords" => $keywords,
 				"themes" => $item->getThemesList(),
 				"entities" => $item->getEntitiesList(),
@@ -100,14 +102,18 @@ class CorpusExport
 		$written[] = $this->writeJson($dir, "files.json", $fileRows);
 		$written[] = $this->writeJson($dir, "keyword-freq.json", $keywordFreq);
 		$written[] = $this->writeCooccurJson($dir, "keyword-cooccur.json", $cooccur);
+		$neighbors = Deduper::topNeighbors(5);
 		$written[] = $this->writeItemsCsv($dir, "items.csv", $rows);
 		$written[] = $this->writeKeywordFreqCsv($dir, "keyword-freq.csv", $keywordFreq);
 		$written[] = $this->writeCooccurCsv($dir, "keyword-cooccur.csv", $cooccur);
+		$written[] = $this->writeNeighborsCsv($dir, "neighbors.csv", $neighbors);
+		$written[] = $this->writeJson($dir, "neighbors.json", $neighbors);
 
 		$this->log(sprintf(
-			"Exported %d items (%d distinct keywords) → %s",
+			"Exported %d items (%d distinct keywords, %d neighbor rows) → %s",
 			count($rows),
 			count($keywordFreq),
+			count($neighbors),
 			$dir,
 		));
 
@@ -155,7 +161,7 @@ class CorpusExport
 			throw new \RuntimeException("Cannot write {$path}");
 		}
 
-		fputcsv($fh, ["id", "source", "sourceKey", "title", "status", "kind", "postedAt", "enrichmentVersion", "coverFileId", "keywords", "themes", "entities", "layoutPattern", "fileCount"]);
+		fputcsv($fh, ["id", "source", "sourceKey", "title", "status", "kind", "postedAt", "enrichmentVersion", "coverFileId", "duplicateOfId", "hasEmbedding", "keywords", "themes", "entities", "layoutPattern", "fileCount"]);
 		foreach ($rows as $row) {
 			fputcsv($fh, [
 				$row["id"],
@@ -167,6 +173,8 @@ class CorpusExport
 				$row["postedAt"],
 				$row["enrichmentVersion"],
 				$row["coverFileId"],
+				$row["duplicateOfId"],
+				$row["hasEmbedding"] ? 1 : 0,
 				implode("; ", $row["keywords"]),
 				implode("; ", $row["themes"]),
 				implode("; ", $row["entities"]),
@@ -218,6 +226,26 @@ class CorpusExport
 			}
 			[$a, $b] = explode("\t", $key, 2);
 			fputcsv($fh, [$a, $b, $count]);
+		}
+		fclose($fh);
+
+		return (string)$path;
+	}
+
+	/**
+	 * @param list<array{id: int, neighborId: int, score: float}> $rows
+	 */
+	private function writeNeighborsCsv(File $dir, string $name, array $rows): string
+	{
+		$path = new File($dir, $name);
+		$fh = fopen((string)$path, "w");
+		if (!$fh) {
+			throw new \RuntimeException("Cannot write {$path}");
+		}
+
+		fputcsv($fh, ["id", "neighborId", "score"]);
+		foreach ($rows as $row) {
+			fputcsv($fh, [$row["id"], $row["neighborId"], $row["score"]]);
 		}
 		fclose($fh);
 
