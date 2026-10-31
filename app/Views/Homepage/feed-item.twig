@@ -1,4 +1,9 @@
-<article class="home-feed__item" id="home-post-{{ post.getId }}">
+<article
+	class="home-feed__item"
+	id="home-post-{{ post.getId }}"
+	data-feed-url="{{ post.getPublicPath }}"
+	data-feed-title="{{ post.getTitle|e("html_attr") }} · Efemér"
+>
 	<div class="post-article home-feed__article">
 		{% set sectionCode = post.getSection %}
 		{% if sectionCode == "ritualy" %}

@@ -206,8 +206,49 @@ const initLightboxGalleries = () => {
 const initFeeds = () => {
 	// Preload when the sentinel is still ~2.5 viewports below the fold.
 	const FEED_ROOT_MARGIN = "0px 0px 250% 0px";
+	// Active post = the one intersecting a band around the viewport center.
+	const URL_ROOT_MARGIN = "-35% 0px -45% 0px";
 
 	document.querySelectorAll("[data-feed]").forEach((feed) => {
+		const listTitle = document.title;
+		let activePath = window.location.pathname;
+		const observed = new WeakSet();
+
+		const applyFeedUrl = (item) => {
+			const path = item?.dataset?.feedUrl;
+			if (!path || path === activePath) {
+				return;
+			}
+			activePath = path;
+			const title = item.dataset.feedTitle || listTitle;
+			document.title = title;
+			window.history.replaceState({ feedUrl: path }, title, path);
+		};
+
+		const urlObserver = new IntersectionObserver(
+			(entries) => {
+				const visible = entries
+					.filter((entry) => entry.isIntersecting)
+					.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+				if (visible[0]) {
+					applyFeedUrl(visible[0].target);
+				}
+			},
+			{ rootMargin: URL_ROOT_MARGIN, threshold: [0, 0.1, 0.25, 0.5, 0.75] },
+		);
+
+		const observeFeedItems = (root) => {
+			root.querySelectorAll("[data-feed-url]").forEach((item) => {
+				if (observed.has(item)) {
+					return;
+				}
+				observed.add(item);
+				urlObserver.observe(item);
+			});
+		};
+
+		observeFeedItems(feed);
+
 		const sentinel = feed.querySelector("[data-feed-sentinel]");
 		if (!sentinel) {
 			return;
@@ -249,10 +290,11 @@ const initFeeds = () => {
 				}
 				if (html) {
 					sentinel.insertAdjacentHTML("beforebegin", html);
+					observeFeedItems(feed);
 				}
 				if (!nextUrl) {
 					sentinel.remove();
-					observer.disconnect();
+					loadObserver.disconnect();
 				}
 			} catch (error) {
 				console.error(error);
@@ -266,7 +308,7 @@ const initFeeds = () => {
 			}
 		};
 
-		const observer = new IntersectionObserver(
+		const loadObserver = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) {
@@ -277,7 +319,7 @@ const initFeeds = () => {
 			{ rootMargin: FEED_ROOT_MARGIN, threshold: 0 },
 		);
 
-		observer.observe(sentinel);
+		loadObserver.observe(sentinel);
 	});
 };
 

@@ -1,4 +1,9 @@
-<article class="denik-feed__item" id="post-{{ post.getId }}">
+<article
+	class="denik-feed__item"
+	id="post-{{ post.getId }}"
+	data-feed-url="{{ post.getPublicPath }}"
+	data-feed-title="{{ post.getTitle|e("html_attr") }} · Efemér"
+>
 	<div class="post-article denik-feed__article">
 		{% include "Posts/body.twig" with {
 			post: post,

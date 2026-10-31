@@ -16,7 +16,12 @@
 			data-feed
 			{% if feedHasMore and feedNextUrl %}data-feed-next="{{ feedNextUrl }}"{% endif %}
 		>
-			<article class="{{ itemShell }}" id="post-{{ post.getId }}">
+			<article
+				class="{{ itemShell }}"
+				id="post-{{ post.getId }}"
+				data-feed-url="{{ post.getPublicPath }}"
+				data-feed-title="{{ post.getTitle|e("html_attr") }} · Efemér"
+			>
 				<div class="post-article {{ articleShell }}">
 					{% include "Posts/body.twig" with {
 						post: post,
