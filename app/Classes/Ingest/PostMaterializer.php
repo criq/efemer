@@ -6,6 +6,7 @@ use App\Classes\Content\Post;
 use App\Classes\Content\PostParts;
 use App\Classes\Content\Section;
 use App\Classes\Content\Tags;
+use App\Classes\Instagram\CaptionDates;
 use App\Classes\Jobs\ConsoleStyle;
 use Katu\Tools\Calendar\Time;
 
@@ -95,8 +96,9 @@ class PostMaterializer
 		$post->setInstagramAccount($item->getInstagramAccount());
 		$post->setInstagramShortcode($item->getInstagramShortcode());
 		$post->setIngestItemId((int)$item->getId());
-		$post->setStartsAt($item->getStartsAt());
-		$post->setEndsAt($item->getEndsAt());
+		[$startsAt, $endsAt] = $this->resolveTimeframe($item);
+		$post->setStartsAt($startsAt);
+		$post->setEndsAt($endsAt);
 		$post->setPlace($item->getPlace());
 		$post->setTagsList($this->publicTags($item));
 
@@ -345,18 +347,88 @@ class PostMaterializer
 			}
 		}
 
+		$sourceTitle = trim((string)$item->getTitle());
+		$sourceIsDate = CaptionDates::isDateOnlyTitle($sourceTitle);
+
 		// Prefer LLM short headline when source title is a caption paste.
 		$planned = $this->normalizePublicTitle((string)($plan["title"] ?? ""));
-		if ($planned !== "") {
+		if ($planned !== "" && !CaptionDates::isDateOnlyTitle($planned)) {
 			return $planned;
 		}
 
+		// Diary date as source title + short body headline ("Sklizeň") → use the headline.
+		if ($sourceIsDate) {
+			$fromBody = $this->extractDiaryHeadlineFromBody($item);
+			if ($fromBody !== "") {
+				return $fromBody;
+			}
+		}
+
 		$derived = $this->deriveTitle($item);
-		if ($derived !== "" && !$this->looksLikeCaptionPaste($derived)) {
+		if ($derived !== "" && !$this->looksLikeCaptionPaste($derived) && !($sourceIsDate && CaptionDates::isDateOnlyTitle($derived))) {
 			return $derived;
 		}
 
-		return $this->shortenCaptionTitle($derived !== "" ? $derived : trim((string)$item->getTitle()));
+		return $this->shortenCaptionTitle($derived !== "" ? $derived : $sourceTitle);
+	}
+
+	/**
+	 * First non-date body line when it reads as a short diary headline, not a sentence.
+	 */
+	private function extractDiaryHeadlineFromBody(IngestItem $item): string
+	{
+		$html = (string)$item->getBodyHtml();
+		if (trim($html) === "") {
+			return "";
+		}
+
+		$withBreaks = preg_replace("/<(br|\\/p|\\/div|\\/h[1-6])\\s*\\/?>/iu", "\n", $html) ?? $html;
+		$plain = trim(html_entity_decode(strip_tags($withBreaks), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+		$lines = preg_split("/\\R+/u", $plain) ?: [];
+		foreach ($lines as $line) {
+			$line = trim(preg_replace("/\\s+/u", " ", $line) ?? $line);
+			if ($line === "") {
+				continue;
+			}
+			if (CaptionDates::isDateOnlyTitle($line)) {
+				continue;
+			}
+			// Whole line is only a parseable date fragment — skip.
+			$parsed = CaptionDates::parse($line);
+			if (($parsed["startsAt"] ?? null) && mb_strlen($line) <= 28 && !preg_match("/\\p{L}{4,}/u", preg_replace("/\\d+/u", "", $line) ?? $line)) {
+				continue;
+			}
+
+			return $this->normalizeDiaryHeadline($line);
+		}
+
+		return "";
+	}
+
+	private function normalizeDiaryHeadline(string $raw): string
+	{
+		$title = trim(html_entity_decode(strip_tags($raw), ENT_QUOTES | ENT_HTML5, "UTF-8"));
+		$title = preg_replace("/\\s+/u", " ", $title) ?? $title;
+		$title = trim($title, " \t\n\r\0\x0B\"'«».,;:");
+		if ($title === "" || $this->looksLikeCaptionPaste($title) || CaptionDates::isDateOnlyTitle($title)) {
+			return "";
+		}
+
+		$len = mb_strlen($title);
+		$words = preg_split("/\\s+/u", $title) ?: [];
+		if ($len < 2 || $len > 45 || count($words) > 8) {
+			return "";
+		}
+		// Mid-sentence punctuation → prose, not a headline.
+		if (preg_match("/[.!?]\\s/u", $title)) {
+			return "";
+		}
+		// Long narrative openers after a diary date.
+		if ($len > 28 && preg_match("/^(po |už |ještě |dům |noc |ani |když |prší |vydáváme|přijela|celý )/ui", $title)) {
+			return "";
+		}
+
+		return $title;
 	}
 
 	private function shortenCaptionTitle(string $raw): string
@@ -502,6 +574,27 @@ class PostMaterializer
 		}
 
 		return $first;
+	}
+
+	/**
+	 * Keep ingest timeframe; if missing, parse a diary date used as the source title.
+	 *
+	 * @return array{0: ?Time, 1: ?Time}
+	 */
+	private function resolveTimeframe(IngestItem $item): array
+	{
+		$startsAt = $item->getStartsAt();
+		$endsAt = $item->getEndsAt();
+		if ($startsAt) {
+			return [$startsAt, $endsAt];
+		}
+
+		$fromTitle = CaptionDates::parse(trim((string)$item->getTitle()));
+		if ($fromTitle["startsAt"] instanceof Time) {
+			return [$fromTitle["startsAt"], $endsAt ?: $fromTitle["endsAt"]];
+		}
+
+		return [null, $endsAt];
 	}
 
 	private function pathSlug(IngestItem $item, string $title): string

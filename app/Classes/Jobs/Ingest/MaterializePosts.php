@@ -4,6 +4,7 @@ namespace App\Classes\Jobs\Ingest;
 
 use App\Classes\Ingest\IngestItem;
 use App\Classes\Ingest\PostMaterializer;
+use App\Classes\Instagram\CaptionDates;
 use App\Classes\Jobs\ConsoleStyle;
 use App\Classes\Jobs\Job;
 use App\Classes\Jobs\Signals;
@@ -19,6 +20,7 @@ use Katu\Tools\Calendar\Timeout;
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"invitationsOnly":true}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"existingOnly":true}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"kind":"wedding","existingOnly":true}' -f
+ * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"dateTitleOnly":true,"existingOnly":true}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"sinceYears":3}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"dryRun":true,"limit":5}' -f
  */
@@ -44,6 +46,7 @@ class MaterializePosts extends Job
 			$dryRun = !empty($args["dryRun"]);
 			$invitationsOnly = !empty($args["invitationsOnly"]);
 			$existingOnly = !empty($args["existingOnly"]);
+			$dateTitleOnly = !empty($args["dateTitleOnly"]);
 			$kind = isset($args["kind"]) && is_string($args["kind"]) && $args["kind"] !== ""
 				? $args["kind"]
 				: null;
@@ -54,12 +57,17 @@ class MaterializePosts extends Job
 				$limit = $this->getLimit();
 			}
 
-			$items = $this->selectItems($id, $invitationsOnly, $existingOnly, $kind, $sinceYears, $limit);
+			if ($dateTitleOnly || $sinceYears >= 2) {
+				$this->setTimeout(new Timeout("8 hours"));
+			}
+
+			$items = $this->selectItems($id, $invitationsOnly, $existingOnly, $dateTitleOnly, $kind, $sinceYears, $limit);
 			$this->outputLine(ConsoleStyle::step(sprintf(
-				"MaterializePosts: %s item(s)%s%s%s%s%s.",
+				"MaterializePosts: %s item(s)%s%s%s%s%s%s.",
 				count($items),
 				$invitationsOnly ? ", invitationsOnly" : "",
 				$existingOnly ? ", existingOnly (rematerialize)" : ", new only",
+				$dateTitleOnly ? ", dateTitleOnly" : "",
 				$kind !== null ? ", kind={$kind}" : "",
 				$sinceYears > 0 ? ", sinceYears={$sinceYears}" : "",
 				$dryRun ? ", dryRun" : "",
@@ -102,6 +110,7 @@ class MaterializePosts extends Job
 		?int $id,
 		bool $invitationsOnly,
 		bool $existingOnly,
+		bool $dateTitleOnly,
 		?string $kind,
 		int $sinceYears,
 		?int $limit,
@@ -141,6 +150,9 @@ class MaterializePosts extends Job
 			if ($kind !== null && $item->getKind() !== $kind) {
 				continue;
 			}
+			if ($dateTitleOnly && !$this->itemHasDateOnlyTitle($item)) {
+				continue;
+			}
 			if ($cutoffTs !== null) {
 				$itemTs = (int)($item->getStartsAt()?->format("U") ?? $item->getPostedAt()?->format("U") ?? 0);
 				if ($itemTs < $cutoffTs) {
@@ -162,5 +174,19 @@ class MaterializePosts extends Job
 		}
 
 		return $selected;
+	}
+
+	private function itemHasDateOnlyTitle(IngestItem $item): bool
+	{
+		if (CaptionDates::isDateOnlyTitle(trim((string)$item->getTitle()))) {
+			return true;
+		}
+
+		$post = $item->getPost();
+		if ($post && CaptionDates::isDateOnlyTitle(trim((string)$post->getTitle()))) {
+			return true;
+		}
+
+		return false;
 	}
 }

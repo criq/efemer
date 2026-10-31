@@ -107,7 +107,9 @@ Rules:
 - Do NOT repeat the public title inside the body. If Source title is a diary date (e.g. "26. 5. 2026") or the same short headline you return in title, omit that leading date/headline line from the first text part — keep the rest (plant names, paragraphs, etc.).
 - excerpt is a short teaser (perex) for homepage/cards/section listings only — plain text. It is NOT shown as a separate block on the post page. Write a polished 1–2 sentence Czech perex: concrete mood, place, plants, or ritual — not a raw first-line paste, no hashtags, no @handles. About 120–220 characters; never over 280.
 - title: short public headline for the post page (Czech preferred), about 2–8 words / under ~55 characters — never a pasted Instagram caption, never truncated mid-sentence with “…”, never hashtags or @handles.
-  - If Source title is already a clean diary date (e.g. "6. 6. 2026", "Květen 2026") or a short proper name, set title to null so we keep that source title.
+  - If Source title is a clean diary date (e.g. "6. 6. 2026", "Květen 2026") AND the body opens with a short headline right after that date (e.g. "Sklizeň", "Hesperis matronalis", "Mariä Lichtmess", "Advent"), set title to that headline. The date stays on the post via Starts/Posted and is shown under the title — do not keep the date as the public title.
+  - If Source title is a clean diary date with no separate short headline (body goes straight into a sentence), set title to null so we keep the date as title.
+  - If Source title is already a short proper name (not a date), set title to null so we keep that source title.
   - If Source title is a long opening sentence, thank-you line, emoji flyer, or caption paste, you MUST invent a short fitting title from the story (mood, ritual, place, object) — e.g. "Koruna letničního krále", not the full caption.
 - Split body into several short text parts (roughly 1–3 sentences / ~60–180 words each). Prefer more shorter beats over one long wall.
 - Keep Czech wording faithful; you may re-paragraph and wrap in <p> (optional <em>). Do not invent facts, dates, or places.

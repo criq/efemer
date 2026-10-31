@@ -25,6 +25,14 @@ class CaptionDates
 			return true;
 		}
 
+		// "15. 12.–23. 12. 2025" / "25. 12. 2025–5. 1. 2026"
+		if (preg_match("/^\\d{1,2}\\.\\s*\\d{1,2}\\.\\s*[–\\-]\\s*\\d{1,2}\\.\\s*\\d{1,2}\\.\\s*\\d{4}$/u", $title)) {
+			return true;
+		}
+		if (preg_match("/^\\d{1,2}\\.\\s*\\d{1,2}\\.\\s*\\d{4}\\s*[–\\-]\\s*\\d{1,2}\\.\\s*\\d{1,2}\\.\\s*\\d{4}$/u", $title)) {
+			return true;
+		}
+
 		$genitive = implode("|", array_map("preg_quote", array_keys(self::months())));
 		if (preg_match("/^\\d{1,2}\\.\\s*[–\\-]\\s*\\d{1,2}\\.\\s*(?:" . $genitive . ")(?:\\s+\\d{4})?$/ui", $title)) {
 			return true;

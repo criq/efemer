@@ -61,12 +61,14 @@ cd ~/Sites/efemer
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"existingOnly":true}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"kind":"wedding","existingOnly":true}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"kind":"installation","existingOnly":true}' -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"dateTitleOnly":true,"existingOnly":true}' -f
 ```
 
 **Titles** (PostLayoutPlanner + `PostMaterializer::resolveTitle`):
 - Weddings (`kind=wedding`): KeywordAnalyzer fills `couple` (“Jana a Petr”); title = couple names + short ceremonial **perex** (`posts.excerpt`). Rematerialize with `kind=wedding` after prompt changes.
 - Art (`kind=installation` → umění): short **work title** + perex — not caption openers or bare dates. Rematerialize with `kind=installation` after prompt changes; rekeyword former false positives so they become `diary`/`portrait` first.
-- Everything else (deník etc.): keep Source title when it is already a clean diary date / short name; otherwise LLM invents a short headline (2–8 words). Never use truncated Instagram captions (`…`, `@handles`, thank-you pastes) as the public title — `looksLikeCaptionPaste` rejects those fallbacks.
+- Deník date titles: if Source title is only a date (“6. 6. 2026”) but the body opens with a short headline (“Sklizeň”), promote that headline as the public title (date stays via `startsAt` / meta). Planner + `extractDiaryHeadlineFromBody` fallback. Rematerialize with `dateTitleOnly` + `existingOnly`.
+- Everything else: keep Source title when it is already a clean diary date (no separate headline) / short name; otherwise LLM invents a short headline (2–8 words). Never use truncated Instagram captions (`…`, `@handles`, thank-you pastes) as the public title — `looksLikeCaptionPaste` rejects those fallbacks.
 
 Uploads go to GCS `gs://efemer/files/{DEV|PROD}/…`. Reset/purge only touches the current env shard. Admin: `/admin/ingest` (pipeline + kind facets + keyword search).
 

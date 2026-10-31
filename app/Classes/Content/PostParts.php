@@ -4,6 +4,7 @@ namespace App\Classes\Content;
 
 use App\Classes\Html\Excerpt;
 use App\Classes\Html\Sanitizer;
+use App\Classes\Instagram\CaptionDates;
 
 /**
  * Contract for posts.layoutJson.parts — ordered page content.
@@ -189,9 +190,9 @@ class PostParts
 		}
 
 		if ($parts === []) {
-			return self::stripLeadingTitleFromResolved(
+			return self::stripDiaryOpenersFromResolved(
 				self::fallbackResolved($post, $byId),
-				(string)$post->getTitle(),
+				$post,
 			);
 		}
 
@@ -230,7 +231,24 @@ class PostParts
 			}
 		}
 
-		return self::stripLeadingTitleFromResolved($resolved, (string)$post->getTitle());
+		return self::stripDiaryOpenersFromResolved($resolved, $post);
+	}
+
+	/**
+	 * Drop a leading body line that repeats the public title, and for deník also a
+	 * leading date-only line left behind when the title was promoted to a headline.
+	 *
+	 * @param list<array{type: string, html?: string, file?: PostFile|null, files?: list<PostFile>}> $resolved
+	 * @return list<array{type: string, html?: string, file?: PostFile|null, files?: list<PostFile>}>
+	 */
+	public static function stripDiaryOpenersFromResolved(array $resolved, Post $post): array
+	{
+		$resolved = self::stripLeadingTitleFromResolved($resolved, (string)$post->getTitle());
+		if (Section::isJournal($post->getSection()) && !CaptionDates::isDateOnlyTitle(trim((string)$post->getTitle()))) {
+			$resolved = self::stripLeadingDateOnlyFromResolved($resolved);
+		}
+
+		return $resolved;
 	}
 
 	/**
@@ -255,6 +273,39 @@ class PostParts
 				unset($resolved[$i]);
 			} else {
 				$resolved[$i]["html"] = $html;
+			}
+			break;
+		}
+
+		return array_values($resolved);
+	}
+
+	/**
+	 * @param list<array{type: string, html?: string, file?: PostFile|null, files?: list<PostFile>}> $resolved
+	 * @return list<array{type: string, html?: string, file?: PostFile|null, files?: list<PostFile>}>
+	 */
+	public static function stripLeadingDateOnlyFromResolved(array $resolved): array
+	{
+		foreach ($resolved as $i => $part) {
+			if (($part["type"] ?? "") !== self::TYPE_TEXT) {
+				continue;
+			}
+			$html = trim((string)($part["html"] ?? ""));
+			if ($html === "") {
+				break;
+			}
+			// First block text — if the whole block is a date label, drop it.
+			$blockPattern = "/^\\s*<(p|div|h[1-6])(\\s[^>]*)?>\\s*(?:<(?:strong|em|b|i|span)(\\s[^>]*)?>\\s*)*(.*?)\\s*(?:<\\/(?:strong|em|b|i|span)>\\s*)*<\\/\\1>\\s*/ius";
+			if (preg_match($blockPattern, $html, $match)) {
+				$firstPlain = self::normalizeComparableText((string)$match[4]);
+				if (CaptionDates::isDateOnlyTitle($firstPlain)) {
+					$html = trim((string)preg_replace($blockPattern, "", $html, 1));
+					if ($html === "") {
+						unset($resolved[$i]);
+					} else {
+						$resolved[$i]["html"] = $html;
+					}
+				}
 			}
 			break;
 		}
