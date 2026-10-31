@@ -2,17 +2,17 @@
 
 {% block title %}Kontakt · Efemér{% endblock %}
 
+{% block bodyClass %}site--kontakt{% endblock %}
+
 {% block body %}
 
-	<div class="plain-page plain-page--center" data-reveal>
-		<p class="text-eyebrow">kontakt</p>
-		<h1>Lucie Králíková</h1>
-		<p class="plain-page__lead">Efemér · svatební rituály, Himmelhaus, umění</p>
-		<p>
-			<a href="mailto:efemer.info@gmail.com">efemer.info@gmail.com</a><br>
-			<a href="tel:+420605938524">+420 605 938 524</a>
-		</p>
-		<p>Himmelhaus, České středohoří · ateliér v Brně</p>
-	</div>
+	<section class="home-about home-about--page" data-reveal>
+		<div class="home-about__inner">
+			{% include "Partials/about-contact.twig" with {
+				headingTag: "h1",
+				formId: "kontakt-newsletter-email",
+			} %}
+		</div>
+	</section>
 
 {% endblock body %}

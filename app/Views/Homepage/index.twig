@@ -161,30 +161,10 @@
 
 	<section class="home-about" data-reveal>
 		<div class="home-about__inner">
-			<figure class="home-print home-about__portrait">
-				<span class="home-print__photo">
-					<img src="/img/lucie-kralikova.jpg" alt="Lucie Králíková" width="1024" height="682">
-				</span>
-			</figure>
-			<div class="home-about__contact">
-				<p class="text-eyebrow">kontakt</p>
-				<h2 class="home-about__name">Lucie Králíková</h2>
-				<p class="home-about__role">Efemér · svatební rituály, Himmelhaus, umění</p>
-				<ul class="home-about__details">
-					<li><a href="mailto:efemer.info@gmail.com">efemer.info@gmail.com</a></li>
-					<li><a href="tel:+420605938524">+420 605 938 524</a></li>
-					<li>Himmelhaus, České středohoří · ateliér v Brně</li>
-				</ul>
-			</div>
-			<div class="home-about__ja">
-				<p class="text-eyebrow">já</p>
-				<p class="home-about__ja-text">Jsem brněnská zahradní architektka. Efemér jsem založila s architektkou Klárou Zahradníčkovou. Mým patronem je sv. Fiakr, ochránce zahradníků.</p>
-			</div>
-			<div class="home-about__newsletter">
-				<p class="text-eyebrow">dopisy</p>
-				<p class="home-about__newsletter-lead">Občasné zprávy o slavnostech na Himmelhausu, rituálech a sezóně — bez spamování.</p>
-				{% include "Partials/newsletter-form.twig" with { formId: "home-newsletter-email" } %}
-			</div>
+			{% include "Partials/about-contact.twig" with {
+				headingTag: "h2",
+				formId: "home-newsletter-email",
+			} %}
 		</div>
 	</section>
 

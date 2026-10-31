@@ -1050,6 +1050,7 @@
 }
 
 // About: dark contrasting band — 2×2 photo | kontakt / já | dopisy.
+// `.home-about--page` (/kontakt): normal page bg, wider layout.
 .home-about {
 	--about-peek: 0;
 	background: $color-ink;
@@ -1072,6 +1073,63 @@
 	.text-eyebrow {
 		color: rgba($color-greige, .58);
 		margin-bottom: .4rem;
+	}
+}
+
+.home-about--page {
+	background: $color-bg;
+	color: $color-ink;
+	padding: clamp(1.5rem, 3.5vw, 2.5rem) clamp(1.25rem, 4vw, 2.5rem) clamp(2rem, 5vw, 3.25rem);
+
+	.text-eyebrow {
+		color: $color-faint;
+	}
+
+	.home-about__role,
+	.home-about__details li:last-child,
+	.home-about__newsletter-lead {
+		color: $color-muted;
+	}
+
+	.home-about__ja-text {
+		color: inherit;
+	}
+
+	.home-about__details a:hover {
+		color: $color-accent;
+	}
+
+	.home-about__ja,
+	.home-about__newsletter {
+		@media screen and (max-width: 800px) {
+			border-top-color: rgba($color-ink, .12);
+		}
+	}
+
+	.home-about__inner {
+		gap: clamp(1.15rem, 2.5vw, 1.5rem);
+
+		@media screen and (min-width: 801px) {
+			column-gap: clamp(1.5rem, 3vw, 2.25rem);
+			max-width: 54rem;
+			row-gap: clamp(1.15rem, 2.5vw, 1.65rem);
+		}
+
+		@media screen and (min-width: 1200px) {
+			max-width: 58rem;
+		}
+	}
+
+	.home-about__portrait {
+		max-width: min(18rem, 100%);
+
+		@media screen and (min-width: 801px) {
+			max-width: none;
+		}
+	}
+
+	.home-about__name {
+		font-size: clamp(1.55rem, 2.8vw, 2.15rem);
 	}
 }
 
@@ -1320,49 +1378,61 @@
 }
 
 .home-about__newsletter .newsletter-form__input {
-	background: transparent;
-	border-color: rgba($color-greige, .55);
-	color: $color-greige;
 	flex: 1 1 auto;
 	font-size: .92rem;
 	min-width: 0;
 	padding: .65rem .85rem;
-
-	&::placeholder {
-		color: rgba($color-greige, .45);
-	}
-
-	&:focus {
-		outline-color: $color-greige;
-	}
 }
 
 .home-about__newsletter .newsletter-form__submit {
-	border-color: rgba($color-greige, .85);
-	color: $color-greige;
 	flex: 0 0 auto;
 	font-size: .72rem;
 	padding: .65rem 1rem;
-
-	&:hover:not(:disabled) {
-		background: $color-greige;
-		color: $color-ink;
-	}
 }
 
 .home-about__newsletter .newsletter-form__consent {
-	color: rgba($color-greige, .5);
 	font-size: .72rem;
 	line-height: 1.35;
 	margin-top: .55rem;
 }
 
-.home-about__newsletter .newsletter-form__status.is-ok {
-	color: $color-sage;
-}
+// Dark homepage about only — keep /kontakt form readable on white.
+.home-about:not(.home-about--page) .home-about__newsletter {
+	.newsletter-form__input {
+		background: transparent;
+		border-color: rgba($color-greige, .55);
+		color: $color-greige;
 
-.home-about__newsletter .newsletter-form__status.is-error {
-	color: #e8a090;
+		&::placeholder {
+			color: rgba($color-greige, .45);
+		}
+
+		&:focus {
+			outline-color: $color-greige;
+		}
+	}
+
+	.newsletter-form__submit {
+		border-color: rgba($color-greige, .85);
+		color: $color-greige;
+
+		&:hover:not(:disabled) {
+			background: $color-greige;
+			color: $color-ink;
+		}
+	}
+
+	.newsletter-form__consent {
+		color: rgba($color-greige, .5);
+	}
+
+	.newsletter-form__status.is-ok {
+		color: $color-sage;
+	}
+
+	.newsletter-form__status.is-error {
+		color: #e8a090;
+	}
 }
 
 .newsletter-form__label {
