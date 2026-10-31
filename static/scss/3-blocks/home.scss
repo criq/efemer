@@ -910,11 +910,151 @@
 	}
 }
 
-// About: 2×2 — photo | kontakt / já | dopisy (stacked on phones).
+// Dark rituály interlude every 4 feed posts — text center, photos peek from the sides.
+.home-feed-banner {
+	align-items: center;
+	background: $color-ink;
+	box-sizing: border-box;
+	color: $color-greige;
+	display: grid;
+	grid-template-columns: 1fr;
+	isolation: isolate;
+	min-width: 0;
+	overflow: hidden;
+	padding: clamp(2.25rem, 5vw, 3.5rem) clamp(1.25rem, 5vw, 3rem);
+	position: relative;
+	text-decoration: none;
+	width: 100%;
+
+	@media screen and (min-width: 901px) {
+		grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem) minmax(0, 1fr);
+		padding-inline: 0;
+		padding-block: clamp(2.5rem, 5vw, 3.75rem);
+	}
+
+	&:hover {
+		.home-feed-banner__cta {
+			background: $color-greige;
+			color: $color-ink;
+		}
+	}
+}
+
+.home-feed-banner__side {
+	display: none;
+	pointer-events: none;
+	position: relative;
+
+	@media screen and (min-width: 901px) {
+		display: block;
+		min-height: 14rem;
+	}
+}
+
+.home-feed-banner__side--left {
+	justify-self: start;
+
+	.home-feed-banner__print--lead {
+		transform: translateX(-18%) rotate(-0.4deg);
+		width: min(15rem, 22vw);
+	}
+
+	.home-feed-banner__print--aside {
+		bottom: 8%;
+		left: 72%;
+		position: absolute;
+		transform: translateX(-30%) rotate(0.45deg);
+		width: min(7.5rem, 12vw);
+		z-index: 2;
+	}
+}
+
+.home-feed-banner__side--right {
+	justify-self: end;
+
+	.home-feed-banner__print--lead {
+		margin-left: auto;
+		transform: translateX(18%) rotate(0.35deg);
+		width: min(15rem, 22vw);
+	}
+
+	.home-feed-banner__print--aside {
+		bottom: 12%;
+		position: absolute;
+		right: 72%;
+		transform: translateX(30%) rotate(-0.5deg);
+		width: min(7rem, 11vw);
+		z-index: 2;
+	}
+}
+
+.home-feed-banner__print {
+	display: block;
+	line-height: 0;
+
+	img {
+		display: block;
+		height: auto;
+		max-height: min(42vh, 22rem);
+		object-fit: contain;
+		width: 100%;
+	}
+}
+
+.home-feed-banner__inner {
+	margin-inline: auto;
+	max-width: min(36rem, 100%);
+	position: relative;
+	text-align: center;
+	z-index: 3;
+}
+
+.home-feed-banner__eyebrow {
+	color: rgba($color-greige, .62);
+	font-family: $font-ui;
+	font-size: .68rem;
+	font-weight: 500;
+	letter-spacing: 0.16em;
+	margin: 0 0 .65rem;
+	text-transform: uppercase;
+}
+
+.home-feed-banner__title {
+	font-family: $font-display;
+	font-size: clamp(1.85rem, 4vw, 2.65rem);
+	font-weight: 400;
+	letter-spacing: -0.03em;
+	line-height: 1.05;
+	margin: 0;
+}
+
+.home-feed-banner__lead {
+	color: rgba($color-greige, .78);
+	font-size: clamp(.95rem, 1.6vw, 1.05rem);
+	line-height: 1.45;
+	margin: .85rem 0 0;
+	text-wrap: pretty;
+}
+
+.home-feed-banner__cta {
+	border: 1px solid rgba($color-greige, .85);
+	color: $color-greige;
+	display: inline-block;
+	font-family: $font-ui;
+	font-size: .88rem;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+	margin-top: 1.45rem;
+	padding: .75rem 1.35rem .7rem;
+	transition: background .18s ease, color .18s ease;
+}
+
+// About: dark contrasting band — 2×2 photo | kontakt / já | dopisy.
 .home-about {
 	--about-peek: 0;
-	background: $color-greige;
+	background: $color-ink;
 	box-sizing: border-box;
+	color: $color-greige;
 	isolation: isolate;
 	overflow: hidden;
 	padding: clamp(1.75rem, 4vw, 2.75rem) clamp(1.25rem, 5vw, 3rem) clamp(2rem, 4.5vw, 3rem);
@@ -927,6 +1067,11 @@
 
 	@media screen and (min-width: 1280px) {
 		--about-peek: 3.25rem;
+	}
+
+	.text-eyebrow {
+		color: rgba($color-greige, .58);
+		margin-bottom: .4rem;
 	}
 }
 
@@ -969,10 +1114,6 @@
 	@media screen and (min-width: 801px) {
 		padding-top: .15rem;
 	}
-
-	.text-eyebrow {
-		margin-bottom: .4rem;
-	}
 }
 
 .home-about__name {
@@ -985,7 +1126,7 @@
 }
 
 .home-about__role {
-	color: $color-muted;
+	color: rgba($color-greige, .72);
 	font-size: .95rem;
 	line-height: 1.4;
 	margin: .45rem 0 0;
@@ -1007,12 +1148,12 @@
 		text-decoration: none;
 
 		&:hover {
-			color: $color-accent;
+			color: $color-sage;
 		}
 	}
 
 	li:last-child {
-		color: $color-muted;
+		color: rgba($color-greige, .62);
 		font-size: .88rem;
 		margin-top: .45rem;
 	}
@@ -1020,16 +1161,13 @@
 
 .home-about__ja {
 	@media screen and (max-width: 800px) {
-		border-top: 1px solid rgba($color-ink, .12);
+		border-top: 1px solid rgba($color-greige, .16);
 		padding-top: 1.15rem;
-	}
-
-	.text-eyebrow {
-		margin-bottom: .4rem;
 	}
 }
 
 .home-about__ja-text {
+	color: rgba($color-greige, .88);
 	font-size: .95rem;
 	line-height: 1.5;
 	margin: 0;
@@ -1039,17 +1177,13 @@
 
 .home-about__newsletter {
 	@media screen and (max-width: 800px) {
-		border-top: 1px solid rgba($color-ink, .12);
+		border-top: 1px solid rgba($color-greige, .16);
 		padding-top: 1.15rem;
-	}
-
-	.text-eyebrow {
-		margin-bottom: .4rem;
 	}
 }
 
 .home-about__newsletter-lead {
-	color: $color-muted;
+	color: rgba($color-greige, .68);
 	font-size: .88rem;
 	line-height: 1.4;
 	margin: 0 0 .75rem;
@@ -1186,23 +1320,49 @@
 }
 
 .home-about__newsletter .newsletter-form__input {
-	background: $color-bg;
+	background: transparent;
+	border-color: rgba($color-greige, .55);
+	color: $color-greige;
 	flex: 1 1 auto;
 	font-size: .92rem;
 	min-width: 0;
 	padding: .65rem .85rem;
+
+	&::placeholder {
+		color: rgba($color-greige, .45);
+	}
+
+	&:focus {
+		outline-color: $color-greige;
+	}
 }
 
 .home-about__newsletter .newsletter-form__submit {
+	border-color: rgba($color-greige, .85);
+	color: $color-greige;
 	flex: 0 0 auto;
 	font-size: .72rem;
 	padding: .65rem 1rem;
+
+	&:hover:not(:disabled) {
+		background: $color-greige;
+		color: $color-ink;
+	}
 }
 
 .home-about__newsletter .newsletter-form__consent {
+	color: rgba($color-greige, .5);
 	font-size: .72rem;
 	line-height: 1.35;
 	margin-top: .55rem;
+}
+
+.home-about__newsletter .newsletter-form__status.is-ok {
+	color: $color-sage;
+}
+
+.home-about__newsletter .newsletter-form__status.is-error {
+	color: #e8a090;
 }
 
 .newsletter-form__label {

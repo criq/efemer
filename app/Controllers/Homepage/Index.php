@@ -28,9 +28,12 @@ class Index extends \Katu\Controllers\Controller
 
 		$engine = new HTMLEngine($request);
 
+		$ritualyBannerImages = $this->ritualyBannerImages($page);
+
 		if ($partial) {
 			$html = $engine->render("Homepage/feed.twig", [
 				"posts" => $feedPosts,
+				"ritualyBannerImages" => $ritualyBannerImages,
 			]);
 			$response = $response
 				->withHeader("Content-Type", "text/html; charset=UTF-8")
@@ -59,7 +62,34 @@ class Index extends \Katu\Controllers\Controller
 			"feedPosts" => $feedPosts,
 			"feedHasMore" => $hasMore,
 			"feedNextPage" => $nextPage,
+			"ritualyBannerImages" => $ritualyBannerImages,
 		]));
+	}
+
+	/**
+	 * Portrait-leaning rituály photos for the feed interlude banner (rotated by page).
+	 *
+	 * @return list<array{url: string, image: \Katu\Tools\Images\Image}>
+	 */
+	private function ritualyBannerImages(int $page = 1): array
+	{
+		$pool = $this->sectionPlotImages(
+			Post::getPublishedBySection(Section::RITUALY),
+			"portrait",
+			8,
+		);
+		if ($pool === []) {
+			return [];
+		}
+
+		$count = count($pool);
+		$offset = (($page - 1) * 2) % $count;
+		$picked = [];
+		for ($i = 0; $i < min(4, $count); $i++) {
+			$picked[] = $pool[($offset + $i) % $count];
+		}
+
+		return $picked;
 	}
 
 	/**

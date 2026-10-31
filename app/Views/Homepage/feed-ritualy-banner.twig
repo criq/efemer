@@ -1,0 +1,51 @@
+{% set bannerPhotos = ritualyBannerImages|default([]) %}
+<a class="home-feed-banner home-feed-banner--ritualy" href="{{ url("sections.ritualy") }}">
+	{% if bannerPhotos|length > 0 %}
+		<div class="home-feed-banner__side home-feed-banner__side--left" aria-hidden="true">
+			<span class="home-print home-feed-banner__print home-feed-banner__print--lead">
+				<span class="home-print__photo">
+					<img src="{{ bannerPhotos[0].image.getImageVersion("GALLERY").getURL }}" alt="">
+				</span>
+			</span>
+			{% if bannerPhotos|length > 2 and bannerPhotos[1] is defined %}
+				<span class="home-print home-feed-banner__print home-feed-banner__print--aside">
+					<span class="home-print__photo">
+						<img src="{{ bannerPhotos[1].image.getImageVersion("GALLERY").getURL }}" alt="">
+					</span>
+				</span>
+			{% endif %}
+		</div>
+	{% endif %}
+
+	<div class="home-feed-banner__inner">
+		<p class="home-feed-banner__eyebrow">rituály</p>
+		<p class="home-feed-banner__title">Svatební rituály</p>
+		<p class="home-feed-banner__lead">Od intimního obřadu v&nbsp;krajině po celodenní slavnost — obřad na míru místu, rostlinám a&nbsp;lidem.</p>
+		<span class="home-feed-banner__cta">K rituálům</span>
+	</div>
+
+	{% if bannerPhotos|length > 2 %}
+		<div class="home-feed-banner__side home-feed-banner__side--right" aria-hidden="true">
+			<span class="home-print home-feed-banner__print home-feed-banner__print--lead">
+				<span class="home-print__photo">
+					<img src="{{ bannerPhotos[2].image.getImageVersion("GALLERY").getURL }}" alt="">
+				</span>
+			</span>
+			{% if bannerPhotos[3] is defined %}
+				<span class="home-print home-feed-banner__print home-feed-banner__print--aside">
+					<span class="home-print__photo">
+						<img src="{{ bannerPhotos[3].image.getImageVersion("GALLERY").getURL }}" alt="">
+					</span>
+				</span>
+			{% endif %}
+		</div>
+	{% elseif bannerPhotos|length == 2 %}
+		<div class="home-feed-banner__side home-feed-banner__side--right" aria-hidden="true">
+			<span class="home-print home-feed-banner__print home-feed-banner__print--lead">
+				<span class="home-print__photo">
+					<img src="{{ bannerPhotos[1].image.getImageVersion("GALLERY").getURL }}" alt="">
+				</span>
+			</span>
+		</div>
+	{% endif %}
+</a>
