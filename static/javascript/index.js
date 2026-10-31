@@ -210,28 +210,53 @@ const initFeeds = () => {
 	const URL_ROOT_MARGIN = "-35% 0px -45% 0px";
 
 	document.querySelectorAll("[data-feed]").forEach((feed) => {
+		const listPath = `${window.location.pathname}${window.location.search}` || "/";
 		const listTitle = document.title;
 		let activePath = window.location.pathname;
 		const observed = new WeakSet();
+		const intersecting = new Map();
 
-		const applyFeedUrl = (item) => {
-			const path = item?.dataset?.feedUrl;
+		const applyUrl = (path, title) => {
 			if (!path || path === activePath) {
 				return;
 			}
 			activePath = path;
-			const title = item.dataset.feedTitle || listTitle;
 			document.title = title;
 			window.history.replaceState({ feedUrl: path }, title, path);
 		};
 
+		const applyFeedUrl = (item) => {
+			const path = item?.dataset?.feedUrl;
+			if (!path) {
+				return;
+			}
+			applyUrl(path, item.dataset.feedTitle || listTitle);
+		};
+
+		const applyListUrl = () => {
+			applyUrl(listPath, listTitle);
+		};
+
+		const feedIsBelowCenterBand = () => {
+			// Center band starts ~35% down the viewport (matches URL_ROOT_MARGIN).
+			return feed.getBoundingClientRect().top > window.innerHeight * 0.35;
+		};
+
 		const urlObserver = new IntersectionObserver(
 			(entries) => {
-				const visible = entries
-					.filter((entry) => entry.isIntersecting)
-					.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-				if (visible[0]) {
-					applyFeedUrl(visible[0].target);
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						intersecting.set(entry.target, entry.intersectionRatio);
+					} else {
+						intersecting.delete(entry.target);
+					}
+				});
+				if (intersecting.size > 0) {
+					const best = [...intersecting.entries()].sort((a, b) => b[1] - a[1])[0][0];
+					applyFeedUrl(best);
+				} else if (feedIsBelowCenterBand()) {
+					// Scrolled back above the feed (homepage hero / section intro).
+					applyListUrl();
 				}
 			},
 			{ rootMargin: URL_ROOT_MARGIN, threshold: [0, 0.1, 0.25, 0.5, 0.75] },
