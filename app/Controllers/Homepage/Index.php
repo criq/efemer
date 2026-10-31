@@ -3,6 +3,7 @@
 namespace App\Controllers\Homepage;
 
 use App\Classes\Content\Post;
+use App\Classes\Content\RitualyFeedBanner;
 use App\Classes\Content\Section;
 use App\Classes\Views\HTMLEngine;
 use Psr\Http\Message\ResponseInterface;
@@ -27,7 +28,7 @@ class Index extends \Katu\Controllers\Controller
 
 		$engine = new HTMLEngine($request);
 
-		$ritualyBannerImages = $this->ritualyBannerImages($page);
+		$ritualyBannerImages = RitualyFeedBanner::imagesForPage($page);
 
 		if ($partial) {
 			$html = $engine->render("Homepage/feed.twig", [
@@ -63,39 +64,6 @@ class Index extends \Katu\Controllers\Controller
 			"feedNextPage" => $nextPage,
 			"ritualyBannerImages" => $ritualyBannerImages,
 		]));
-	}
-
-	/**
-	 * Portrait-leaning rituály photos for the feed interlude banner.
-	 * Each page gets a distinct 4-photo window (step 4 through a larger pool).
-	 *
-	 * @return list<array{url: string, image: \Katu\Tools\Images\Image}>
-	 */
-	private function ritualyBannerImages(int $page = 1): array
-	{
-		$pool = $this->sectionPlotImages(
-			Post::getPublishedBySection(Section::RITUALY),
-			"portrait",
-			24,
-		);
-		if ($pool === []) {
-			return [];
-		}
-
-		$count = count($pool);
-		$take = min(4, $count);
-		$offset = (($page - 1) * $take) % $count;
-		$picked = [];
-		for ($i = 0; $i < $take; $i++) {
-			$picked[] = $pool[($offset + $i) % $count];
-		}
-
-		// Alternate mirrored order so consecutive banners feel different even on a short pool.
-		if ($page % 2 === 0) {
-			$picked = array_reverse($picked);
-		}
-
-		return $picked;
 	}
 
 	/**

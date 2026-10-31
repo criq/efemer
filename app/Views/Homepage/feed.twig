@@ -1,6 +1,9 @@
 {% for post in posts %}
 	{% include "Homepage/feed-item.twig" %}
 {% endfor %}
-{% if posts|length == 3 %}
-	{% include "Homepage/feed-ritualy-banner.twig" %}
-{% endif %}
+{% include "Partials/feed-ritualy-banner-slot.twig" with {
+	posts: posts,
+	showRitualyBanner: true,
+	ritualyBannerImages: ritualyBannerImages|default([]),
+	feedPageSize: 3,
+} %}

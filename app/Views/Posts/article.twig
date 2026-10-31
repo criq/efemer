@@ -37,6 +37,12 @@
 			{% for continuePost in continuePosts|default([]) %}
 				{% include itemTemplate with { post: continuePost } %}
 			{% endfor %}
+			{% include "Partials/feed-ritualy-banner-slot.twig" with {
+				posts: continuePosts|default([]),
+				showRitualyBanner: showRitualyBanner|default(false),
+				ritualyBannerImages: ritualyBannerImages|default([]),
+				feedPageSize: feedPageSize|default(4),
+			} %}
 
 			{% if feedHasMore %}
 				<div class="feed-sentinel" data-feed-sentinel aria-hidden="true"></div>

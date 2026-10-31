@@ -3,6 +3,7 @@
 namespace App\Controllers\Sections;
 
 use App\Classes\Content\Post;
+use App\Classes\Content\RitualyFeedBanner;
 use App\Classes\Content\Section;
 use App\Classes\Views\HTMLEngine;
 use Psr\Http\Message\ResponseInterface;
@@ -74,12 +75,20 @@ class Index extends \Katu\Controllers\Controller
 		$hasMore = ($offset + count($posts)) < $total;
 		$nextPage = $hasMore ? $page + 1 : null;
 
+		// Promo banner on every feed except rituály itself (already there).
+		$showRitualyBanner = $section !== Section::RITUALY;
+		$ritualyBannerImages = $showRitualyBanner ? RitualyFeedBanner::imagesForPage($page) : [];
+
 		$engine = new HTMLEngine($request);
+		$feedVars = [
+			"posts" => $posts,
+			"showRitualyBanner" => $showRitualyBanner,
+			"ritualyBannerImages" => $ritualyBannerImages,
+			"feedPageSize" => self::FEED_PAGE_SIZE,
+		];
 
 		if ($partial) {
-			$html = $engine->render($partialTemplate, [
-				"posts" => $posts,
-			]);
+			$html = $engine->render($partialTemplate, $feedVars);
 			$response = $response
 				->withHeader("Content-Type", "text/html; charset=UTF-8")
 				->withHeader("Cache-Control", "no-store");
@@ -95,10 +104,9 @@ class Index extends \Katu\Controllers\Controller
 			"section" => $section,
 			"title" => Section::title($section),
 			"lead" => Section::lead($section),
-			"posts" => $posts,
 			"hasMore" => $hasMore,
 			"nextPage" => $nextPage,
 			"page" => $page,
-		], $extra)));
+		], $extra, $feedVars)));
 	}
 }

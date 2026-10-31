@@ -1,0 +1,4 @@
+{# After a full feed page: dark rituály promo (skipped on /svatebni-ritualy). #}
+{% if showRitualyBanner|default(false) and posts|length == feedPageSize|default(3) %}
+	{% include "Homepage/feed-ritualy-banner.twig" %}
+{% endif %}

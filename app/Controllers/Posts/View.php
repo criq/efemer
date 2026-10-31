@@ -3,6 +3,7 @@
 namespace App\Controllers\Posts;
 
 use App\Classes\Content\Post;
+use App\Classes\Content\RitualyFeedBanner;
 use App\Classes\Content\Section;
 use App\Classes\Views\HTMLEngine;
 use Psr\Http\Message\ResponseInterface;
@@ -47,6 +48,9 @@ class View extends \Katu\Controllers\Controller
 		$continuePosts = array_slice($peek, 0, self::FEED_PAGE_SIZE);
 
 		$feedMeta = $this->feedMeta($section);
+		$showRitualyBanner = $section !== Section::RITUALY;
+		$bannerPage = $this->bannerPageAfter($section, $afterId);
+		$ritualyBannerImages = $showRitualyBanner ? RitualyFeedBanner::imagesForPage($bannerPage) : [];
 		$engine = new HTMLEngine($request);
 		$nextUrl = null;
 		if ($hasMore && $continuePosts !== []) {
@@ -54,10 +58,15 @@ class View extends \Katu\Controllers\Controller
 			$nextUrl = rtrim($post->getPublicUrl(), "/") . "?partial=1&after={$lastId}";
 		}
 
+		$feedVars = [
+			"posts" => $continuePosts,
+			"showRitualyBanner" => $showRitualyBanner,
+			"ritualyBannerImages" => $ritualyBannerImages,
+			"feedPageSize" => self::FEED_PAGE_SIZE,
+		];
+
 		if ($partial) {
-			$html = $engine->render($feedMeta["partialTemplate"], [
-				"posts" => $continuePosts,
-			]);
+			$html = $engine->render($feedMeta["partialTemplate"], $feedVars);
 			$response = $response
 				->withHeader("Content-Type", "text/html; charset=UTF-8")
 				->withHeader("Cache-Control", "no-store");
@@ -68,7 +77,7 @@ class View extends \Katu\Controllers\Controller
 			return $response->withBody($html);
 		}
 
-		return $response->withBody($engine->render("Posts/article.twig", [
+		return $response->withBody($engine->render("Posts/article.twig", array_merge([
 			"post" => $post,
 			"sectionTitle" => Section::title($post->getSection()),
 			"sectionPath" => Section::pathPrefix($post->getSection()),
@@ -79,7 +88,19 @@ class View extends \Katu\Controllers\Controller
 			"continuePosts" => $continuePosts,
 			"feedHasMore" => $hasMore,
 			"feedNextUrl" => $nextUrl,
-		]));
+		], $feedVars)));
+	}
+
+	private function bannerPageAfter(string $section, int $afterId): int
+	{
+		$all = Post::getPublishedBySection($section);
+		foreach ($all as $i => $candidate) {
+			if ((int)$candidate->getId() === $afterId) {
+				return (int)floor(($i + 1) / self::FEED_PAGE_SIZE) + 1;
+			}
+		}
+
+		return 1;
 	}
 
 	/**

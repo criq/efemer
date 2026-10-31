@@ -23,6 +23,7 @@
 			{% else %}
 				<p class="umeni__empty">Zatím tu nic není.</p>
 			{% endfor %}
+			{% include "Partials/feed-ritualy-banner-slot.twig" %}
 			{% if hasMore %}
 				<div class="feed-sentinel" data-feed-sentinel aria-hidden="true"></div>
 			{% endif %}
