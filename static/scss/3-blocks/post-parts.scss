@@ -64,10 +64,8 @@
 	width: 100%;
 }
 
-// Desktop: singles and galleries share one breakout width so a lone photo
-// isn’t smaller than a two-up row. Portraits are height-capped and centered.
+// Desktop: galleries break out wide; lone photos stay a bit quieter / smaller.
 @media screen and (min-width: 901px) {
-	.post-parts__image,
 	.post-parts__gallery {
 		margin-inline: calc((100% - min(68rem, 92vw)) / 2);
 		max-width: none;
@@ -75,7 +73,10 @@
 	}
 
 	.post-parts__image {
+		margin-inline: calc((100% - min(36rem, 58vw)) / 2);
+		max-width: none;
 		text-align: center;
+		width: min(36rem, 58vw);
 
 		.home-print__photo {
 			display: inline-block;
@@ -86,7 +87,7 @@
 
 		img {
 			height: auto;
-			max-height: min(78vh, 46rem);
+			max-height: min(64vh, 36rem);
 			max-width: 100%;
 			width: auto;
 		}
