@@ -1,6 +1,6 @@
 ---
 name: Multi-stage content loader
-overview: "Master plan: stage-1 + KeywordIngest done (kw-v3, 0 loaded) → MaterializePosts pilots shipped (5 posts) → next: corpus re-export/eval → embeddings → taxonomy → broader materialize."
+overview: "Master plan: stage-1 + KeywordIngest done; broad MaterializePosts in flight on prod (~457 public + 281 keyworded running). Next after materialize: corpus re-export/eval → embeddings → taxonomy pause → rich admin."
 todos:
   - id: schema-ingest
     content: Base ingest schema + stage-1 load tables
@@ -78,8 +78,8 @@ todos:
     content: "IG KeywordIngest done — 631 IG items kw-v3 (0 loaded); 126 invitations"
     status: completed
   - id: stage1-body-thin-text
-    content: "Investigate empty bodyHtml / thin_text on ~65 efemer posts (blocks hero_text_gallery); fix scraper or accept image-led"
-    status: pending
+    content: "Investigated 2026-10-31: 65 thin_text (59 efemer_cz empty body). Live www.efemer.cz is an HTTrack 2020 mirror — posts lack section.copy. Accept image-led / gallery_essay; scraper cannot recover missing prose."
+    status: completed
   - id: kw-normalize-typos
     content: "Typo map florika→floristika + košilela→košile done; keep expanding as leaks appear"
     status: completed
@@ -90,8 +90,8 @@ todos:
     content: "himmlhaus mostly diary is OK for house journal; invitations live on @efemer_flowers as workshop+isInvitation. Optional later: soft seriesKey for ritual calendar cycles"
     status: completed
   - id: corpus-reexport-after-ig
-    content: "After IG KeywordIngest finishes: ExportCorpus + EvaluateKeywords; spot-check demote/text-slide skips; optional IG invite eval rows"
-    status: pending
+    content: "Prod 2026-10-31: ExportCorpus 266 items / 1146 keywords; EvaluateKeywords cover+roles 100% (1 missing fixture masopustni-veselky). Optional: IG invite eval rows + demote spot-check"
+    status: completed
   - id: event-materialize
     content: "Superseded: invitations are posts (MaterializePosts), not Event entity"
     status: cancelled
@@ -102,8 +102,11 @@ todos:
     content: "Pause after full keyworded corpus; multi-label facets (occasion/material/place/medium + event); do not map kind→section 1:1"
     status: pending
   - id: stage3-materialize
-    content: "PostMaterializer + layoutJson.parts; invitations → udalosti (ephemeral); pilots Wanderlust + diary + 3 work posts (5 total)"
+    content: "PostMaterializer + layoutJson.parts; invitations → udalosti / past→deník; dateTitle rematerialize done; broader MaterializePosts running on prod (281 keyworded)"
     status: completed
+  - id: stage3-materialize-broad
+    content: "Finish MaterializePosts for remaining keyworded on prod (281 in flight); spot-check titles/sections"
+    status: in_progress
   - id: ingest-admin-rich
     content: Manual cover/role pick (locks), reject visibility, layout preview (list facets already shipped)
     status: pending
@@ -307,13 +310,12 @@ Prod Instagram archive loop remains **off**. Prefer Instaloader dump + Import wh
 
 ### Next
 
-1. **ExportCorpus + EvaluateKeywords** (full corpus after IG finish); optional IG invite/cover eval rows
-2. ~~Optional: rekeyword older items that still lack `timeframe` JSON (~130)~~ — **in progress on prod** (flagged `needs_rekeyword`, KeywordIngest `rekeyword` limit 150)
-3. Embeddings / dedup → **taxonomy pause** → assign categories
-4. **Broader MaterializePosts** (beyond the 5 pilots)
-5. Rich ingest admin (manual cover/role locks, layout preview)
-6. Optional: empty `bodyHtml` / `thin_text` (~65) — fix scraper or accept image-led
-7. Drop legacy admin `events` UI when ready
+1. **Finish broader MaterializePosts** on prod (281 keyworded in flight; then spot-check)
+2. **ExportCorpus + EvaluateKeywords** (full corpus); optional IG invite/cover eval rows
+3. Embeddings / dedup → **taxonomy pause** → assign categories (soft `kind` still ≠ section)
+4. Rich ingest admin (manual cover/role locks, layout preview)
+5. ~~empty `bodyHtml` / `thin_text`~~ — **accept image-led** (HTTrack mirror has no prose)
+6. Drop legacy admin `events` UI when ready
 
 ### Materialize CLI (already shipped)
 
