@@ -4,7 +4,6 @@ namespace App\Controllers\Homepage;
 
 use App\Classes\Content\Post;
 use App\Classes\Content\Section;
-use App\Classes\Ingest\IngestItemFile;
 use App\Classes\Views\HTMLEngine;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -123,17 +122,23 @@ class Index extends \Katu\Controllers\Controller
 
 	/**
 	 * Prefer high-rated photos with the given LLM orientation from the section’s posts.
+	 * Scans recent posts only and defers StorageFile loads until after ranking —
+	 * a full-section file+ingest scan was ~3s of homepage TTFB on production.
 	 *
 	 * @param list<Post> $posts
 	 * @return list<array{url: string, image: \Katu\Tools\Images\Image}>
 	 */
 	private function sectionPlotImages(array $posts, string $preferOrientation = "landscape", int $limit = 1): array
 	{
-		// Prefer LLM orientation, then rating. Avoid getWidth/getHeight —
-		// each call can download from GCS and made the homepage time out on production.
+		// Prefer LLM orientation, then rating. Never call getWidth/getHeight here
+		// (GCS downloads) and avoid per-file ingest lookups (see post_files.orientation).
 		$preferOrientation = strtolower($preferOrientation);
 		$limit = max(1, $limit);
+		// Small plot needs (1–2) only need a recent window; banner pools scan the section.
+		$maxPosts = $limit <= 4 ? 30 : count($posts);
+		$posts = array_slice($posts, 0, $maxPosts);
 		$candidates = [];
+		$preferredCount = 0;
 
 		foreach ($posts as $post) {
 			foreach ($post->getFiles() as $file) {
@@ -141,19 +146,21 @@ class Index extends \Katu\Controllers\Controller
 					continue;
 				}
 
-				$image = $file->getImage();
-				if (!$image) {
-					continue;
-				}
-
+				$preferred = $file->getOrientation() === $preferOrientation;
 				$candidates[] = [
 					"url" => $post->getPublicUrl(),
-					"image" => $image,
 					"post" => $post,
 					"file" => $file,
 					"rating" => $file->getRating() ?? 0.55,
-					"preferred" => $this->fileOrientation($file) === $preferOrientation,
+					"preferred" => $preferred,
 				];
+				if ($preferred) {
+					$preferredCount++;
+				}
+			}
+
+			if ($limit <= 4 && $preferredCount >= $limit * 3) {
+				break;
 			}
 		}
 
@@ -176,10 +183,16 @@ class Index extends \Katu\Controllers\Controller
 			if ($key < 1 || isset($seen[$key])) {
 				continue;
 			}
+
+			$image = $candidate["file"]->getImage();
+			if (!$image) {
+				continue;
+			}
+
 			$seen[$key] = true;
 			$picked[] = [
 				"url" => $candidate["url"],
-				"image" => $candidate["image"],
+				"image" => $image,
 			];
 			if (count($picked) >= $limit) {
 				break;
@@ -187,22 +200,6 @@ class Index extends \Katu\Controllers\Controller
 		}
 
 		return $picked;
-	}
-
-	private function fileOrientation(\App\Classes\Content\PostFile $file): ?string
-	{
-		$storageFileId = (int)$file->storageFileId;
-		if ($storageFileId < 1) {
-			return null;
-		}
-
-		$ingestFile = IngestItemFile::getOneBy([
-			"storageFileId" => $storageFileId,
-		]);
-
-		$orientation = $ingestFile?->getOrientation();
-
-		return is_string($orientation) && $orientation !== "" ? strtolower($orientation) : null;
 	}
 
 	/**

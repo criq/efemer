@@ -33,7 +33,11 @@ Featured item is the next **current invitation** post, else the latest lasting w
 
 ## Section plots
 
-Three lasting plots: deník → rituály → umění. Prefer high-rated LLM orientation (**portrait** for rituály, **landscape** otherwise); fall back to best-rated. Plot frames use `object-fit: cover`; photo peeks past the outer edge. On phones a bit narrower (`min(88%, 22rem)`, centered), photo on top; rituály ordered first. From 801px–1199px: **rituály full-width on top** (order), mirrored vs hero — centered text left, lead+aside collage right (same ~24rem photo column / 36% aside as the hero). Deník + umění in two columns below. From 1200px: **three equal columns** deník | rituály | umění — outer plots photo-on-top; **rituály text on top, photo peeks bottom** (aside hidden). Stacked below 801px. Same `.75rem` white gap. Outer-edge crop `2.25rem` until 1280px, then `4.25rem`. Invitations live in the hero, not as a plot.
+Three lasting plots: deník → rituály → umění. Prefer high-rated LLM orientation (**portrait** for rituály, **landscape** otherwise); fall back to best-rated. Plot/banner picking reads `post_files.orientation` (no per-file ingest lookups) and only scans a recent window — never walk every file in deník on each request.
+
+## Performance
+
+Homepage TTFB must stay low: do not call `getWidth`/`getHeight` (GCS) or `IngestItemFile::getOneBy` while ranking plot photos. Defer `getImage()` until after ranking. Plot frames use `object-fit: cover`; photo peeks past the outer edge. On phones a bit narrower (`min(88%, 22rem)`, centered), photo on top; rituály ordered first. From 801px–1199px: **rituály full-width on top** (order), mirrored vs hero — centered text left, lead+aside collage right (same ~24rem photo column / 36% aside as the hero). Deník + umění in two columns below. From 1200px: **three equal columns** deník | rituály | umění — outer plots photo-on-top; **rituály text on top, photo peeks bottom** (aside hidden). Stacked below 801px. Same `.75rem` white gap. Outer-edge crop `2.25rem` until 1280px, then `4.25rem`. Invitations live in the hero, not as a plot.
 
 ## About + Principy (below plots)
 

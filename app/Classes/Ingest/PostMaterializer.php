@@ -132,6 +132,7 @@ class PostMaterializer
 				$ingestFile->getRating(),
 				$ingestFile->getRole(),
 				$ingestFile->isDemoted(),
+				$ingestFile->getOrientation(),
 			);
 			$indexToPostFileId[$fileIndex] = (int)$postFile->getId();
 		}

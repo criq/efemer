@@ -829,6 +829,7 @@ class Post extends \Katu\Models\Model
 		?float $rating = null,
 		?string $role = null,
 		bool $demote = false,
+		?string $orientation = null,
 	): PostFile {
 		$link = new PostFile;
 		$link->timeCreated = new Time;
@@ -839,6 +840,7 @@ class Post extends \Katu\Models\Model
 		$link->setRating($rating);
 		$link->setRole($role);
 		$link->setDemote($demote);
+		$link->setOrientation($orientation);
 		$link->persist();
 
 		return $link;

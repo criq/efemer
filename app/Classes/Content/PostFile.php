@@ -2,7 +2,6 @@
 
 namespace App\Classes\Content;
 
-use App\Classes\Ingest\IngestItemFile;
 use App\Classes\Storage\StorageFile;
 
 class PostFile extends \Katu\Models\Model
@@ -18,6 +17,7 @@ class PostFile extends \Katu\Models\Model
 	public int|float|string|null $rating = null;
 	public ?string $role = null;
 	public int|string|null $demote = 0;
+	public ?string $orientation = null;
 
 	public function setPost(Post $post): PostFile
 	{
@@ -103,22 +103,25 @@ class PostFile extends \Katu\Models\Model
 		return $this->getStorageFile()->getImage();
 	}
 
+	public function setOrientation(?string $orientation): PostFile
+	{
+		$orientation = is_string($orientation) ? strtolower(trim($orientation)) : null;
+		$this->orientation = $orientation !== "" ? $orientation : null;
+
+		return $this;
+	}
+
 	/**
-	 * LLM orientation from ingest enrichment (landscape|portrait|square), if known.
+	 * LLM orientation (landscape|portrait|square) from the denormalized column.
+	 * Filled at materialize; legacy rows are backfilled by PostFileOrientationSchema.
 	 */
 	public function getOrientation(): ?string
 	{
-		$storageFileId = (int)$this->storageFileId;
-		if ($storageFileId < 1) {
+		if (!is_string($this->orientation) || $this->orientation === "") {
 			return null;
 		}
 
-		$ingestFile = IngestItemFile::getOneBy([
-			"storageFileId" => $storageFileId,
-		]);
-		$orientation = $ingestFile?->getOrientation();
-
-		return is_string($orientation) && $orientation !== "" ? strtolower($orientation) : null;
+		return strtolower($this->orientation);
 	}
 
 	public function getAdminPayload(): array
