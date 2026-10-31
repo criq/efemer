@@ -384,6 +384,15 @@ class Post extends \Katu\Models\Model
 		return $this->title;
 	}
 
+	/**
+	 * Diary date used as the sole title ("6. 6. 2026", "Květen 2026").
+	 * Named event / report titles return false so the date can sit in meta below.
+	 */
+	public function titleIsDateOnly(): bool
+	{
+		return CaptionDates::isDateOnlyTitle(trim((string)$this->getTitle()));
+	}
+
 	public function setPath(?string $path): Post
 	{
 		$this->path = $path;

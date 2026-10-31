@@ -7,6 +7,41 @@ use Katu\Tools\Calendar\Time;
 class CaptionDates
 {
 	/**
+	 * True when the whole string is a diary/event date label (no other headline).
+	 * Matches "6. 6. 2026", "1.–3. 6. 2026", "6. června 2026", "Květen 2026".
+	 */
+	public static function isDateOnlyTitle(string $title): bool
+	{
+		$title = trim($title);
+		if ($title === "") {
+			return false;
+		}
+
+		if (preg_match("/^\\d{1,2}\\.\\s*\\d{1,2}\\.\\s*\\d{4}$/u", $title)) {
+			return true;
+		}
+
+		if (preg_match("/^\\d{1,2}\\.\\s*[–\\-]\\s*\\d{1,2}\\.\\s*\\d{1,2}\\.\\s*\\d{4}$/u", $title)) {
+			return true;
+		}
+
+		$genitive = implode("|", array_map("preg_quote", array_keys(self::months())));
+		if (preg_match("/^\\d{1,2}\\.\\s*[–\\-]\\s*\\d{1,2}\\.\\s*(?:" . $genitive . ")(?:\\s+\\d{4})?$/ui", $title)) {
+			return true;
+		}
+		if (preg_match("/^\\d{1,2}\\.\\s*(?:" . $genitive . ")(?:\\s+\\d{4})?$/ui", $title)) {
+			return true;
+		}
+
+		$nominative = implode("|", array_map("preg_quote", self::nominativeMonths()));
+		if (preg_match("/^(?:" . $nominative . ")\\s+\\d{4}$/ui", $title)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * @return array{startsAt: ?Time, endsAt: ?Time}
 	 */
 	public static function parse(string $caption): array
@@ -88,6 +123,36 @@ class CaptionDates
 			"října" => 10,
 			"listopadu" => 11,
 			"prosince" => 12,
+		];
+	}
+
+	/**
+	 * Nominative month names used as diary titles ("Květen 2026").
+	 *
+	 * @return list<string>
+	 */
+	private static function nominativeMonths(): array
+	{
+		return [
+			"leden",
+			"unor",
+			"únor",
+			"brezen",
+			"březen",
+			"duben",
+			"kveten",
+			"květen",
+			"cerven",
+			"červen",
+			"cervenec",
+			"červenec",
+			"srpen",
+			"zari",
+			"září",
+			"rijen",
+			"říjen",
+			"listopad",
+			"prosinec",
 		];
 	}
 }

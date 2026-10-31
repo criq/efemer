@@ -34,8 +34,11 @@
 				</span>
 			{% endif %}
 		</p>
+	{% elseif post.getSection == "denik" and not post.titleIsDateOnly and post.getDateLabel %}
+		{# Named deník titles (events, reports, …): date sits below in meta. #}
+		<p class="post-article__meta">{{ post.getDateLabel }}</p>
 	{% elseif post.getPublishedAt and post.getSection != "denik" %}
-		{# Deník: the title is the explicit diary date — do not also show publishedAt. #}
+		{# Date-only deník titles already carry the date — skip duplicate meta. #}
 		<p class="post-article__meta">{{ post.getPublishedAt|date("j. n. Y") }}</p>
 	{% endif %}
 	{% if post.isInvitation and post.getInstagramShortcode %}
