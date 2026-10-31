@@ -64,19 +64,39 @@
 	width: 100%;
 }
 
-// Desktop: galleries break out wide; lone photos stay a bit quieter / smaller.
+// Desktop: photos peek past the text column; outer edges clip on the greige band.
 @media screen and (min-width: 901px) {
+	// Full-bleed across the feed shell; 3+ frames run a little wider so sides peek/cut.
 	.post-parts__gallery {
-		margin-inline: calc((100% - min(68rem, 92vw)) / 2);
+		gap: clamp(.85rem, 1.6vw, 1.35rem);
+		justify-content: center;
+		margin-inline: calc(50% - 50vw);
 		max-width: none;
-		width: min(68rem, 92vw);
+		width: 100vw;
 	}
 
+	.post-parts__gallery:has(> .post-parts__frame:nth-child(3)) {
+		margin-inline: calc(50% - 54vw);
+		width: 108vw;
+	}
+
+	// Two-up: wide but not quite full-bleed.
+	.post-parts__gallery:has(> .post-parts__frame:nth-child(2):last-child) {
+		margin-inline: calc(50% - 46vw);
+		width: 92vw;
+	}
+
+	.post-parts__frame {
+		flex: 1 1 14rem;
+		max-width: 26rem;
+		min-width: min(16rem, 22vw);
+	}
+
+	// Lone photos: quieter than galleries, nudged sideways so one edge peeks.
 	.post-parts__image {
-		margin-inline: calc((100% - min(36rem, 58vw)) / 2);
 		max-width: none;
 		text-align: center;
-		width: min(36rem, 58vw);
+		width: min(42rem, 64vw);
 
 		.home-print__photo {
 			display: inline-block;
@@ -91,16 +111,21 @@
 			max-width: 100%;
 			width: auto;
 		}
-	}
 
-	.post-parts__gallery {
-		gap: clamp(1.25rem, 2vw, 1.75rem);
-	}
+		&.post-parts__tilt-1 {
+			margin-inline: max(0px, calc((100% - min(42rem, 64vw)) / 2 - 5vw)) auto;
+			transform: rotate(-0.4deg);
+		}
 
-	// Two-up: a touch narrower than the full breakout so portraits don’t dominate.
-	.post-parts__gallery:has(> .post-parts__frame:nth-child(2):last-child) {
-		margin-inline: calc((100% - min(54rem, 84vw)) / 2);
-		width: min(54rem, 84vw);
+		&.post-parts__tilt-2 {
+			margin-inline: auto max(0px, calc((100% - min(42rem, 64vw)) / 2 - 5vw));
+			transform: rotate(0.45deg);
+		}
+
+		&.post-parts__tilt-0 {
+			margin-inline: max(0px, calc((100% - min(42rem, 64vw)) / 2 - 3vw)) auto;
+			transform: rotate(-0.3deg);
+		}
 	}
 }
 

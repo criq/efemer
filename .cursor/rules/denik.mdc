@@ -13,6 +13,7 @@ alwaysApply: false
 - Intro hero: flat greige on phones; from 801px white→greige gradient (same as homepage hero)
 - Continuous **feed of whole diary posts** (same body as detail via `Posts/body.twig` + `Posts/parts.twig`)
 - Full-bleed greige shells (`.denik-feed__item`) with a centered `.post-article` inside; `.75rem` white gaps between bands
+- From 901px: galleries full-bleed across the greige band (3+ frames slightly over-wide so sides peek/clip); lone photos sit quieter and nudge left/right so one edge peeks (`post-parts.scss`)
 - Date-only titles (e.g. “6. 6. 2026”, “Květen 2026”) stay as the heading with **no** meta date under them
 - Named titles (events, reports, …): heading = title, date in `.post-article__meta` via `getDateLabel()` (`Post::titleIsDateOnly()`)
 - Sort by `Post::getExplicitAt()` (startsAt / title date / publishedAt)
