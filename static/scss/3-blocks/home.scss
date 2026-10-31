@@ -910,7 +910,7 @@
 	}
 }
 
-// Dark rituály interlude every 4 feed posts — text center, photos peek from the sides.
+// Dark rituály interlude every 3 feed posts — text center, photos peek from the sides.
 .home-feed-banner {
 	align-items: center;
 	background: $color-ink;
@@ -921,15 +921,15 @@
 	isolation: isolate;
 	min-width: 0;
 	overflow: hidden;
-	padding: clamp(2.25rem, 5vw, 3.5rem) clamp(1.25rem, 5vw, 3rem);
+	padding: clamp(1.5rem, 3.5vw, 2.25rem) clamp(1.25rem, 5vw, 3rem);
 	position: relative;
 	text-decoration: none;
 	width: 100%;
 
 	@media screen and (min-width: 901px) {
-		grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem) minmax(0, 1fr);
+		grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem) minmax(0, 1fr);
+		padding-block: clamp(1.65rem, 3.2vw, 2.35rem);
 		padding-inline: 0;
-		padding-block: clamp(2.5rem, 5vw, 3.75rem);
 	}
 
 	&:hover {
@@ -947,7 +947,7 @@
 
 	@media screen and (min-width: 901px) {
 		display: block;
-		min-height: 14rem;
+		min-height: 11rem;
 	}
 }
 
@@ -956,15 +956,15 @@
 
 	.home-feed-banner__print--lead {
 		transform: translateX(-18%) rotate(-0.4deg);
-		width: min(15rem, 22vw);
+		width: min(13rem, 20vw);
 	}
 
 	.home-feed-banner__print--aside {
-		bottom: 8%;
+		bottom: 6%;
 		left: 72%;
 		position: absolute;
 		transform: translateX(-30%) rotate(0.45deg);
-		width: min(7.5rem, 12vw);
+		width: min(6.5rem, 11vw);
 		z-index: 2;
 	}
 }
@@ -975,15 +975,15 @@
 	.home-feed-banner__print--lead {
 		margin-left: auto;
 		transform: translateX(18%) rotate(0.35deg);
-		width: min(15rem, 22vw);
+		width: min(13rem, 20vw);
 	}
 
 	.home-feed-banner__print--aside {
-		bottom: 12%;
+		bottom: 10%;
 		position: absolute;
 		right: 72%;
 		transform: translateX(30%) rotate(-0.5deg);
-		width: min(7rem, 11vw);
+		width: min(6rem, 10vw);
 		z-index: 2;
 	}
 }
@@ -995,7 +995,7 @@
 	img {
 		display: block;
 		height: auto;
-		max-height: min(42vh, 22rem);
+		max-height: min(32vh, 16rem);
 		object-fit: contain;
 		width: 100%;
 	}
@@ -1003,7 +1003,7 @@
 
 .home-feed-banner__inner {
 	margin-inline: auto;
-	max-width: min(36rem, 100%);
+	max-width: min(34rem, 100%);
 	position: relative;
 	text-align: center;
 	z-index: 3;
@@ -1015,13 +1015,13 @@
 	font-size: .68rem;
 	font-weight: 500;
 	letter-spacing: 0.16em;
-	margin: 0 0 .65rem;
+	margin: 0 0 .45rem;
 	text-transform: uppercase;
 }
 
 .home-feed-banner__title {
 	font-family: $font-display;
-	font-size: clamp(1.85rem, 4vw, 2.65rem);
+	font-size: clamp(1.65rem, 3.6vw, 2.35rem);
 	font-weight: 400;
 	letter-spacing: -0.03em;
 	line-height: 1.05;
@@ -1030,9 +1030,9 @@
 
 .home-feed-banner__lead {
 	color: rgba($color-greige, .78);
-	font-size: clamp(.95rem, 1.6vw, 1.05rem);
-	line-height: 1.45;
-	margin: .85rem 0 0;
+	font-size: clamp(.9rem, 1.5vw, 1rem);
+	line-height: 1.4;
+	margin: .55rem 0 0;
 	text-wrap: pretty;
 }
 
@@ -1041,11 +1041,11 @@
 	color: $color-greige;
 	display: inline-block;
 	font-family: $font-ui;
-	font-size: .88rem;
+	font-size: .82rem;
 	font-weight: 500;
 	letter-spacing: 0.02em;
-	margin-top: 1.45rem;
-	padding: .75rem 1.35rem .7rem;
+	margin-top: 1rem;
+	padding: .6rem 1.2rem .55rem;
 	transition: background .18s ease, color .18s ease;
 }
 

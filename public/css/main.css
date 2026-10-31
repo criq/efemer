@@ -12466,7 +12466,7 @@ body.builder .builder-file-list--insert:not(:empty),
   isolation: isolate;
   min-width: 0;
   overflow: hidden;
-  padding: max(2.25rem, min(5vw, 3.5rem)) max(1.25rem, min(5vw, 3rem));
+  padding: max(1.5rem, min(3.5vw, 2.25rem)) max(1.25rem, min(5vw, 3rem));
   position: relative;
   -webkit-text-decoration: none;
   text-decoration: none;
@@ -12474,11 +12474,11 @@ body.builder .builder-file-list--insert:not(:empty),
 }
 @media screen and (min-width: 901px) {
   .home-feed-banner {
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem) minmax(0, 1fr);
+    padding-top: max(1.65rem, min(3.2vw, 2.35rem));
+    padding-bottom: max(1.65rem, min(3.2vw, 2.35rem));
     padding-left: 0;
     padding-right: 0;
-    padding-top: max(2.5rem, min(5vw, 3.75rem));
-    padding-bottom: max(2.5rem, min(5vw, 3.75rem));
   }
 }
 .home-feed-banner:hover .home-feed-banner__cta {
@@ -12494,7 +12494,7 @@ body.builder .builder-file-list--insert:not(:empty),
 @media screen and (min-width: 901px) {
   .home-feed-banner__side {
     display: block;
-    min-height: 14rem;
+    min-height: 11rem;
   }
 }
 
@@ -12503,14 +12503,14 @@ body.builder .builder-file-list--insert:not(:empty),
 }
 .home-feed-banner__side--left .home-feed-banner__print--lead {
   transform: translateX(-18%) rotate(-0.4deg);
-  width: min(15rem, 22vw);
+  width: min(13rem, 20vw);
 }
 .home-feed-banner__side--left .home-feed-banner__print--aside {
-  bottom: 8%;
+  bottom: 6%;
   left: 72%;
   position: absolute;
   transform: translateX(-30%) rotate(0.45deg);
-  width: min(7.5rem, 12vw);
+  width: min(6.5rem, 11vw);
   z-index: 2;
 }
 
@@ -12520,14 +12520,14 @@ body.builder .builder-file-list--insert:not(:empty),
 .home-feed-banner__side--right .home-feed-banner__print--lead {
   margin-left: auto;
   transform: translateX(18%) rotate(0.35deg);
-  width: min(15rem, 22vw);
+  width: min(13rem, 20vw);
 }
 .home-feed-banner__side--right .home-feed-banner__print--aside {
-  bottom: 12%;
+  bottom: 10%;
   position: absolute;
   right: 72%;
   transform: translateX(30%) rotate(-0.5deg);
-  width: min(7rem, 11vw);
+  width: min(6rem, 10vw);
   z-index: 2;
 }
 
@@ -12538,7 +12538,7 @@ body.builder .builder-file-list--insert:not(:empty),
 .home-feed-banner__print img {
   display: block;
   height: auto;
-  max-height: min(42vh, 22rem);
+  max-height: min(32vh, 16rem);
   -o-object-fit: contain;
      object-fit: contain;
   width: 100%;
@@ -12547,7 +12547,7 @@ body.builder .builder-file-list--insert:not(:empty),
 .home-feed-banner__inner {
   margin-left: auto;
   margin-right: auto;
-  max-width: min(36rem, 100%);
+  max-width: min(34rem, 100%);
   position: relative;
   text-align: center;
   z-index: 3;
@@ -12559,13 +12559,13 @@ body.builder .builder-file-list--insert:not(:empty),
   font-size: 0.68rem;
   font-weight: 500;
   letter-spacing: 0.16em;
-  margin: 0 0 0.65rem;
+  margin: 0 0 0.45rem;
   text-transform: uppercase;
 }
 
 .home-feed-banner__title {
   font-family: "Fraunces", "Times New Roman", Times, serif;
-  font-size: max(1.85rem, min(4vw, 2.65rem));
+  font-size: max(1.65rem, min(3.6vw, 2.35rem));
   font-weight: 400;
   letter-spacing: -0.03em;
   line-height: 1.05;
@@ -12574,9 +12574,9 @@ body.builder .builder-file-list--insert:not(:empty),
 
 .home-feed-banner__lead {
   color: rgba(250, 249, 247, 0.78);
-  font-size: max(0.95rem, min(1.6vw, 1.05rem));
-  line-height: 1.45;
-  margin: 0.85rem 0 0;
+  font-size: max(0.9rem, min(1.5vw, 1rem));
+  line-height: 1.4;
+  margin: 0.55rem 0 0;
   text-wrap: pretty;
 }
 
@@ -12585,11 +12585,11 @@ body.builder .builder-file-list--insert:not(:empty),
   color: #faf9f7;
   display: inline-block;
   font-family: "Outfit", "Helvetica Neue", sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 500;
   letter-spacing: 0.02em;
-  margin-top: 1.45rem;
-  padding: 0.75rem 1.35rem 0.7rem;
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem 0.55rem;
   transition: background 0.18s ease, color 0.18s ease;
 }
 

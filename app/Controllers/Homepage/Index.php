@@ -11,7 +11,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class Index extends \Katu\Controllers\Controller
 {
-	private const FEED_PAGE_SIZE = 4;
+	private const FEED_PAGE_SIZE = 3;
 
 	public function getResponse(ServerRequestInterface $request, ResponseInterface $response)
 	{
@@ -67,7 +67,8 @@ class Index extends \Katu\Controllers\Controller
 	}
 
 	/**
-	 * Portrait-leaning rituály photos for the feed interlude banner (rotated by page).
+	 * Portrait-leaning rituály photos for the feed interlude banner.
+	 * Each page gets a distinct 4-photo window (step 4 through a larger pool).
 	 *
 	 * @return list<array{url: string, image: \Katu\Tools\Images\Image}>
 	 */
@@ -76,17 +77,23 @@ class Index extends \Katu\Controllers\Controller
 		$pool = $this->sectionPlotImages(
 			Post::getPublishedBySection(Section::RITUALY),
 			"portrait",
-			8,
+			24,
 		);
 		if ($pool === []) {
 			return [];
 		}
 
 		$count = count($pool);
-		$offset = (($page - 1) * 2) % $count;
+		$take = min(4, $count);
+		$offset = (($page - 1) * $take) % $count;
 		$picked = [];
-		for ($i = 0; $i < min(4, $count); $i++) {
+		for ($i = 0; $i < $take; $i++) {
 			$picked[] = $pool[($offset + $i) % $count];
+		}
+
+		// Alternate mirrored order so consecutive banners feel different even on a short pool.
+		if ($page % 2 === 0) {
+			$picked = array_reverse($picked);
 		}
 
 		return $picked;

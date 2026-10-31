@@ -196,7 +196,7 @@
 		{% for post in feedPosts %}
 			{% include "Homepage/feed-item.twig" %}
 		{% endfor %}
-		{% if feedPosts|length == 4 %}
+		{% if feedPosts|length == 3 %}
 			{% include "Homepage/feed-ritualy-banner.twig" %}
 		{% endif %}
 		{% if feedHasMore %}
