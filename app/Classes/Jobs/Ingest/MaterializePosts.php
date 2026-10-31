@@ -19,6 +19,7 @@ use Katu\Tools\Calendar\Timeout;
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"invitationsOnly":true}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"existingOnly":true}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"kind":"wedding","existingOnly":true}' -f
+ * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"sinceYears":3}' -f
  * ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts --args='{"dryRun":true,"limit":5}' -f
  */
 class MaterializePosts extends Job
@@ -29,7 +30,10 @@ class MaterializePosts extends Job
 	public function __construct(array $args = [])
 	{
 		parent::__construct($args);
-		$this->setTimeout(new Timeout(static::DEFAULT_TIMEOUT));
+		$sinceYears = isset($args["sinceYears"]) ? max(0, (int)$args["sinceYears"]) : 0;
+		// Large backfills (e.g. 3 years of keyworded items) need a long Gemini budget.
+		$timeout = $sinceYears >= 2 ? "8 hours" : static::DEFAULT_TIMEOUT;
+		$this->setTimeout(new Timeout($timeout));
 		$this->setMaxLoadAverage(null);
 	}
 
@@ -43,19 +47,21 @@ class MaterializePosts extends Job
 			$kind = isset($args["kind"]) && is_string($args["kind"]) && $args["kind"] !== ""
 				? $args["kind"]
 				: null;
+			$sinceYears = isset($args["sinceYears"]) ? max(0, (int)$args["sinceYears"]) : 0;
 			$id = isset($args["id"]) ? (int)$args["id"] : null;
 			$limit = isset($args["limit"]) ? max(1, (int)$args["limit"]) : null;
 			if ($this->getLimit()) {
 				$limit = $this->getLimit();
 			}
 
-			$items = $this->selectItems($id, $invitationsOnly, $existingOnly, $kind, $limit);
+			$items = $this->selectItems($id, $invitationsOnly, $existingOnly, $kind, $sinceYears, $limit);
 			$this->outputLine(ConsoleStyle::step(sprintf(
-				"MaterializePosts: %s item(s)%s%s%s%s.",
+				"MaterializePosts: %s item(s)%s%s%s%s%s.",
 				count($items),
 				$invitationsOnly ? ", invitationsOnly" : "",
 				$existingOnly ? ", existingOnly (rematerialize)" : ", new only",
 				$kind !== null ? ", kind={$kind}" : "",
+				$sinceYears > 0 ? ", sinceYears={$sinceYears}" : "",
 				$dryRun ? ", dryRun" : "",
 			)));
 
@@ -92,8 +98,14 @@ class MaterializePosts extends Job
 	/**
 	 * @return list<IngestItem>
 	 */
-	private function selectItems(?int $id, bool $invitationsOnly, bool $existingOnly, ?string $kind, ?int $limit): array
-	{
+	private function selectItems(
+		?int $id,
+		bool $invitationsOnly,
+		bool $existingOnly,
+		?string $kind,
+		int $sinceYears,
+		?int $limit,
+	): array {
 		if ($id) {
 			$item = IngestItem::get($id);
 			if (!$item) {
@@ -101,6 +113,13 @@ class MaterializePosts extends Job
 			}
 
 			return [$item];
+		}
+
+		$cutoffTs = null;
+		if ($sinceYears > 0) {
+			$cutoffTs = (new \DateTimeImmutable("now"))
+				->modify("-{$sinceYears} years")
+				->getTimestamp();
 		}
 
 		$selected = [];
@@ -121,6 +140,12 @@ class MaterializePosts extends Job
 			}
 			if ($kind !== null && $item->getKind() !== $kind) {
 				continue;
+			}
+			if ($cutoffTs !== null) {
+				$itemTs = (int)($item->getStartsAt()?->format("U") ?? $item->getPostedAt()?->format("U") ?? 0);
+				if ($itemTs < $cutoffTs) {
+					continue;
+				}
 			}
 			$selected[] = $item;
 		}
