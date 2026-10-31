@@ -758,8 +758,8 @@ class Post extends \Katu\Models\Model
 		}
 
 		usort($posts, function (Post $a, Post $b) {
-			$aTime = (int)($a->getPublishedAt()?->format("U") ?? 0);
-			$bTime = (int)($b->getPublishedAt()?->format("U") ?? 0);
+			$aTime = (int)($a->getExplicitAt()?->format("U") ?? 0);
+			$bTime = (int)($b->getExplicitAt()?->format("U") ?? 0);
 
 			return $bTime <=> $aTime;
 		});
