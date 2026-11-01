@@ -3,7 +3,6 @@
 namespace App\Classes\Content;
 
 use App\Classes\Html\Excerpt;
-use App\Classes\Ingest\IngestItem;
 use App\Classes\Instagram\CaptionDates;
 use App\Classes\Storage\StorageFile;
 use App\Classes\Tools\Slugger;
@@ -895,53 +894,15 @@ class Post extends \Katu\Models\Model
 	}
 
 	/**
-	 * Past open calls rematerialized as lasting deník (public invitation tag dropped).
-	 * Feed keeps them; homepage hero skips them.
-	 */
-	public function isArchivedInvitation(): bool
-	{
-		if ($this->isInvitation()) {
-			return false;
-		}
-
-		$ingestItemId = $this->getIngestItemId();
-		if (!$ingestItemId) {
-			return false;
-		}
-
-		$item = IngestItem::get($ingestItemId);
-
-		return $item instanceof IngestItem && $item->isInvitation();
-	}
-
-	/**
-	 * Latest rituály / deník / umění post suitable for the hero when no upcoming invite.
-	 * Skips archived invitations (they stay in the feed).
+	 * Latest lasting work post for the hero when no upcoming invite.
+	 * Ordered by getExplicitAt (startsAt / title date), not Instagram publishedAt —
+	 * so a June harvest posted in October does not outrank a September festival.
 	 */
 	public static function getHeroWorkPost(): ?Post
 	{
 		$posts = static::getPublished();
-		if ($posts === []) {
-			return null;
-		}
 
-		$archivedIngestIds = [];
-		foreach (IngestItem::getBy([
-			"isInvitation" => 1,
-		])->getItems() as $item) {
-			$archivedIngestIds[(int)$item->getId()] = true;
-		}
-
-		foreach ($posts as $post) {
-			$id = $post->getIngestItemId();
-			if ($id && isset($archivedIngestIds[$id])) {
-				continue;
-			}
-
-			return $post;
-		}
-
-		return null;
+		return $posts[0] ?? null;
 	}
 
 	public static function getByIngestItemId(int $ingestItemId): ?Post

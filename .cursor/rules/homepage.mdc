@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## Hero photos
 
-Text sits in the center of a **symmetric** `1fr / center / 1fr` grid so it lines up with the middle rituály plot below. Photos from the **same** featured post (next not-yet-started invitation, else latest rituály/deník/umění that is not an archived invitation). Cover/lead is left; the rest are highest LLM `rating` among remaining non-demoted files.
+Text sits in the center of a **symmetric** `1fr / center / 1fr` grid so it lines up with the middle rituály plot below. Photos from the **same** featured post (next not-yet-started invitation, else latest lasting work by `getExplicitAt`). Cover/lead is left; the rest are highest LLM `rating` among remaining non-demoted files.
 
 - **Main photo** on each side: vertically centered, the large one, overflowing past the outer edge of the frame. Top and bottom stay in frame.
 - **Secondary photos**: smaller, toward the text; each side shrink-wraps to its lead so aside position is relative to the large photo. Left aside: center on the lead’s right edge. Right asides: center on the lead’s left edge, top nudged 15% left, bottom 15% right. Off the lead’s vertical center; not lined up with each other.
@@ -29,7 +29,7 @@ Text sits in the center of a **symmetric** `1fr / center / 1fr` grid so it lines
 
 ## Hero text
 
-Featured item is the next **not-yet-started invitation** (`getUpcomingInvitation`), else the latest lasting work post that is **not** an archived invitation (`getHeroWorkPost` — past invites rematerialized as deník stay in the feed only). Once `startsAt` has passed the hero falls back even if `endsAt` is still ahead (invite can remain on `/udalosti` until end). Centered: kicker, title, place and date, a short summary, and **Připoj se** (invite) or **Číst dál** (work). Title is upright Fraunces, larger than the body, not huge.
+Featured item is the next **not-yet-started invitation** (`getUpcomingInvitation`), else the latest lasting work post by **`getExplicitAt`** (`startsAt` / title date — not Instagram `publishedAt`). Past invites rematerialized as deník are fine here with **Číst dál**; live upcoming invites still get **Připoj se**. Once `startsAt` has passed the invite leaves the hero even if `endsAt` is still ahead. Title is upright Fraunces, larger than the body, not huge.
 
 ## Section plots
 
