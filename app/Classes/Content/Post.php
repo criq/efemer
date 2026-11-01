@@ -3,6 +3,7 @@
 namespace App\Classes\Content;
 
 use App\Classes\Html\Excerpt;
+use App\Classes\Ingest\IngestItem;
 use App\Classes\Instagram\CaptionDates;
 use App\Classes\Storage\StorageFile;
 use App\Classes\Tools\Slugger;
@@ -878,7 +879,7 @@ class Post extends \Katu\Models\Model
 
 	/**
 	 * Next invitation that has not started yet — homepage hero only.
-	 * Once startsAt has passed, the hero falls back to the latest lasting work post
+	 * Once startsAt has passed, the hero falls back to lasting work
 	 * (the invite can still appear on /udalosti until endsAt).
 	 */
 	public static function getUpcomingInvitation(): ?Post
@@ -888,6 +889,56 @@ class Post extends \Katu\Models\Model
 			if ($start && (int)$start->format("U") > time()) {
 				return $post;
 			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Past open calls rematerialized as lasting deník (public invitation tag dropped).
+	 * Feed keeps them; homepage hero skips them.
+	 */
+	public function isArchivedInvitation(): bool
+	{
+		if ($this->isInvitation()) {
+			return false;
+		}
+
+		$ingestItemId = $this->getIngestItemId();
+		if (!$ingestItemId) {
+			return false;
+		}
+
+		$item = IngestItem::get($ingestItemId);
+
+		return $item instanceof IngestItem && $item->isInvitation();
+	}
+
+	/**
+	 * Latest rituály / deník / umění post suitable for the hero when no upcoming invite.
+	 * Skips archived invitations (they stay in the feed).
+	 */
+	public static function getHeroWorkPost(): ?Post
+	{
+		$posts = static::getPublished();
+		if ($posts === []) {
+			return null;
+		}
+
+		$archivedIngestIds = [];
+		foreach (IngestItem::getBy([
+			"isInvitation" => 1,
+		])->getItems() as $item) {
+			$archivedIngestIds[(int)$item->getId()] = true;
+		}
+
+		foreach ($posts as $post) {
+			$id = $post->getIngestItemId();
+			if ($id && isset($archivedIngestIds[$id])) {
+				continue;
+			}
+
+			return $post;
 		}
 
 		return null;

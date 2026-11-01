@@ -52,11 +52,12 @@ class Index extends \Katu\Controllers\Controller
 		}
 
 		$invitation = Post::getUpcomingInvitation();
-		$featured = $invitation ?? ($all[0] ?? null);
+		$latestPost = $invitation ? null : Post::getHeroWorkPost();
+		$featured = $invitation ?? $latestPost;
 
 		return $response->withBody($engine->render("Homepage/index.twig", [
 			"invitation" => $invitation,
-			"latestPost" => $all[0] ?? null,
+			"latestPost" => $latestPost,
 			"heroImages" => $this->heroImages($featured),
 			"sections" => $sections,
 			"feedPosts" => $feedPosts,
