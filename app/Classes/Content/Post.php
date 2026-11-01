@@ -876,11 +876,21 @@ class Post extends \Katu\Models\Model
 		return $posts;
 	}
 
+	/**
+	 * Next invitation that has not started yet — homepage hero only.
+	 * Once startsAt has passed, the hero falls back to the latest lasting work post
+	 * (the invite can still appear on /udalosti until endsAt).
+	 */
 	public static function getUpcomingInvitation(): ?Post
 	{
-		$current = static::getCurrentInvitations();
+		foreach (static::getCurrentInvitations() as $post) {
+			$start = $post->getStartsAt();
+			if ($start && (int)$start->format("U") > time()) {
+				return $post;
+			}
+		}
 
-		return $current[0] ?? null;
+		return null;
 	}
 
 	public static function getByIngestItemId(int $ingestItemId): ?Post

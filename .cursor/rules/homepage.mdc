@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## Hero photos
 
-Text sits in the center of a **symmetric** `1fr / center / 1fr` grid so it lines up with the middle rituály plot below. Photos from the **same** featured post (current invitation, else latest work post). Cover/lead is left; the rest are highest LLM `rating` among remaining non-demoted files.
+Text sits in the center of a **symmetric** `1fr / center / 1fr` grid so it lines up with the middle rituály plot below. Photos from the **same** featured post (next not-yet-started invitation, else latest work post). Cover/lead is left; the rest are highest LLM `rating` among remaining non-demoted files.
 
 - **Main photo** on each side: vertically centered, the large one, overflowing past the outer edge of the frame. Top and bottom stay in frame.
 - **Secondary photos**: smaller, toward the text; each side shrink-wraps to its lead so aside position is relative to the large photo. Left aside: center on the lead’s right edge. Right asides: center on the lead’s left edge, top nudged 15% left, bottom 15% right. Off the lead’s vertical center; not lined up with each other.
@@ -29,7 +29,7 @@ Text sits in the center of a **symmetric** `1fr / center / 1fr` grid so it lines
 
 ## Hero text
 
-Featured item is the next **current invitation** post, else the latest lasting work post. Centered: kicker, title, place and date, a short summary (opening of the body, about 220 characters), and a **Připoj se** button. Title is upright Fraunces, larger than the body, not huge.
+Featured item is the next **not-yet-started invitation** (`getUpcomingInvitation`), else the latest lasting work post. Once `startsAt` has passed the hero falls back even if `endsAt` is still ahead (invite can remain on `/udalosti` until end). Centered: kicker, title, place and date, a short summary (opening of the body, about 220 characters), and a **Připoj se** button. Title is upright Fraunces, larger than the body, not huge.
 
 ## Section plots
 

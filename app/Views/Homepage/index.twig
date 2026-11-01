@@ -42,7 +42,7 @@
 		<div class="home-hero__text">
 			{% if invitation %}
 				<div class="home-hero__copy">
-					<span class="home-hero__kicker">{{ invitation.isHappening ? "právě probíhá" : "nadcházející" }}</span>
+					<span class="home-hero__kicker">nadcházející</span>
 					<a class="home-hero__title" href="{{ invitation.getPublicUrl }}">{{ invitation.getTitle }}</a>
 					{% set heroPlace = invitation.getHeroPlaceLabel %}
 					{% if heroPlace or invitation.getDateLabel %}
