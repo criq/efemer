@@ -30,10 +30,10 @@ cd ~/Sites/efemer
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ResetImportedContent --args='{"yes":true}' -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshEfemerCz -f
 
-./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"efemer_flowers","full":true}' -f
-./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"himmlhaus","full":true}' -f
-./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f
+# Instagram stage 1: Instaloader dump (preferred) then import — see instagram.mdc
+# Production cron: ./deploy/cron-instagram-incremental.sh
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
+# Legacy archive API (avoid; 429-prone): RefreshInstagram / RefreshInstagramAccounts
 
 # stage 2 — Gemini keywords / roles / cover / timeframe (KeywordQc inline)
 ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest -f
@@ -88,9 +88,9 @@ Eval sets: `app/Resources/Ingest/eval/covers.json`, `roles.json`. Exports: `tmp/
 | Job | Role |
 |---|---|
 | `Ingest.RefreshEfemerCz` | efemer.cz → ingest |
-| `Ingest.RefreshInstagram` | one IG account → ingest |
-| `Ingest.RefreshInstagramAccounts` | both IG accounts → ingest |
-| `Ingest.ImportInstagramDump` | `data/instagram` dump → ingest (Archiver or Instaloader) |
+| `Ingest.ImportInstagramDump` | `data/instagram` dump → ingest (Instaloader preferred; Archiver layout OK) |
+| `Ingest.RefreshInstagram*` | legacy archive API — avoid; use Instaloader + ImportInstagramDump |
+
 | `Ingest.KeywordIngest` | Gemini → `keyworded`; inline KeywordQc; retries `needs_rekeyword` |
 | `Ingest.EmbedIngest` | Gemini text embedding → `ingest_items.embedding` (keyworded/materialized; `reembed` clears soft dupes) |
 | `Ingest.DedupIngest` | cosine ≥ 0.92 → soft `duplicateOfId` (older wins); does not hide public posts |
@@ -103,4 +103,4 @@ Eval sets: `app/Resources/Ingest/eval/covers.json`, `roles.json`. Exports: `tmp/
 | `Database.Migrate` | schema migrations |
 | `Pages.ImportEfemerCz` | legacy page-builder import |
 
-Upsert by `(source, sourceKey)`. Diary `postedAt`: body text date first, else index date. Soft kinds: `diary|wedding|gift|portrait|workshop|installation|bouquet|product|other` (no `mourning`). Prefer Instaloader dump when RefreshInstagram is 429 (`instagram.mdc`).
+Upsert by `(source, sourceKey)`. Diary `postedAt`: body text date first, else index date. Soft kinds: `diary|wedding|gift|portrait|workshop|installation|bouquet|product|other` (no `mourning`). Instagram stage 1: Instaloader + `ImportInstagramDump` (`instagram.mdc`).

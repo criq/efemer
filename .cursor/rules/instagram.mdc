@@ -1,68 +1,51 @@
 ---
-description: Instagram session and stage-1 ingest for @efemer_flowers and @himmlhaus
+description: Instagram stage-1 ingest via Instaloader for @efemer_flowers and @himmlhaus
 alwaysApply: true
 ---
 
 # Instagram
 
-Stage 1 loads `@efemer_flowers` and `@himmlhaus` into **`ingest_items`** (idempotent on `account:shortcode`). Then `KeywordIngest` → optional `MaterializePosts` (see `ingest.mdc`). Soft `kind` and invitations come from Gemini, not PHP heuristics.
+Stage 1 loads `@efemer_flowers` and `@himmlhaus` into **`ingest_items`** (idempotent on `account:shortcode`). Then `KeywordIngest` → `MaterializePosts` (see `ingest.mdc`). Soft `kind` and invitations come from Gemini, not PHP heuristics.
 
-**Prefer Instaloader dump + `ImportInstagramDump` when the archive API is 429.** Production uses crontab twice daily (`0 6,18 * * *` UTC → `deploy/cron-instagram-incremental.sh`); the docker `instagram-archive` loop stays **off**.
+**Production primary path is Instaloader** — not the private archive API (`RefreshInstagram*`). Cron twice daily (`0 6,18 * * *` UTC → `deploy/cron-instagram-incremental.sh`): Instaloader dump → `ImportInstagramDump` → `KeywordIngest` → `MaterializePosts`. Log: `~/efemer2/logs/cron-instagram.log`. Docker `instagram-archive` loop stays **off**.
 
-## Session
+## Run (Instaloader)
 
-Store Jan’s Instagram `sessionid` in Secret Manager (never commit it):
-
-| Item | Value |
-|---|---|
-| Project | `efemer-456414` |
-| Secret | `instagram-session-id` |
-| Accessor | `efemer-storage@efemer-456414.iam.gserviceaccount.com` |
-
-Runtime reads GSM first, then `.secret/instagram.session`. Local file is seeded into GSM when GSM is empty.
-
-Refresh the secret when Instagram checkpoints the session:
+Local venv: `tmp/instagram-venv`. On production the cron bootstraps the same path.
 
 ```bash
-printf '%s' "$SESSIONID" | gcloud secrets versions add instagram-session-id \
-  --project=efemer-456414 --account=jablunka@gmail.com --data-file=-
-```
-
-## Run (ingest jobs)
-
-Prefer `./bin/job` (TTY) so Ctrl+C kills the job:
-
-```bash
-./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"efemer_flowers","full":true}' -f
-./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagram --args='{"account":"himmlhaus","full":true}' -f
-
-# both accounts
-./bin/job jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts --args='{"full":true}' -f
-
-# offline dump under data/instagram (Archiver layout OR Instaloader)
-./bin/job jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
-```
-
-On HTTP 429 the client waits (60s → … capped at 15m, up to 8 attempts, honors `Retry-After`) then retries; Ctrl+C still interrupts waits. Browser OK ≠ archive API unthrottled. **Do not keep re-running RefreshInstagram while 429 persists** — it deepens the throttle.
-
-### Bypass when API is rate-limited: Instaloader
-
-`ImportInstagramDump` also reads native Instaloader dumps (`data/instagram/{account}/*_UTC.json.xz` + jpgs). Local venv: `tmp/instagram-venv`.
-
-```bash
-# stop if a RefreshInstagram backoff is still running
-./bin/job jobs:kill -f
-
 cd ~/Sites/efemer
 mkdir -p data/instagram
-# anonymous often works when session archive API is 429’d
-# omit --fast-update for a first full dump (it stops at the first already-downloaded post)
+# --fast-update stops at the first already-downloaded post
+# --count caps newest posts (safe when the dump dir is empty)
 tmp/instagram-venv/bin/instaloader \
   --no-videos \
+  --fast-update \
+  --count 20 \
   --dirname-pattern 'data/instagram/{profile}' \
   --filename-pattern '{date_utc}_UTC' \
   efemer_flowers himmlhaus
 
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest -f
+./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts -f
+```
+
+Production one-shot (same as cron):
+
+```bash
+cd ~/efemer2 && ./deploy/cron-instagram-incremental.sh
+```
+
+Omit `--fast-update` only for a deliberate full re-dump. Anonymous scrape is enough for these public profiles.
+
+## Legacy archive API (avoid)
+
+`RefreshInstagram` / `RefreshInstagramAccounts` use the private archive API + Secret Manager `instagram-session-id`. They 429 easily — **do not use for routine ingest**. Prefer Instaloader above.
+
+If you ever need the session secret again:
+
+```bash
+printf '%s' "$SESSIONID" | gcloud secrets versions add instagram-session-id \
+  --project=efemer-456414 --account=jablunka@gmail.com --data-file=-
 ```

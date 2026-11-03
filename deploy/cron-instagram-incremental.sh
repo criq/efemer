@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Incremental Instagram ingest twice daily (no full backfill).
-# Refresh → KeywordIngest → MaterializePosts so new posts can go public.
+# Twice-daily Instagram ingest via Instaloader (no archive API).
+# Dump → ImportInstagramDump → KeywordIngest → MaterializePosts.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -12,12 +12,38 @@ if [ ! -f .env ]; then
 fi
 
 COMPOSE=(docker compose -f docker-compose.production.yml)
-LOG_DIR="${ROOT}/logs"
-mkdir -p "$LOG_DIR"
+VENV="${ROOT}/tmp/instagram-venv"
+INSTALOADER="${VENV}/bin/instaloader"
+ACCOUNTS=(efemer_flowers himmlhaus)
+# Cap per account so an empty dump dir never tries a full archive.
+COUNT="${INSTAGRAM_COUNT:-20}"
 
-echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) Instagram incremental ==="
+mkdir -p logs data/instagram tmp
 
-"${COMPOSE[@]}" exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.RefreshInstagramAccounts -f
+ensure_instaloader() {
+	if [ -x "$INSTALOADER" ]; then
+		return 0
+	fi
+	echo "Bootstrapping Instaloader venv at ${VENV}..."
+	python3 -m venv "$VENV"
+	"${VENV}/bin/pip" install -U pip instaloader
+}
+
+echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) Instagram Instaloader incremental ==="
+
+ensure_instaloader
+
+# Anonymous scrape; --fast-update stops at the first already-downloaded post.
+# --count caps how many newest posts to consider (safe on empty dump dirs).
+"$INSTALOADER" \
+	--no-videos \
+	--fast-update \
+	--count "$COUNT" \
+	--dirname-pattern "${ROOT}/data/instagram/{profile}" \
+	--filename-pattern "{date_utc}_UTC" \
+	"${ACCOUNTS[@]}"
+
+"${COMPOSE[@]}" exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
 "${COMPOSE[@]}" exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.KeywordIngest -f
 "${COMPOSE[@]}" exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.MaterializePosts -f
 

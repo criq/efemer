@@ -47,9 +47,15 @@ echo "Ensuring Instagram archive loop is stopped..."
 "${COMPOSE[@]}" rm -f instagram-archive >/dev/null 2>&1 || true
 
 chmod +x deploy/cron-instagram-incremental.sh
+# Instaloader venv for production cron (archive API path stays unused).
+if [ ! -x tmp/instagram-venv/bin/instaloader ]; then
+	echo "Bootstrapping Instaloader venv..."
+	python3 -m venv tmp/instagram-venv
+	tmp/instagram-venv/bin/pip install -U pip instaloader
+fi
 CRON_MARKER="deploy/cron-instagram-incremental.sh"
 CRON_LINE="0 6,18 * * * cd ${ROOT} && ./deploy/cron-instagram-incremental.sh >> ${ROOT}/logs/cron-instagram.log 2>&1"
-echo "Ensuring Instagram incremental cron (06:00 and 18:00 UTC)..."
+echo "Ensuring Instagram Instaloader cron (06:00 and 18:00 UTC)..."
 mkdir -p logs
 EXISTING="$(crontab -l 2>/dev/null || true)"
 FILTERED="$(printf '%s\n' "$EXISTING" | grep -vF "$CRON_MARKER" || true)"
