@@ -46,10 +46,12 @@ services:
     networks:
       - efemer-network
 
+  # Optional long-running loop — production uses deploy/cron-instagram-incremental.sh
+  # (twice daily) instead; remote-setup.sh keeps this service stopped.
   instagram-archive:
     image: efemer
     container_name: efemer_instagram_archive
-    command: ["php", "bin/cli.php", "jobs:loop", "App.Classes.Jobs.Ingest.RefreshInstagramAccounts", "--interval=21600", "-f"]
+    command: ["php", "bin/cli.php", "jobs:loop", "App.Classes.Jobs.Ingest.RefreshInstagramAccounts", "--interval=43200", "-f"]
     volumes:
       - ./.env:/var/www/.env
       - ./.platform:/var/www/.platform

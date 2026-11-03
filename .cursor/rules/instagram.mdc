@@ -7,7 +7,7 @@ alwaysApply: true
 
 Stage 1 loads `@efemer_flowers` and `@himmlhaus` into **`ingest_items`** (idempotent on `account:shortcode`). Then `KeywordIngest` → optional `MaterializePosts` (see `ingest.mdc`). Soft `kind` and invitations come from Gemini, not PHP heuristics.
 
-**Prefer Instaloader dump + `ImportInstagramDump` when the archive API is 429.** Production `instagram-archive` loop stays **off**.
+**Prefer Instaloader dump + `ImportInstagramDump` when the archive API is 429.** Production uses crontab twice daily (`0 6,18 * * *` UTC → `deploy/cron-instagram-incremental.sh`); the docker `instagram-archive` loop stays **off**.
 
 ## Session
 

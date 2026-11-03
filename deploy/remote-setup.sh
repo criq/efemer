@@ -40,10 +40,19 @@ echo "Ensuring www-data can write image/tmp caches..."
 "${COMPOSE[@]}" exec -T php sh -c "mkdir -p /var/www/public/tmp /var/www/tmp && chown -R www-data:www-data /var/www/public/tmp /var/www/tmp && chmod -R ug+rwX /var/www/public/tmp /var/www/tmp && if [ -f /var/www/.secret/efemer-storage@efemer-456414.iam.gserviceaccount.com.json ]; then chgrp www-data /var/www/.secret/efemer-storage@efemer-456414.iam.gserviceaccount.com.json && chmod 640 /var/www/.secret/efemer-storage@efemer-456414.iam.gserviceaccount.com.json; fi"
 echo "Restarting PHP to refresh cached table schemas..."
 "${COMPOSE[@]}" restart php
-# Instagram archive loop is intentionally off (rate limits / manual ingest only).
-# Re-enable: docker compose -f docker-compose.production.yml up -d --no-build instagram-archive
+# Long-running docker loop stays off; twice-daily cron does incremental refresh.
+# Re-enable loop: docker compose -f docker-compose.production.yml up -d --no-build instagram-archive
 echo "Ensuring Instagram archive loop is stopped..."
 "${COMPOSE[@]}" stop instagram-archive >/dev/null 2>&1 || true
 "${COMPOSE[@]}" rm -f instagram-archive >/dev/null 2>&1 || true
+
+chmod +x deploy/cron-instagram-incremental.sh
+CRON_MARKER="deploy/cron-instagram-incremental.sh"
+CRON_LINE="0 6,18 * * * cd ${ROOT} && ./deploy/cron-instagram-incremental.sh >> ${ROOT}/logs/cron-instagram.log 2>&1"
+echo "Ensuring Instagram incremental cron (06:00 and 18:00 UTC)..."
+mkdir -p logs
+EXISTING="$(crontab -l 2>/dev/null || true)"
+FILTERED="$(printf '%s\n' "$EXISTING" | grep -vF "$CRON_MARKER" || true)"
+printf '%s\n%s\n' "$FILTERED" "$CRON_LINE" | sed '/^$/d' | crontab -
 
 echo "Efemer containers are up."

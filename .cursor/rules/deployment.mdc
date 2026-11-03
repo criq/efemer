@@ -53,7 +53,7 @@ Reload after changes: `sudo caddy validate --config /etc/caddy/Caddyfile && sudo
 
 `deploy.sh` builds webpack assets, rsyncs the app (excluding `.env`, `vendor`, `data/mysql`, `data/instagram`), syncs `.secret/`, then runs `deploy/remote-setup.sh` on the server.
 
-Production `instagram-archive` (`jobs:loop` RefreshInstagramAccounts every 6 hours) is **stopped** — `remote-setup.sh` keeps it off. Re-enable manually when needed. Session lives in Secret Manager (`instagram-session-id` in `efemer-456414`), not in git.
+Instagram ingest on production is a **crontab** (not the docker `instagram-archive` loop): `0 6,18 * * *` UTC → `./deploy/cron-instagram-incremental.sh` (RefreshInstagramAccounts incremental → KeywordIngest → MaterializePosts). Log: `~/efemer2/logs/cron-instagram.log`. `remote-setup.sh` installs/refreshes that cron and keeps the docker loop stopped. Session lives in Secret Manager (`instagram-session-id` in `efemer-456414`), not in git.
 
 ## Server `.env`
 
