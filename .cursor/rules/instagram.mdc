@@ -7,7 +7,7 @@ alwaysApply: true
 
 Stage 1 loads `@efemer_flowers` and `@himmlhaus` into **`ingest_items`** (idempotent on `account:shortcode`). Then `KeywordIngest` → `MaterializePosts` (see `ingest.mdc`). Soft `kind` and invitations come from Gemini, not PHP heuristics.
 
-**Production primary path is Instaloader** — not the private archive API (`RefreshInstagram*`). Cron twice daily (`0 6,18 * * *` UTC → `deploy/cron-instagram-incremental.sh`): Instaloader (via `deploy/instaloader-incremental.py` + `.secret/instagram.session`) → `ImportInstagramDump` → `KeywordIngest` → `MaterializePosts`. Log: `~/efemer2/logs/cron-instagram.log`. Docker `instagram-archive` loop stays **off**. Instagram now requires login for scrapes; anonymous Instaloader redirects to login.
+**Production primary path is Instaloader** — not the private archive API (`RefreshInstagram*`). Cron twice daily (`0 6,18 * * *` UTC → `deploy/cron-instagram-incremental.sh`): Instaloader (via `deploy/instaloader-incremental.py` + `.secret/instagram.session`) → `ImportInstagramDump` → `KeywordIngest` → `MaterializePosts`. Keyword + Materialize always run even if Instaloader fails. Log: `~/efemer2/logs/cron-instagram.log`. Docker `instagram-archive` loop stays **off**. Instagram now requires login for scrapes; anonymous Instaloader redirects to login.
 
 ## Session
 
