@@ -3,6 +3,7 @@
 .env
 .platform
 .secret
+.venv-instagram/
 composer.phar
 data/*
 files/*

@@ -11,7 +11,7 @@ Stage 1 loads `@efemer_flowers` and `@himmlhaus` into **`ingest_items`** (idempo
 
 ## Run (Instaloader)
 
-Local venv: `tmp/instagram-venv`. On production the cron bootstraps the same path.
+Local venv: `tmp/instagram-venv` (dev) or production `.venv-instagram` (cron bootstraps it; needs host `python3-venv`).
 
 ```bash
 cd ~/Sites/efemer

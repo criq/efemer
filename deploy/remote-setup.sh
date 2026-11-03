@@ -47,11 +47,12 @@ echo "Ensuring Instagram archive loop is stopped..."
 "${COMPOSE[@]}" rm -f instagram-archive >/dev/null 2>&1 || true
 
 chmod +x deploy/cron-instagram-incremental.sh
-# Instaloader venv for production cron (archive API path stays unused).
-if [ ! -x tmp/instagram-venv/bin/instaloader ]; then
-	echo "Bootstrapping Instaloader venv..."
-	python3 -m venv tmp/instagram-venv
-	tmp/instagram-venv/bin/pip install -U pip instaloader
+# Instaloader venv for production cron (outside tmp/ — that dir is www-data-owned).
+# Requires host package python3-venv (e.g. python3.12-venv on Ubuntu).
+if [ ! -x .venv-instagram/bin/instaloader ]; then
+	echo "Bootstrapping Instaloader venv at .venv-instagram..."
+	python3 -m venv .venv-instagram
+	.venv-instagram/bin/pip install -U pip instaloader
 fi
 CRON_MARKER="deploy/cron-instagram-incremental.sh"
 CRON_LINE="0 6,18 * * * cd ${ROOT} && ./deploy/cron-instagram-incremental.sh >> ${ROOT}/logs/cron-instagram.log 2>&1"

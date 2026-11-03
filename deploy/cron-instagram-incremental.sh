@@ -12,13 +12,14 @@ if [ ! -f .env ]; then
 fi
 
 COMPOSE=(docker compose -f docker-compose.production.yml)
-VENV="${ROOT}/tmp/instagram-venv"
+# Keep venv outside tmp/ (PHP/www-data owns that tree on production).
+VENV="${ROOT}/.venv-instagram"
 INSTALOADER="${VENV}/bin/instaloader"
 ACCOUNTS=(efemer_flowers himmlhaus)
 # Cap per account so an empty dump dir never tries a full archive.
 COUNT="${INSTAGRAM_COUNT:-20}"
 
-mkdir -p logs data/instagram tmp
+mkdir -p logs data/instagram
 
 ensure_instaloader() {
 	if [ -x "$INSTALOADER" ]; then
