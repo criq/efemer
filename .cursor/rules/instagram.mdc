@@ -1,5 +1,5 @@
 ---
-description: Instagram stage-1 ingest via Instaloader for @efemer_flowers and @himmlhaus
+description: Instagram stage-1 ingest via Playwright headless for @efemer_flowers and @himmlhaus
 alwaysApply: true
 ---
 
@@ -7,29 +7,24 @@ alwaysApply: true
 
 Stage 1 loads `@efemer_flowers` and `@himmlhaus` into **`ingest_items`** (idempotent on `account:shortcode`). Then `KeywordIngest` → `MaterializePosts` (see `ingest.mdc`). Soft `kind` and invitations come from Gemini, not PHP heuristics.
 
-**Production primary path is Instaloader** — not the private archive API (`RefreshInstagram*`). Cron twice daily (`0 6,18 * * *` UTC → `deploy/cron-instagram-incremental.sh`): Instaloader (via `deploy/instaloader-incremental.py` + `.secret/instagram.session`) → `ImportInstagramDump` → `KeywordIngest` → `MaterializePosts`. Keyword + Materialize always run even if Instaloader fails. Log: `~/efemer2/logs/cron-instagram.log`. Docker `instagram-archive` loop stays **off**. Instagram now requires login for scrapes; anonymous Instaloader redirects to login.
+**Production primary path is Playwright headless** (`deploy/instagram-headless-dump.py`) — GraphQL/Instaloader often hits `feedback_required` / 429. Cron twice daily (`0 6,18 * * *` UTC → `deploy/cron-instagram-incremental.sh`): headless dump (Archiver layout under `data/instagram/`) → `ImportInstagramDump` → `KeywordIngest` → `MaterializePosts`. Keyword + Materialize always run even if dump fails. Log: `~/efemer2/logs/cron-instagram.log`. Docker `instagram-archive` loop stays **off**. Needs `.secret/instagram.cookies.json` (or `instagram.session`) + `.venv-instagram` with Playwright Chromium.
 
 ## Session
 
-Store Jan’s Instagram `sessionid` in `.secret/instagram.session` (rsynced on deploy) and Secret Manager:
+Store Jan’s Instagram cookies in `.secret/` (rsynced on deploy) and `sessionid` in Secret Manager:
 
 | Item | Value |
 |---|---|
 | Project | `efemer-456414` |
 | Secret | `instagram-session-id` |
-| Local file | `.secret/instagram.session` |
+| Local session | `.secret/instagram.session` |
+| Local cookies | `.secret/instagram.cookies.json` (preferred for headless) |
 
-Refresh when Instagram checkpoints the session:
+Refresh when Instagram checkpoints the session (update both files + GSM).
 
-```bash
-printf '%s' "$SESSIONID" | tee .secret/instagram.session >/dev/null
-printf '%s' "$SESSIONID" | gcloud secrets versions add instagram-session-id \
-  --project=efemer-456414 --account=jablunka@gmail.com --data-file=-
-```
+## Run (headless)
 
-## Run (Instaloader)
-
-Production one-shot (same as cron; uses `.venv-instagram` + session cookie):
+Production one-shot (same as cron):
 
 ```bash
 cd ~/efemer2 && ./deploy/cron-instagram-incremental.sh
@@ -40,14 +35,18 @@ Local:
 ```bash
 cd ~/Sites/efemer
 mkdir -p data/instagram
-# needs .secret/instagram.session; venv: tmp/instagram-venv or .venv-instagram
-tmp/instagram-venv/bin/python deploy/instaloader-incremental.py \
-  --root . --count 20 efemer_flowers himmlhaus
+tmp/instagram-venv/bin/python deploy/instagram-headless-dump.py \
+  --root . --count 12 efemer_flowers himmlhaus
+# or one post:
+tmp/instagram-venv/bin/python deploy/instagram-headless-dump.py \
+  --root . --shortcode DfHAP5XDXbN efemer_flowers
 
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts -f
 ```
+
+Fallback when GraphQL is not throttled: `deploy/instaloader-incremental.py`.
 
 ## Legacy archive API (avoid)
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Twice-daily Instagram ingest via Instaloader (sessionid cookie; no archive API).
+# Twice-daily Instagram ingest via Playwright headless dump (Instaloader GraphQL is often throttled).
 # Dump → ImportInstagramDump → KeywordIngest → MaterializePosts.
 # Keyword + Materialize always run so already-loaded items still go public
-# even if Instaloader fails (expired session, rate limit, etc.).
+# even if the dump fails (expired session, rate limit, etc.).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -18,34 +18,34 @@ COMPOSE=(docker compose -f docker-compose.production.yml)
 VENV="${ROOT}/.venv-instagram"
 PY="${VENV}/bin/python"
 ACCOUNTS=(efemer_flowers himmlhaus)
-COUNT="${INSTAGRAM_COUNT:-20}"
+COUNT="${INSTAGRAM_COUNT:-12}"
 dump_failed=0
 
 mkdir -p logs data/instagram
 
-ensure_instaloader() {
-	if [ -x "$PY" ] && "$PY" -c "import instaloader" 2>/dev/null; then
+ensure_venv() {
+	if [ -x "$PY" ] && "$PY" -c "import playwright, requests" 2>/dev/null; then
 		return 0
 	fi
-	echo "Bootstrapping Instaloader venv at ${VENV}..."
+	echo "Bootstrapping Instagram venv at ${VENV}..."
 	python3 -m venv "$VENV"
-	"${VENV}/bin/pip" install -U pip instaloader
+	"${VENV}/bin/pip" install -U pip instaloader playwright requests
+	"${VENV}/bin/playwright" install chromium
 }
 
-echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) Instagram Instaloader incremental ==="
+echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) Instagram headless incremental ==="
 
-ensure_instaloader
+ensure_venv
 
-if ! "$PY" "${ROOT}/deploy/instaloader-incremental.py" \
+if ! "$PY" "${ROOT}/deploy/instagram-headless-dump.py" \
 	--root "$ROOT" \
 	--count "$COUNT" \
 	"${ACCOUNTS[@]}"
 then
-	echo "WARN: Instaloader dump failed — continuing with import/keyword/materialize." >&2
+	echo "WARN: headless dump failed — continuing with import/keyword/materialize." >&2
 	dump_failed=1
 fi
 
-# Import is safe when the dump dir is empty / unchanged.
 "${COMPOSE[@]}" exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
 "${COMPOSE[@]}" exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.KeywordIngest -f
 "${COMPOSE[@]}" exec -T php php bin/cli.php jobs:run App.Classes.Jobs.Ingest.MaterializePosts -f
