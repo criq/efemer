@@ -53,7 +53,7 @@ Reload after changes: `sudo caddy validate --config /etc/caddy/Caddyfile && sudo
 
 `deploy.sh` builds webpack assets, rsyncs the app (excluding `.env`, `vendor`, `data/mysql`, `data/instagram`), syncs `.secret/`, then runs `deploy/remote-setup.sh` on the server.
 
-Instagram ingest on production is a **crontab** (Instaloader, not the archive API / docker loop): `0 6,18 * * *` UTC → `./deploy/cron-instagram-incremental.sh` (Instaloader `--fast-update --count 20` → ImportInstagramDump → KeywordIngest → MaterializePosts). Log: `~/efemer2/logs/cron-instagram.log`. `remote-setup.sh` bootstraps `.venv-instagram` (needs host `python3-venv`), installs/refreshes that cron, and keeps the docker `instagram-archive` loop stopped.
+Instagram ingest on production is a **crontab** (Instaloader + session cookie, not the archive API / docker loop): `0 6,18 * * *` UTC → `./deploy/cron-instagram-incremental.sh` (`deploy/instaloader-incremental.py` with `.secret/instagram.session` → ImportInstagramDump → KeywordIngest → MaterializePosts). Log: `~/efemer2/logs/cron-instagram.log`. `remote-setup.sh` bootstraps `.venv-instagram` (needs host `python3-venv`), installs/refreshes that cron, and keeps the docker `instagram-archive` loop stopped.
 
 ## Server `.env`
 

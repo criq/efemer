@@ -7,45 +7,48 @@ alwaysApply: true
 
 Stage 1 loads `@efemer_flowers` and `@himmlhaus` into **`ingest_items`** (idempotent on `account:shortcode`). Then `KeywordIngest` → `MaterializePosts` (see `ingest.mdc`). Soft `kind` and invitations come from Gemini, not PHP heuristics.
 
-**Production primary path is Instaloader** — not the private archive API (`RefreshInstagram*`). Cron twice daily (`0 6,18 * * *` UTC → `deploy/cron-instagram-incremental.sh`): Instaloader dump → `ImportInstagramDump` → `KeywordIngest` → `MaterializePosts`. Log: `~/efemer2/logs/cron-instagram.log`. Docker `instagram-archive` loop stays **off**.
+**Production primary path is Instaloader** — not the private archive API (`RefreshInstagram*`). Cron twice daily (`0 6,18 * * *` UTC → `deploy/cron-instagram-incremental.sh`): Instaloader (via `deploy/instaloader-incremental.py` + `.secret/instagram.session`) → `ImportInstagramDump` → `KeywordIngest` → `MaterializePosts`. Log: `~/efemer2/logs/cron-instagram.log`. Docker `instagram-archive` loop stays **off**. Instagram now requires login for scrapes; anonymous Instaloader redirects to login.
+
+## Session
+
+Store Jan’s Instagram `sessionid` in `.secret/instagram.session` (rsynced on deploy) and Secret Manager:
+
+| Item | Value |
+|---|---|
+| Project | `efemer-456414` |
+| Secret | `instagram-session-id` |
+| Local file | `.secret/instagram.session` |
+
+Refresh when Instagram checkpoints the session:
+
+```bash
+printf '%s' "$SESSIONID" | tee .secret/instagram.session >/dev/null
+printf '%s' "$SESSIONID" | gcloud secrets versions add instagram-session-id \
+  --project=efemer-456414 --account=jablunka@gmail.com --data-file=-
+```
 
 ## Run (Instaloader)
 
-Local venv: `tmp/instagram-venv` (dev) or production `.venv-instagram` (cron bootstraps it; needs host `python3-venv`).
+Production one-shot (same as cron; uses `.venv-instagram` + session cookie):
+
+```bash
+cd ~/efemer2 && ./deploy/cron-instagram-incremental.sh
+```
+
+Local:
 
 ```bash
 cd ~/Sites/efemer
 mkdir -p data/instagram
-# --fast-update stops at the first already-downloaded post
-# --count caps newest posts (safe when the dump dir is empty)
-tmp/instagram-venv/bin/instaloader \
-  --no-videos \
-  --fast-update \
-  --count 20 \
-  --dirname-pattern 'data/instagram/{profile}' \
-  --filename-pattern '{date_utc}_UTC' \
-  efemer_flowers himmlhaus
+# needs .secret/instagram.session; venv: tmp/instagram-venv or .venv-instagram
+tmp/instagram-venv/bin/python deploy/instaloader-incremental.py \
+  --root . --count 20 efemer_flowers himmlhaus
 
 ./bin/job jobs:run App.Classes.Jobs.Ingest.ImportInstagramDump -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.KeywordIngest -f
 ./bin/job jobs:run App.Classes.Jobs.Ingest.MaterializePosts -f
 ```
 
-Production one-shot (same as cron):
-
-```bash
-cd ~/efemer2 && ./deploy/cron-instagram-incremental.sh
-```
-
-Omit `--fast-update` only for a deliberate full re-dump. Anonymous scrape is enough for these public profiles.
-
 ## Legacy archive API (avoid)
 
-`RefreshInstagram` / `RefreshInstagramAccounts` use the private archive API + Secret Manager `instagram-session-id`. They 429 easily — **do not use for routine ingest**. Prefer Instaloader above.
-
-If you ever need the session secret again:
-
-```bash
-printf '%s' "$SESSIONID" | gcloud secrets versions add instagram-session-id \
-  --project=efemer-456414 --account=jablunka@gmail.com --data-file=-
-```
+`RefreshInstagram` / `RefreshInstagramAccounts` hit the private archive API and 429 easily — **do not use for routine ingest**.
